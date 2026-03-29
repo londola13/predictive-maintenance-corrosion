@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Data (ne pas versionner les gros fichiers)
+data/raw/phmsa/
+data/raw/nasa_cmapss/
+data/enterprise/
+
+# Modèles entraînés (optionnel)
+models/*.pkl
+models/*.joblib
+
+# IDE
+.vscode/
+.idea/
+*.DS_Store
+
+# Streamlit
+.streamlit/secrets.toml
