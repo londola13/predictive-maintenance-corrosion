@@ -10,8 +10,10 @@ import plotly.graph_objects as go
 import plotly.express as px
 import json, sys, os
 import joblib
+from pathlib import Path
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+ROOT = Path(__file__).parent.parent  # dashboard/../ = repo root
+sys.path.append(str(ROOT / 'src'))
 
 st.set_page_config(
     page_title="Maintenance Prédictive — Corrosion Pipeline",
@@ -26,13 +28,13 @@ st.caption("Pipelines pétroliers | Prototype M2 — XGBoost + Random Forest + d
 @st.cache_resource
 def load_models():
     try:
-        model_reg  = joblib.load('models/model_regression.pkl')
-        model_clf  = joblib.load('models/model_classification.pkl')
-        model_rul  = joblib.load('models/model_rul.pkl')
-        scaler_reg = joblib.load('models/scaler_taux_corrosion.pkl')
-        scaler_clf = joblib.load('models/scaler_risque.pkl')
-        scaler_rul = joblib.load('models/scaler_rul.pkl')
-        le         = joblib.load('models/encoder_risque.pkl')
+        model_reg  = joblib.load(ROOT / 'models/model_regression.pkl')
+        model_clf  = joblib.load(ROOT / 'models/model_classification.pkl')
+        model_rul  = joblib.load(ROOT / 'models/model_rul.pkl')
+        scaler_reg = joblib.load(ROOT / 'models/scaler_taux_corrosion.pkl')
+        scaler_clf = joblib.load(ROOT / 'models/scaler_risque.pkl')
+        scaler_rul = joblib.load(ROOT / 'models/scaler_rul.pkl')
+        le         = joblib.load(ROOT / 'models/encoder_risque.pkl')
         return model_reg, model_clf, model_rul, scaler_reg, scaler_clf, scaler_rul, le, True
     except Exception:
         return None, None, None, None, None, None, None, False
@@ -41,7 +43,7 @@ model_reg, model_clf, model_rul, scaler_reg, scaler_clf, scaler_rul, le, ml_ok =
 
 # Importances SHAP (optionnel)
 shap_importance = None
-shap_path = 'models/shap_importance.json'
+shap_path = ROOT / 'models/shap_importance.json'
 if os.path.exists(shap_path):
     with open(shap_path, encoding='utf-8') as f:
         shap_importance = json.load(f)
