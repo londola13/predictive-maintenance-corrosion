@@ -299,7 +299,7 @@ modeles:
     n_folds_walkforward: 4
     objectif_R2: 0.85
     objectif_MAPE: 0.15
-    fichier: "models/xgboost_cotco.pkl"
+    fichier: "models/xgboost_model.pkl"
 
   survival:
     target: "RL_ans"

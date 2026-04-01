@@ -1,50 +1,130 @@
 """
 generate_synthetic_cotco.py
 ---------------------------
-Génère un dataset synthétique calibré sur les conditions réelles
-de la Station de Réduction de Pression de Kribi (COTCO).
+Génère un dataset synthétique basé sur le modèle physique De Waard & Milliams.
+
+Les plages opératoires sont chargées depuis la config entreprise (YAML).
+Si aucune config n'est fournie, les valeurs par défaut (Oil & Gas typique) sont utilisées.
 
 Modèle physique : De Waard & Milliams (1991) + facteurs correctifs terrain.
 Source académique : NORSOK M-506 | API RP 14E | NACE SP0775
 
 Ce dataset est la SOURCE 4 du dataset hybride (poids 0.5).
-Il sert de complément aux données COTCO réelles, PHMSA et SPE papers.
+Il sert de complément aux données réelles, PHMSA et SPE papers.
 """
 
 import numpy as np
 import pandas as pd
 from pathlib import Path
 
-# Plages opératoires calibrées sur Station Kribi
-KRIBI_PARAMS = {
+# Plages opératoires par défaut (pipeline Oil & Gas typique)
+# Remplacées automatiquement si une config entreprise est fournie
+DEFAULT_PARAMS = {
     # Températures (°C)
-    "T_min": 35, "T_max": 75,
+    "T_min": 30, "T_max": 75,
     # Pression entrée (bar)
-    "P_min": 65, "P_max": 100,
-    # CO2 gaz associé (% mol) — source AI-4001
-    "CO2_pct_min": 0.5, "CO2_pct_max": 5.0,
-    # BSW Basic Sediment & Water (% vol) — source AI-4003
+    "P_min": 50, "P_max": 120,
+    # CO2 gaz associé (% mol)
+    "CO2_pct_min": 0.1, "CO2_pct_max": 10.0,
+    # BSW Basic Sediment & Water (% vol)
     "BSW_min": 0.5, "BSW_max": 30,
-    # Vitesse fluide (m/s) — calculée depuis FI-3001
+    # Vitesse fluide (m/s)
     "velocity_min": 0.3, "velocity_max": 6.0,
-    # Résiduel inhibiteur (mg/L) — source CI-5003
-    "inhib_min": 5, "inhib_max": 80,
-    # Teneur sable (ppm) — source AI-4004
+    # Résiduel inhibiteur (mg/L)
+    "inhib_min": 5, "inhib_max": 100,
+    # Teneur sable (ppm)
     "sable_min": 0, "sable_max": 200,
-    # H2S (ppm) — source AI-4002
+    # H2S (ppm)
     "H2S_min": 0, "H2S_max": 500,
     # Dose cible inhibiteur (mg/L)
     "inhib_dose_cible": 40,
-    # Densité pétrole brut Doba (kg/m3)
+    # Densité fluide (kg/m3) — pétrole brut typique
     "rho_m": 850,
-    # Diamètre ligne principale (m)
+    # Diamètre interne (m) — 20 pouces typique
     "D_m": 0.508,
 }
 
+# Alias pour compatibilité ascendante
+KRIBI_PARAMS = DEFAULT_PARAMS
 
-def generer_dataset_cotco(n_points: int = 5000, seed: int = 42) -> pd.DataFrame:
+
+def _charger_params_depuis_config(config_path: str) -> dict:
     """
-    Génère un dataset synthétique réaliste calibré Kribi.
+    Charge les plages opératoires depuis un fichier YAML entreprise.
+    Retourne DEFAULT_PARAMS si le fichier est absent ou mal formé.
+    """
+    try:
+        import yaml
+        with open(config_path, "r", encoding="utf-8") as f:
+            cfg = yaml.safe_load(f)
+
+        plages = cfg.get("simulation", {}).get("plages_operatoires", {})
+        station = cfg.get("station", {})
+        labo_inhib = None
+
+        # Dose cible inhibiteur depuis les tags DCS
+        try:
+            labo_inhib = cfg["tags_dcs"]["corrosion_integrite"]["CI-5003"]["dose_cible"]
+        except (KeyError, TypeError):
+            pass
+
+        # Diamètre interne depuis la config station
+        D_m = DEFAULT_PARAMS["D_m"]
+        try:
+            diam_mm = float(station.get("diametre_mm", 508))
+            ep_mm   = float(station.get("epaisseur_nominale_mm", 15.9))
+            D_m = (diam_mm - 2 * ep_mm) / 1000
+        except (TypeError, ValueError):
+            pass
+
+        # Densité fluide depuis features_derivees si présente
+        rho_m = DEFAULT_PARAMS["rho_m"]
+        try:
+            rho_m = float(cfg["features_derivees"]["erosion_ratio"]["rho_m"])
+        except (KeyError, TypeError):
+            pass
+
+        params = dict(DEFAULT_PARAMS)
+        params.update({
+            "T_min":          float(plages.get("T_min",         DEFAULT_PARAMS["T_min"])),
+            "T_max":          float(plages.get("T_max",         DEFAULT_PARAMS["T_max"])),
+            "P_min":          float(plages.get("P_min",         DEFAULT_PARAMS["P_min"])),
+            "P_max":          float(plages.get("P_max",         DEFAULT_PARAMS["P_max"])),
+            "CO2_pct_min":    float(plages.get("CO2_pct_min",   DEFAULT_PARAMS["CO2_pct_min"])),
+            "CO2_pct_max":    float(plages.get("CO2_pct_max",   DEFAULT_PARAMS["CO2_pct_max"])),
+            "BSW_min":        float(plages.get("BSW_min",       DEFAULT_PARAMS["BSW_min"])),
+            "BSW_max":        float(plages.get("BSW_max",       DEFAULT_PARAMS["BSW_max"])),
+            "velocity_min":   float(plages.get("velocity_min",  DEFAULT_PARAMS["velocity_min"])),
+            "velocity_max":   float(plages.get("velocity_max",  DEFAULT_PARAMS["velocity_max"])),
+            "inhib_min":      float(plages.get("inhib_min",     DEFAULT_PARAMS["inhib_min"])),
+            "inhib_max":      float(plages.get("inhib_max",     DEFAULT_PARAMS["inhib_max"])),
+            "sable_min":      float(plages.get("sable_min",     DEFAULT_PARAMS["sable_min"])),
+            "sable_max":      float(plages.get("sable_max",     DEFAULT_PARAMS["sable_max"])),
+            "H2S_min":        float(plages.get("H2S_min",       DEFAULT_PARAMS["H2S_min"])),
+            "H2S_max":        float(plages.get("H2S_max",       DEFAULT_PARAMS["H2S_max"])),
+            "inhib_dose_cible": float(labo_inhib) if labo_inhib else DEFAULT_PARAMS["inhib_dose_cible"],
+            "rho_m":          rho_m,
+            "D_m":            D_m,
+        })
+        print(f"[Synthétique] Config chargée : {Path(config_path).name}")
+        return params
+
+    except Exception as e:
+        print(f"[Synthétique] Config non chargée ({e}) — utilisation des paramètres par défaut")
+        return dict(DEFAULT_PARAMS)
+
+
+def generer_dataset_cotco(n_points: int = 5000, seed: int = 42,
+                          config_path: str = None) -> pd.DataFrame:
+    """
+    Génère un dataset synthétique réaliste basé sur De Waard & Milliams.
+
+    Args:
+        n_points    : nombre de points à générer
+        seed        : graine aléatoire (reproductibilité)
+        config_path : chemin vers le YAML entreprise (optionnel)
+                      Si fourni, les plages opératoires viennent de la config.
+                      Si absent, utilise DEFAULT_PARAMS (pipeline typique).
 
     Returns:
         DataFrame avec 20 tags DCS simulés + 8 features + targets CR et RL
@@ -52,7 +132,10 @@ def generer_dataset_cotco(n_points: int = 5000, seed: int = 42) -> pd.DataFrame:
     """
     rng = np.random.default_rng(seed)
 
-    p = KRIBI_PARAMS
+    if config_path and Path(config_path).exists():
+        p = _charger_params_depuis_config(config_path)
+    else:
+        p = dict(DEFAULT_PARAMS)
 
     # ── Tags DCS simulés ─────────────────────────────────────────────────────
 
@@ -228,7 +311,7 @@ def generer_dataset_cotco(n_points: int = 5000, seed: int = 42) -> pd.DataFrame:
         "poids":          0.5,
     })
 
-    print(f"[Synthétique COTCO] {n_points} points générés")
+    print(f"[Synthétique] {n_points} points générés (De Waard)")
     print(f"  CR moyen    : {CR_mesure.mean():.4f} mm/an")
     print(f"  CR max      : {CR_mesure.max():.4f} mm/an")
     print(f"  RL médiane  : {np.median(RL_ans):.1f} ans")
@@ -237,10 +320,10 @@ def generer_dataset_cotco(n_points: int = 5000, seed: int = 42) -> pd.DataFrame:
     return df
 
 
-def sauvegarder(df: pd.DataFrame, path: str = "data/raw/synthetic_cotco.csv") -> None:
+def sauvegarder(df: pd.DataFrame, path: str = "data/raw/synthetic_data.csv") -> None:
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(path, index=False)
-    print(f"[Synthétique COTCO] Sauvegardé : {path}")
+    print(f"[Synthétique] Sauvegardé : {path}")
 
 
 if __name__ == "__main__":

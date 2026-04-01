@@ -1,13 +1,13 @@
 """
 run_pipeline.py
 ---------------
-Orchestrateur complet du système ML COTCO.
+Orchestrateur complet du système ML de maintenance prédictive corrosion.
 
 Deux modes :
   MODE A — Pré-stage  : données publiques uniquement (PHMSA + SPE + De Waard)
-                        Disponible avant l'arrivée chez COTCO.
-  MODE B — Fusion     : données publiques + COTCO réel (poids ×3)
-                        Activé dès que les données COTCO sont disponibles.
+                        Disponible avant l'arrivée en stage.
+  MODE B — Fusion     : données publiques + données réelles entreprise (poids ×3)
+                        Activé dès que les données entreprise sont disponibles.
 
 Usage :
     python src/run_pipeline.py                    # auto-détecte le mode
@@ -47,7 +47,7 @@ def run(mode: str = "auto", force_retrain: bool = False) -> dict:
         dict résumé des métriques
     """
     print("\n" + "="*60)
-    print("  PIPELINE MAINTENANCE PRÉDICTIVE COTCO — STATION KRIBI")
+    print("  PIPELINE MAINTENANCE PRÉDICTIVE — CORROSION ML")
     print("="*60)
 
     # ── Étape 1 : Charger / Générer les données ──────────────────────────────
@@ -70,7 +70,7 @@ def run(mode: str = "auto", force_retrain: bool = False) -> dict:
 
     # ── Étape 3 : Fusion 4 sources (si mode fusion) ──────────────────────────
 
-    if detected_mode == "cotco_reel" or mode == "fusion":
+    if detected_mode == "entreprise_reel" or mode == "fusion":
         df_fusion = _fusionner_avec_sources_publiques(df_base)
     else:
         df_fusion = df_base
@@ -143,21 +143,21 @@ def run(mode: str = "auto", force_retrain: bool = False) -> dict:
 
 def _mode_prestage():
     """
-    Mode A — Pré-stage : données publiques disponibles avant COTCO.
+    Mode A — Pré-stage : données publiques disponibles avant le stage.
     PHMSA (réel public) + SPE papers (réel public) + De Waard (synthétique).
     """
     print("\n[MODE PRE-STAGE] Chargement donnees publiques + simulation De Waard...")
     df_sim = generer_dataset_cotco(n_points=5000)
     df_sim = compute_all_features(df_sim)
-    # Fusionner avec PHMSA et SPE si disponibles (sans COTCO)
+    # Fusionner avec PHMSA et SPE si disponibles (sans données réelles entreprise)
     df_fusion = _fusionner_avec_sources_publiques(df_sim)
-    # Exclure COTCO si présent accidentellement
-    df = df_fusion[df_fusion["source"] != "COTCO_reel"].copy()
+    # Exclure données réelles entreprise si présentes accidentellement
+    df = df_fusion[df_fusion["source"] != "entreprise_reel"].copy()
     return df, "prestage"
 
 
 def _mode_fusion():
-    """Mode B : tente de charger COTCO réel + fusionne avec sources publiques."""
+    """Mode B : tente de charger les données réelles entreprise + fusionne avec sources publiques."""
     df_base, mode = charger_ou_generer()
     df_fusion = _fusionner_avec_sources_publiques(df_base)
     return df_fusion, "fusion_" + mode
@@ -165,7 +165,7 @@ def _mode_fusion():
 
 def _fusionner_avec_sources_publiques(df_cotco: "pd.DataFrame"):
     """
-    Fusionne les données COTCO (ou synthétiques) avec :
+    Fusionne les données entreprise (ou synthétiques) avec :
       - PHMSA si disponible dans data/raw/phmsa_pipeline.csv
       - SPE papers si disponibles dans data/raw/spe_papers.csv
       - Simulation De Waard (toujours ajoutée comme complément)
@@ -255,7 +255,7 @@ def _charger_phmsa_survival() -> "pd.DataFrame | None":
 
 def _modeles_existent() -> bool:
     modeles = [
-        ROOT / "models/xgboost_cotco.pkl",
+        ROOT / "models/xgboost_model.pkl",
         ROOT / "models/survival_model.pkl",
         ROOT / "models/isolation_forest.pkl",
     ]
@@ -301,7 +301,7 @@ def _afficher_rapport(resultats: dict) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Pipeline ML COTCO Kribi")
+    parser = argparse.ArgumentParser(description="Pipeline ML Maintenance Prédictive Corrosion")
     parser.add_argument("--mode", choices=["auto", "prestage", "fusion"],
                         default="auto", help="Mode de données")
     parser.add_argument("--retrain", action="store_true",

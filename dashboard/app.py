@@ -1,6 +1,5 @@
 """
-app.py — Dashboard Maintenance Prédictive COTCO
-Station de Réduction de Pression de Kribi
+app.py — Dashboard Maintenance Prédictive Corrosion
 
 6 pages :
   P1 — KPIs globaux
@@ -10,8 +9,8 @@ Station de Réduction de Pression de Kribi
   P5 — Alertes & anomalies
   P6 — Monitoring modèle + dérive
 
-MODE SYNTHÉTIQUE  : données De Waard calibrées Kribi (prototype)
-MODE FUSION       : COTCO réel + PHMSA + SPE + simulation (production)
+MODE PRÉ-STAGE  : données De Waard synthétiques (prototype démonstration)
+MODE FUSION     : données réelles entreprise + PHMSA + SPE + simulation (production)
 """
 
 import json
@@ -35,7 +34,7 @@ from src.models.decision_engine import (
 # ── Configuration page ────────────────────────────────────────────────────────
 
 st.set_page_config(
-    page_title="COTCO — Maintenance Prédictive Kribi",
+    page_title="Maintenance Prédictive — Corrosion ML",
     page_icon="🛢️",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -59,7 +58,7 @@ NACE_SEUILS = [0.025, 0.050, 0.125, 0.250, 0.500]
 @st.cache_resource
 def charger_modeles():
     try:
-        model_xgb  = joblib.load(ROOT / "models/xgboost_cotco.pkl")
+        model_xgb  = joblib.load(ROOT / "models/xgboost_model.pkl")
         model_surv = joblib.load(ROOT / "models/survival_model.pkl")
         model_anom = joblib.load(ROOT / "models/isolation_forest.pkl")
         scaler_anom = joblib.load(ROOT / "models/scaler_anomaly.pkl")
@@ -89,12 +88,12 @@ if state_path.exists():
 def charger_dataset_fusion():
     """Charge le dataset hybride complet (4 sources)."""
     path_fusion = ROOT / "data/processed/dataset_ML_final.csv"
-    path_synth  = ROOT / "data/raw/synthetic_cotco.csv"
+    path_synth  = ROOT / "data/raw/synthetic_data.csv"
 
     if path_fusion.exists():
         df = pd.read_csv(path_fusion)
         sources = df["source"].value_counts().to_dict() if "source" in df.columns else {}
-        a_cotco = "COTCO_reel" in sources
+        a_cotco = "entreprise_reel" in sources
         return df, "fusion", sources, a_cotco
     elif path_synth.exists():
         df = pd.read_csv(path_synth)
@@ -109,9 +108,9 @@ def charger_dataset_fusion():
 @st.cache_data
 def charger_dataset_prestage():
     """
-    Mode Pré-stage : données disponibles AVANT l'arrivée chez COTCO.
+    Mode Pré-stage : données publiques disponibles avant le stage.
     Sources : PHMSA (public réel) + SPE/NACE papers (public réel) + De Waard (synthétique).
-    Aucune donnée COTCO réelle.
+    Aucune donnée réelle entreprise.
     """
     from src.data.generate_synthetic_cotco import generer_dataset_cotco
     from src.etl.merge_all_sources import fusionner_toutes_sources
@@ -133,7 +132,7 @@ def charger_dataset_prestage():
         sources["df_spe"] = df_spe
 
     # De Waard — simulation synthétique (toujours présente)
-    path_synth = ROOT / "data/raw/synthetic_cotco.csv"
+    path_synth = ROOT / "data/raw/synthetic_data.csv"
     if path_synth.exists():
         df_sim = pd.read_csv(path_synth)
     else:
@@ -157,26 +156,26 @@ def charger_dataset_prestage():
 
 with st.sidebar:
     st.image("https://img.icons8.com/fluency/48/oil-industry.png", width=48)
-    st.markdown("### 🛢️ COTCO — Kribi")
-    st.caption("Station Réduction Pression")
+    st.markdown("### 🛢️ Maintenance Prédictive")
+    st.caption("Corrosion ML — Pipeline Oil & Gas")
 
     st.divider()
 
     # ── TOGGLE MODE ───────────────────────────────────────────────────────────
     st.markdown("**Mode d'affichage**")
     mode_demo = st.toggle(
-        "🔗 Mode Fusion (avec COTCO)",
+        "🔗 Mode Fusion (données réelles)",
         value=False,
         help=(
             "OFF → Mode Pré-stage : données publiques uniquement\n"
             "(PHMSA réel + SPE/NACE réel + simulation De Waard)\n\n"
-            "ON → Mode Fusion : données publiques + COTCO réel (poids ×3)\n"
-            "(à activer une fois les données COTCO disponibles)"
+            "ON → Mode Fusion : données publiques + données réelles entreprise (poids ×3)\n"
+            "(à activer une fois les données entreprise disponibles)"
         ),
     )
 
     if mode_demo:
-        st.success("🔗 FUSION\nPublic + COTCO réel")
+        st.success("🔗 FUSION\nPublic + Données réelles")
     else:
         st.info("📂 PRÉ-STAGE\nPHMSA + SPE + De Waard")
 
@@ -203,7 +202,7 @@ with st.sidebar:
         st.warning("⚠️ Mode physique\n`python src/run_pipeline.py`")
 
     # Import données enterprise
-    st.markdown("**Import données COTCO**")
+    st.markdown("**Import données entreprise**")
     fichier_pi  = st.file_uploader("Export PI Server (CSV)", type=["csv"], key="pi")
     fichier_ut  = st.file_uploader("Rapport UT (PDF)",      type=["pdf"], key="ut")
     fichier_lab = st.file_uploader("Analyses Labo (Excel)", type=["xlsx","xls"], key="lab")
@@ -226,14 +225,14 @@ def _afficher_badge_mode(mode, sources, a_cotco):
     """
     Affiche un banner visuel distinct selon le mode actif.
 
-    MODE PRÉ-STAGE  : données publiques (PHMSA + SPE + De Waard) — avant COTCO
-    MODE FUSION     : données publiques + COTCO réel (poids ×3) — pendant/après stage
+    MODE PRÉ-STAGE  : données publiques (PHMSA + SPE + De Waard) — avant le stage
+    MODE FUSION     : données publiques + données réelles entreprise (poids ×3) — pendant/après stage
     """
     total = sum(sources.values())
 
     if mode == "fusion" and a_cotco:
-        n_cotco = sources.get("COTCO_reel", 0)
-        n_public = total - n_cotco
+        n_reel = sources.get("entreprise_reel", 0)
+        n_public = total - n_reel
         st.markdown(
             f"""
             <div style="
@@ -243,11 +242,11 @@ def _afficher_badge_mode(mode, sources, a_cotco):
                 padding: 12px 16px;
                 margin-bottom: 12px;
             ">
-            <b style="color:#6ee68e; font-size:1.05em;">🔗 MODE FUSION — Données Publiques + COTCO Réel</b><br>
+            <b style="color:#6ee68e; font-size:1.05em;">🔗 MODE FUSION — Données Publiques + Données Réelles</b><br>
             <span style="color:#ccc; font-size:0.88em;">
             📂 Données publiques : {n_public} lignes (PHMSA + SPE/NACE + De Waard simulation)<br>
-            🏭 Données COTCO réelles : {n_cotco} lignes <b style="color:#6ee68e;">(poids ×3 — prioritaires)</b><br>
-            <b style="color:#aaa;">Métriques finales évaluées sur COTCO réel uniquement — honnêteté académique</b>
+            🏭 Données réelles entreprise : {n_reel} lignes <b style="color:#6ee68e;">(poids ×3 — prioritaires)</b><br>
+            <b style="color:#aaa;">Métriques finales évaluées sur données réelles uniquement — honnêteté académique</b>
             </span>
             </div>
             """,
@@ -275,7 +274,7 @@ def _afficher_badge_mode(mode, sources, a_cotco):
             <b style="color:#64b5f6; font-size:1.05em;">📂 MODE PRÉ-STAGE — Données Publiques uniquement</b><br>
             <span style="color:#ccc; font-size:0.88em;">
             {detail_lines}<br>
-            <b style="color:#aaa;">Pas encore de données COTCO réelles — activer le toggle pour passer en Mode Fusion</b>
+            <b style="color:#aaa;">Pas encore de données réelles entreprise — activer le toggle pour passer en Mode Fusion</b>
             </span>
             </div>
             """,
@@ -286,7 +285,7 @@ def _afficher_badge_mode(mode, sources, a_cotco):
 def _afficher_composition_sources(sources: dict, df: pd.DataFrame):
     """Graphique composition des sources avec poids."""
     POIDS_LABEL = {
-        "COTCO_reel":         ("COTCO Réel", "#1a6e3c", 3.0),
+        "entreprise_reel":    ("Données Réelles Entreprise", "#1a6e3c", 3.0),
         "PHMSA_public":       ("PHMSA Public", "#1e88e5", 1.0),
         "SPE_papers":         ("SPE/NACE Papers", "#8e24aa", 1.0),
         "simulation_DeWaard": ("Simulation De Waard", "#546e7a", 0.5),
@@ -326,7 +325,7 @@ def _afficher_composition_sources(sources: dict, df: pd.DataFrame):
 
 
 def _simuler_cml_station() -> pd.DataFrame:
-    """Simule les métriques des 12 CMLs de la station Kribi."""
+    """Simule les métriques de 12 CMLs représentatifs de l'installation."""
     cml_data = [
         # CML_ID            CR_predit  RL_med  RL_pess  risque   freq
         ("CML-KRB-001",     0.042,      16.9,   11.8,   "Faible",   18),
@@ -367,7 +366,7 @@ def _predire_CR(df_cond, T, CO2_pct, inhib, debit_vol, P):
         try:
             X, _ = get_feature_matrix(df_cond)
             CR_predit = float(np.clip(model_xgb.predict(X)[0], 0.001, 5.0))
-            return CR_predit, CR_dw, "🤖 XGBoost COTCO"
+            return CR_predit, CR_dw, "🤖 XGBoost ML"
         except Exception:
             pass
 
@@ -382,8 +381,8 @@ def _afficher_comparaison_xgb_dw(cr_xgb, cr_dw):
     """Affiche la comparaison XGBoost vs De Waard."""
     delta_pct = (cr_dw - cr_xgb) / cr_dw * 100 if cr_dw > 0 else 0
     col1, col2, col3 = st.columns(3)
-    col1.metric("XGBoost (ML COTCO)", f"{cr_xgb:.4f} mm/an",
-                help="Intègre les données réelles COTCO : inhibiteurs, upsets, saisonnalité")
+    col1.metric("XGBoost (ML)", f"{cr_xgb:.4f} mm/an",
+                help="Intègre les données réelles entreprise : inhibiteurs, upsets, saisonnalité")
     col2.metric("De Waard (physique)", f"{cr_dw:.4f} mm/an",
                 help="Modèle physique pur — De Waard & Milliams (1991)")
     col3.metric("Écart XGBoost/DeWaard", f"{delta_pct:+.1f}%",
@@ -391,7 +390,7 @@ def _afficher_comparaison_xgb_dw(cr_xgb, cr_dw):
 
     st.caption(
         "💡 L'écart entre XGBoost et De Waard représente la **valeur ajoutée du ML** : "
-        "prise en compte des inhibiteurs réels, des upsets, de la géométrie locale COTCO."
+        "prise en compte des inhibiteurs réels, des upsets, de la géométrie locale de l'installation."
     )
 
 
@@ -405,7 +404,7 @@ def _afficher_courbe_degradation(t_mm, t_nominal, t_min, cr_xgb, cr_dw, rl):
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=annees, y=eps_xgb, mode="lines",
-                             name="XGBoost COTCO", line=dict(color="#1e88e5", width=3)))
+                             name="XGBoost ML", line=dict(color="#1e88e5", width=3)))
     fig.add_trace(go.Scatter(x=annees, y=eps_dw,  mode="lines",
                              name="De Waard (physique)",
                              line=dict(color="#aaa", width=2, dash="dash")))
@@ -471,7 +470,7 @@ def _style_risque(val):
 
 if page == "📊 KPIs Globaux":
 
-    st.title("📊 KPIs Globaux — Station Kribi")
+    st.title("📊 KPIs Globaux — Maintenance Prédictive")
     _afficher_badge_mode(mode_actif, sources_actives, a_donnees_cotco)
 
     # Données pour calcul KPIs
@@ -568,7 +567,7 @@ elif page == "🎯 Prédiction par CML":
 
     st.divider()
 
-    # Inputs process (sliders calibrés Kribi)
+    # Inputs process (sliders conditions opératoires)
     col1, col2, col3 = st.columns(3)
 
     with col1:

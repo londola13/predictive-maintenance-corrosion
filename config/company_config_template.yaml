@@ -1,0 +1,306 @@
+# ============================================================
+# TEMPLATE — Configuration Entreprise
+# Système de Maintenance Prédictive par ML — Corrosion Pipelines
+# ============================================================
+# INSTRUCTIONS :
+#   1. Copier ce fichier : cp company_config_template.yaml my_company_config.yaml
+#   2. Remplir chaque champ avec les valeurs réelles de votre installation
+#   3. Lancer : python src/run_pipeline.py --config config/my_company_config.yaml
+#
+# Les plages marquées [À REMPLIR] sont obligatoires.
+# Les plages marquées [DÉFAUT] peuvent rester telles quelles si inconnues.
+# ============================================================
+
+station:
+  nom: "[À REMPLIR] Ex: Station de compression de Limbé"
+  entreprise: "[À REMPLIR] Ex: SONARA, PERENCO, TRADEX..."
+  localisation: "[À REMPLIR] Ex: Limbé, Région du Sud-Ouest, Cameroun"
+  pipeline: "[À REMPLIR] Ex: Pipeline Limbé-Douala — 60 km"
+  materiau: "[À REMPLIR] Ex: API 5L X52 / X65 / X70"
+  diametre_mm: 508          # [À REMPLIR] Diamètre externe en mm
+  epaisseur_nominale_mm: 15.9   # [À REMPLIR] Épaisseur nominale en mm
+  en_service_depuis: 2000   # [À REMPLIR] Année de mise en service
+  fluide: "[À REMPLIR] Ex: Pétrole brut / Gaz naturel / Condensat"
+
+# ------------------------------------------------------------
+# TAGS DCS — 20 tags process
+# Adapter les noms de tags à votre système PI Server / DCS
+# ------------------------------------------------------------
+tags_dcs:
+
+  temperature:
+    TI-1001:
+      description: "Température entrée station"
+      unite: "°C"
+      plage_normale: [30, 70]   # [À REMPLIR]
+      alarme_haute: 75
+      feature: "T_mean"
+    TI-1002:
+      description: "Température sortie / aval"
+      unite: "°C"
+      plage_normale: [15, 50]   # [À REMPLIR]
+      alarme_basse: 10
+      feature: "T_aval"
+    TI-1003:
+      description: "Température paroi pipe"
+      unite: "°C"
+      plage_normale: [25, 65]   # [À REMPLIR]
+      feature: "T_paroi"
+    TI-1004:
+      description: "Température ambiante"
+      unite: "°C"
+      plage_normale: [20, 40]   # [À REMPLIR selon localisation]
+      feature: "T_ambiante"
+
+  pression:
+    PI-2001:
+      description: "Pression entrée (haute pression)"
+      unite: "bar"
+      plage_normale: [50, 120]  # [À REMPLIR]
+      alarme_haute: 125
+      feature: "P_mean"
+    PI-2002:
+      description: "Pression sortie / basse pression"
+      unite: "bar"
+      plage_normale: [5, 20]    # [À REMPLIR]
+      feature: "P_aval"
+    PI-2003:
+      description: "ΔP filtre entrée"
+      unite: "bar"
+      plage_normale: [0, 5]
+      alarme_haute: 4.0
+      feature: "dP_filtre"
+    PI-2004:
+      description: "Pression soupape de sécurité (PSV)"
+      unite: "bar"
+      plage_normale: [50, 120]  # [À REMPLIR selon design pressure]
+      alarme_haute: 120
+      feature: "P_psv"
+    PI-2005:
+      description: "Pression corps appareil principal"
+      unite: "bar"
+      plage_normale: [50, 120]  # [À REMPLIR]
+      feature: "P_appareil"
+
+  debit:
+    FI-3001:
+      description: "Débit volumique entrée"
+      unite: "m3/h"
+      plage_normale: [100, 1000]  # [À REMPLIR]
+      feature: "debit_vol"
+    FI-3002:
+      description: "Débit massique brut"
+      unite: "t/h"
+      plage_normale: [80, 900]    # [À REMPLIR]
+      feature: "debit_masse"
+    FI-3003:
+      description: "Débit injection inhibiteur de corrosion"
+      unite: "L/h"
+      plage_normale: [5, 100]     # [À REMPLIR]
+      alarme_basse: 5
+      feature: "debit_inhib"
+
+  analyseurs:
+    AI-4001:
+      description: "% CO2 dans le fluide"
+      unite: "% mol"
+      plage_normale: [0.1, 10.0]  # [À REMPLIR selon analyse fluide]
+      alarme_haute: 8.0
+      feature: "CO2_pct"
+    AI-4002:
+      description: "H2S"
+      unite: "ppm"
+      plage_normale: [0, 500]     # [À REMPLIR]
+      alarme_haute: 300
+      feature: "H2S_ppm"
+    AI-4003:
+      description: "BSW — Basic Sediment & Water"
+      unite: "% vol"
+      plage_normale: [0, 30]      # [À REMPLIR]
+      alarme_haute: 25
+      feature: "BSW_mean"
+    AI-4004:
+      description: "Teneur en sable / particules solides"
+      unite: "ppm"
+      plage_normale: [0, 200]     # [À REMPLIR]
+      alarme_haute: 150
+      feature: "sable_ppm"
+
+  corrosion_integrite:
+    CI-5001:
+      description: "Sonde corrosion ER amont"
+      unite: "mm/an"
+      plage_normale: [0, 0.5]
+      alarme_haute: 0.25
+      feature: "CR_sonde_amont"
+    CI-5002:
+      description: "Sonde corrosion ER aval"
+      unite: "mm/an"
+      plage_normale: [0, 0.5]
+      alarme_haute: 0.25
+      feature: "CR_sonde_aval"
+    CI-5003:
+      description: "Résiduel inhibiteur de corrosion"
+      unite: "mg/L"
+      plage_normale: [20, 100]    # [À REMPLIR selon produit chimique]
+      alarme_basse: 20
+      dose_cible: 40              # [À REMPLIR] dose cible du fournisseur
+      feature: "inhib_mean"
+    CI-5004:
+      description: "Potentiel de protection cathodique"
+      unite: "mV/CSE"
+      plage_normale: [-1100, -850]
+      alarme_haute: -850    # sous-protection
+      alarme_basse: -1200   # surprotection — risque fragilisation H2
+      feature: "CP_mV"
+
+# ------------------------------------------------------------
+# FEATURES DÉRIVÉES — formules physiques
+# Ne pas modifier sauf si votre installation a une géométrie différente
+# ------------------------------------------------------------
+features_derivees:
+
+  pCO2_bar:
+    formule: "PI-2001 * AI-4001 / 100"
+    description: "Pression partielle CO2"
+    unite: "bar"
+    seuils:
+      faible: 0.5
+      modere: 2.0
+      severe: ">2.0"
+
+  CR_deWaard:
+    formule: "10^(5.8 - 1710/(TI-1001+273.15) + 0.67*log10(pCO2_bar))"
+    description: "Taux de corrosion De Waard & Milliams (1991)"
+    unite: "mm/an"
+    reference: "NORSOK M-506"
+
+  velocity_ms:
+    formule: "FI-3001 / (3600 * pi * (D_interne/2000)^2)"
+    description: "Vélocité fluide — D_interne calculé depuis diametre_mm et epaisseur"
+    unite: "m/s"
+
+  erosion_ratio:
+    formule: "velocity_ms / (100 / sqrt(rho_m))"
+    description: "Ratio érosif vs vitesse critique API RP 14E"
+    rho_m: 850    # [À REMPLIR] densité fluide en kg/m3 (brut ~850, condensat ~720)
+    seuils:
+      sur: 0.5
+      surveillance: 1.0
+      erosion: ">1.0"
+
+  delta_T:
+    formule: "TI-1001 - TI-1002"
+    description: "Chute de température process"
+    unite: "°C"
+
+  inhibitor_efficiency:
+    formule: "CI-5003 / dose_cible"
+    description: "Efficacité inhibiteur (dose cible depuis config)"
+
+  filter_fouling:
+    formule: "PI-2003 / dP_filtre_max"
+    dP_filtre_max: 5    # [À REMPLIR] ΔP maxi avant nettoyage en bar
+
+  aggressivity_index:
+    formule: "pCO2_bar*0.4 + BSW/100*0.3 + sable/200*0.2 + (1-inhib_eff)*0.1"
+    description: "Indice agressivité global composite (0-1)"
+
+# ------------------------------------------------------------
+# SEUILS NORMATIFS (standards internationaux — ne pas modifier)
+# ------------------------------------------------------------
+seuils_normatifs:
+
+  taux_corrosion_NACE_SP0775:
+    acceptable_mmpa: 0.025
+    faible_mmpa: 0.050
+    modere_mmpa: 0.125
+    eleve_mmpa: 0.250
+    severe_mmpa: 0.500
+
+  epaisseur_min_ASME_B313:
+    # t_min = (P*D)/(2*S*E + 2*P*0.4) + CA
+    # Remplir P, D, S selon votre installation
+    P_bar: 100            # [À REMPLIR] pression de design en bar
+    D_mm: 508             # [À REMPLIR] = diametre_mm ci-dessus
+    S_MPa: 448            # [À REMPLIR] X65=448 MPa, X52=359 MPa, X70=483 MPa
+    E: 1.0                # joint longitudinal soudé = 1.0
+    CA_mm: 3.2            # [À REMPLIR] corrosion allowance en mm
+
+  protection_cathodique_NACE_SP0169:
+    protection_mV_CSE: -850
+    max_mV_CSE: -1200
+
+# ------------------------------------------------------------
+# PARAMÈTRES DE SIMULATION (De Waard calibré sur vos conditions)
+# Ces plages génèrent les données synthétiques pré-stage
+# ------------------------------------------------------------
+simulation:
+  n_points: 5000
+  random_seed: 42
+  bruit_lognormal_sigma: 0.12   # variabilité terrain typique (0.08-0.15)
+
+  plages_operatoires:
+    # Copier ici les plages normales de vos tags DCS
+    T_min: 30             # [À REMPLIR] = TI-1001 plage_normale[0]
+    T_max: 70             # [À REMPLIR] = TI-1001 plage_normale[1]
+    P_min: 50             # [À REMPLIR] = PI-2001 plage_normale[0]
+    P_max: 120            # [À REMPLIR] = PI-2001 plage_normale[1]
+    CO2_pct_min: 0.1      # [À REMPLIR]
+    CO2_pct_max: 10.0     # [À REMPLIR]
+    BSW_min: 0.5
+    BSW_max: 30           # [À REMPLIR]
+    velocity_min: 0.3
+    velocity_max: 6.0
+    inhib_min: 5
+    inhib_max: 100        # [À REMPLIR]
+    sable_min: 0
+    sable_max: 200        # [À REMPLIR]
+    H2S_min: 0
+    H2S_max: 500          # [À REMPLIR]
+
+# ------------------------------------------------------------
+# DONNÉES LABO (analyses périodiques eau produite)
+# ------------------------------------------------------------
+labo:
+  frequence: "mensuelle"    # [À REMPLIR] hebdomadaire / mensuelle
+  parametres:
+    pH:
+      plage: [5.5, 7.5]
+    Cl_mgL:
+      plage: [100, 5000]
+      alarme: 3000
+    Fe_mgL:
+      plage: [0, 50]
+      alarme: 30            # Fe2+ dissous → indicateur corrosion active
+    SRB_ufc_mL:
+      plage: [0, 1000]
+      alarme: 100           # Sulfate-Reducing Bacteria → MIC
+
+# ------------------------------------------------------------
+# PARAMÈTRES MODÈLES ML — généralement pas besoin de modifier
+# ------------------------------------------------------------
+modeles:
+
+  xgboost:
+    target: "CR_mesure"
+    n_trials_optuna: 100
+    n_folds_walkforward: 4
+    objectif_R2: 0.80         # réaliste en conditions industrielles
+    objectif_MAPE: 0.20
+    fichier: "models/xgboost_model.pkl"
+
+  survival:
+    target: "RL_ans"
+    methode: "WeibullAFT"
+    intervalle_confiance: 0.90
+    fichier: "models/survival_model.pkl"
+
+  anomaly:
+    contamination: 0.05
+    fichier: "models/isolation_forest.pkl"
+
+  retrain:
+    scheduler: "hebdomadaire"
+    seuil_derive_MAE: 2.0
+    fenetre_derive_jours: 30
