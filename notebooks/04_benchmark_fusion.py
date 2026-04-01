@@ -118,9 +118,9 @@ def _generer_phmsa_like(n_points: int, seed: int) -> pd.DataFrame:
     def clf(cr):
         if cr < 0.025: return "Acceptable"
         if cr < 0.050: return "Faible"
-        if cr < 0.125: return "Modere"
-        if cr < 0.250: return "Eleve"
-        if cr < 0.500: return "Severe"
+        if cr < 0.125: return "Modéré"
+        if cr < 0.250: return "Élevé"
+        if cr < 0.500: return "Sévère"
         return "Critique"
 
     return pd.DataFrame({
@@ -189,7 +189,7 @@ def evaluer(y_true, y_pred, nom: str) -> dict:
     print(f"\n  [{nom}]")
     print(f"    MAE  : {mae:.4f} mm/an")
     print(f"    RMSE : {rmse:.4f}")
-    print(f"    R2   : {r2:.4f}")
+    print(f"    R²   : {r2:.4f}")
     print(f"    MAPE : {mape:.1f}%")
 
     return {"nom": nom, "mae": mae, "rmse": rmse, "r2": r2, "mape": mape}
@@ -215,31 +215,31 @@ def run():
     resultats = []
 
     # ── M0 : Baseline De Waard (pas de ML) ───────────────────────────────────
-    print("\n[3] Evaluation des modèles...")
+    print("\n[3] Évaluation des modèles...")
     if "CR_deWaard" in df_test.columns:
         y_dw = df_test["CR_deWaard"].values
-        res_m0 = evaluer(y_test, y_dw, "M0 - De Waard (baseline physique)")
+        res_m0 = evaluer(y_test, y_dw, "M0 — De Waard (baseline physique)")
         resultats.append(res_m0)
 
     # ── M1 : XGBoost COTCO seul ───────────────────────────────────────────────
-    print("\n  Entrainement M1 (COTCO seul)...")
+    print("\n  Entraînement M1 (COTCO seul)...")
     model_m1, _ = entrainer_xgboost(df_train_cotco)
     y_m1 = np.clip(model_m1.predict(X_test), 0.001, 5.0)
-    res_m1 = evaluer(y_test, y_m1, "M1 - XGBoost (COTCO seul)")
+    res_m1 = evaluer(y_test, y_m1, "M1 — XGBoost (COTCO seul)")
     resultats.append(res_m1)
 
     # ── M2 : XGBoost Fusion ───────────────────────────────────────────────────
-    print("\n  Entrainement M2 (fusion)...")
+    print("\n  Entraînement M2 (fusion)...")
     model_m2, _ = entrainer_xgboost(df_train_fusion)
     y_m2 = np.clip(model_m2.predict(X_test), 0.001, 5.0)
-    res_m2 = evaluer(y_test, y_m2, "M2 - XGBoost (fusion ponderee)")
+    res_m2 = evaluer(y_test, y_m2, "M2 — XGBoost (fusion pondérée)")
     resultats.append(res_m2)
 
     # ── Rapport final ─────────────────────────────────────────────────────────
     print("\n" + "="*60)
-    print("  RESULTATS BENCHMARK")
+    print("  RÉSULTATS BENCHMARK")
     print("="*60)
-    print(f"  {'Modele':<35} {'MAE':>8} {'R2':>8} {'MAPE':>8}")
+    print(f"  {'Modèle':<35} {'MAE':>8} {'R²':>8} {'MAPE':>8}")
     print(f"  {'-'*59}")
     for r in resultats:
         print(f"  {r['nom']:<35} {r['mae']:>8.4f} {r['r2']:>8.4f} {r['mape']:>7.1f}%")
@@ -249,7 +249,7 @@ def run():
         mae_m1 = resultats[1]["mae"]
         mae_m2 = resultats[2]["mae"]
         amelioration = (mae_m1 - mae_m2) / mae_m1 * 100
-        print(f"\n  Amelioration Fusion vs COTCO seul : {amelioration:+.1f}% MAE")
+        print(f"\n  Amélioration Fusion vs COTCO seul : {amelioration:+.1f}% MAE")
         label = "[OK] Fusion justifiee" if amelioration > 0 else "[INFO] Fusion non benefique sur synthetique (attendu)"
         print(f"  {label}")
 
@@ -257,13 +257,13 @@ def run():
     output = {
         "benchmark": resultats,
         "n_test": int(len(df_test)),
-        "note": "Test set = COTCO uniquement. Fusion benefique si MAE M2 < MAE M1.",
+        "note": "Test set = COTCO uniquement. Fusion bénéfique si MAE M2 < MAE M1.",
     }
     out_path = ROOT / "models/benchmark_results.json"
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
-    print(f"\n[Benchmark] Resultats sauvegardes : {out_path}")
-    print("[Benchmark] Visible dans le dashboard — Page 6 Monitoring Modele")
+    print(f"\n[Benchmark] Résultats sauvegardés : {out_path}")
+    print("[Benchmark] Visible dans le dashboard — Page 6 Monitoring Modèle")
 
     return output
 

@@ -19,6 +19,27 @@ build/
 data/raw/phmsa/
 data/raw/nasa_cmapss/
 data/enterprise/
+data/raw/synthetic_cotco.csv
+data/raw/synthetic_cotco.xlsx
+data/raw/synthetic_corrosion.csv
+data/processed/
+# Fichier PHMSA brut (trop lourd — utiliser phmsa_sample.csv ou phmsa_survival.csv)
+data/raw/phmsa_hl_incidents.xlsx
+data/raw/phmsa_hl_incidents.csv
+
+# Modèles ML compilés (reconstruits par run_pipeline.py --retrain)
+models/xgboost_cotco.pkl
+models/survival_model.pkl
+models/isolation_forest.pkl
+models/scaler_anomaly.pkl
+
+# Scripts temporaires et captures d'écran de débogage
+debug_*.png
+screen_*.png
+deploy_*.py
+grant_*.py
+make_*.py
+fill_*.py
 
 # IDE
 .vscode/

@@ -32,12 +32,17 @@ SURVIVAL_FEATURES = [
 ]
 
 
-def train(df: pd.DataFrame) -> tuple:
+def train(df: pd.DataFrame, df_phmsa: "pd.DataFrame | None" = None) -> tuple:
     """
     Entraîne le modèle Weibull AFT sur le dataset hybride.
 
     Args:
-        df : dataset avec colonnes CR_mesure, RL_ans, features
+        df       : dataset COTCO/synthétique avec colonnes CR_mesure, RL_ans, features
+        df_phmsa : (optionnel) incidents corrosion PHMSA — améliore la distribution
+                   des RL_ans (valeurs réelles 10-40 ans vs ~50 ans synthétiques).
+                   Les features manquantes sont imputées par la médiane COTCO.
+                   Source : parse_phmsa.py → data/raw/phmsa_survival.csv
+                   NE PAS fournir si l'objectif est uniquement la prédiction process.
 
     Returns:
         (model, metrics_dict)
@@ -45,13 +50,38 @@ def train(df: pd.DataFrame) -> tuple:
     if not LIFELINES_OK:
         raise ImportError("lifelines requis : pip install lifelines")
 
-    # Préparer les données
+    # Préparer les données COTCO/synthétiques
     df_clean = df.dropna(subset=["RL_ans", "CR_mesure"]).copy()
     df_clean = df_clean[df_clean["CR_mesure"] > 0]
     df_clean = df_clean[df_clean["RL_ans"] > 0]
 
     # Colonne "event" : RL <= 0 signifie "défaillance atteinte"
     df_clean["event"] = (df_clean["RL_ans"] < 2).astype(int)
+
+    # ── Intégration PHMSA (optionnelle) ───────────────────────────────────────
+    if df_phmsa is not None and len(df_phmsa) > 0:
+        df_phmsa = df_phmsa.dropna(subset=["RL_ans", "CR_mesure"]).copy()
+        df_phmsa = df_phmsa[(df_phmsa["CR_mesure"] > 0) & (df_phmsa["RL_ans"] > 0)].copy()
+
+        # Imputation par la médiane COTCO pour les features manquantes
+        # Justification : "missing covariates imputed with median operating conditions"
+        # Réf : Little & Rubin (2002), Statistical Analysis with Missing Data
+        for col in SURVIVAL_FEATURES:
+            if col in df_phmsa.columns and col in df_clean.columns:
+                mediane_cotco = df_clean[col].median()
+                df_phmsa[col] = df_phmsa[col].fillna(mediane_cotco)
+            elif col in df_clean.columns:
+                df_phmsa[col] = df_clean[col].median()
+
+        # PHMSA : event=1 (défaillances observées par définition)
+        df_phmsa["event"] = 1
+
+        n_avant = len(df_clean)
+        df_clean = pd.concat([df_clean, df_phmsa], ignore_index=True)
+        print(f"  [PHMSA] +{len(df_phmsa)} incidents corrosion ajoutés "
+              f"(RL médiane PHMSA : {df_phmsa['RL_ans'].median():.1f} ans)")
+        print(f"  Dataset combiné : {n_avant} COTCO + {len(df_phmsa)} PHMSA "
+              f"= {len(df_clean)} total")
 
     print(f"\n[Survie] Entraînement : {len(df_clean)} lignes")
     print(f"  RL médiane : {df_clean['RL_ans'].median():.1f} ans")

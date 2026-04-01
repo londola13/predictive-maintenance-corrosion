@@ -32,6 +32,7 @@ from src.models.train_xgboost import train as train_xgboost
 from src.models.train_survival import train as train_survival
 from src.models.train_anomaly import train as train_anomaly
 from src.data.generate_synthetic_cotco import generer_dataset_cotco
+from src.parsers.parse_phmsa import parse_phmsa
 
 
 def run(mode: str = "auto", force_retrain: bool = False) -> dict:
@@ -105,9 +106,10 @@ def run(mode: str = "auto", force_retrain: bool = False) -> dict:
             json.dump(metrics_xgb["shap_importance"], f, indent=2)
         print(f"[SHAP] Importances sauvegardées : {shap_path}")
 
-    # Survival
+    # Survival — avec PHMSA si disponible
     print("\n[ÉTAPE 5b] Lifelines — Remaining Life (Weibull AFT)")
-    model_surv, metrics_surv = train_survival(df_fusion)
+    df_phmsa_survie = _charger_phmsa_survival()
+    model_surv, metrics_surv = train_survival(df_fusion, df_phmsa=df_phmsa_survie)
     resultats["survival"] = metrics_surv
 
     # Anomaly
@@ -202,6 +204,54 @@ def _fusionner_avec_sources_publiques(df_cotco: "pd.DataFrame"):
 
 
 # ── Utilitaires ───────────────────────────────────────────────────────────────
+
+def _charger_phmsa_survival() -> "pd.DataFrame | None":
+    """
+    Charge les données PHMSA survie si disponibles.
+    Cherche dans cet ordre :
+      1. data/raw/phmsa_survival.csv   (produit par parse_phmsa.py)
+      2. data/raw/phmsa_hl_incidents.xlsx  (données PHMSA brutes)
+      3. data/raw/phmsa_sample.csv     (sample de test)
+    Retourne None si aucun fichier trouvé (pipeline continue sans PHMSA).
+    """
+    import pandas as pd
+
+    # Fichier pré-parsé (meilleure option)
+    survival_csv = ROOT / "data/raw/phmsa_survival.csv"
+    if survival_csv.exists():
+        df = pd.read_csv(survival_csv)
+        print(f"[PHMSA] Données survie chargées : {len(df)} incidents ({survival_csv.name})")
+        return df
+
+    # Fichier brut PHMSA → parser à la volée
+    for raw_file in ["phmsa_hl_incidents.xlsx", "phmsa_hl_incidents.csv"]:
+        raw_path = ROOT / f"data/raw/{raw_file}"
+        if raw_path.exists():
+            print(f"[PHMSA] Parsing fichier brut : {raw_file}")
+            try:
+                df = parse_phmsa(raw_path)
+                df.to_csv(survival_csv, index=False)
+                print(f"[PHMSA] Cache sauvegardé : {survival_csv}")
+                return df
+            except Exception as e:
+                print(f"[PHMSA] Erreur parsing : {e}")
+                return None
+
+    # Sample de test
+    sample_path = ROOT / "data/raw/phmsa_sample.csv"
+    if sample_path.exists():
+        print("[PHMSA] Utilisation du fichier SAMPLE (données simulées)")
+        print("        Remplacer par les vraies données PHMSA pour les métriques finales")
+        try:
+            return parse_phmsa(sample_path)
+        except Exception as e:
+            print(f"[PHMSA] Erreur parsing sample : {e}")
+            return None
+
+    print("[PHMSA] Aucun fichier trouvé — survie entraînée sans PHMSA")
+    print("        Pour activer : python src/parsers/parse_phmsa.py --sample")
+    return None
+
 
 def _modeles_existent() -> bool:
     modeles = [

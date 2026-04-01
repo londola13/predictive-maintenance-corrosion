@@ -1,21 +1,21 @@
 {
   "benchmark": [
     {
-      "nom": "M0 - De Waard (baseline physique)",
+      "nom": "M0 — De Waard (baseline physique)",
       "mae": 6.8529666950172565,
       "rmse": 7.856971167645473,
       "r2": -16870.92146464197,
       "mape": 16455.573121207668
     },
     {
-      "nom": "M1 - XGBoost (COTCO seul)",
+      "nom": "M1 — XGBoost (COTCO seul)",
       "mae": 0.020802997604678894,
       "rmse": 0.03270934090656553,
       "r2": 0.7075862349714097,
       "mape": 42.25345837618562
     },
     {
-      "nom": "M2 - XGBoost (fusion ponderee)",
+      "nom": "M2 — XGBoost (fusion pondérée)",
       "mae": 0.02090791971181079,
       "rmse": 0.03272689163593296,
       "r2": 0.7072723520523286,
@@ -23,5 +23,5 @@
     }
   ],
   "n_test": 1000,
-  "note": "Test set = COTCO uniquement. Fusion benefique si MAE M2 < MAE M1."
+  "note": "Test set = COTCO uniquement. Fusion bénéfique si MAE M2 < MAE M1."
 }
