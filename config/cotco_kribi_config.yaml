@@ -1,0 +1,317 @@
+# ============================================================
+# COTCO — Station de Réduction de Pression de Kribi
+# Configuration centrale — tous paramètres opératoires
+# ============================================================
+# Mettre à jour avec les valeurs réelles COTCO au démarrage du stage
+
+station:
+  nom: "Station Réduction Pression Kribi"
+  entreprise: "COTCO (Chad-Cameroon Transportation Company)"
+  localisation: "Kribi, Région du Sud, Cameroun"
+  pipeline: "Chad-Cameroun — 1078 km"
+  materiau: "API 5L X65/X70"
+  diametre_mm: 508        # 20 pouces (ligne principale)
+  epaisseur_nominale_mm: 15.9
+  en_service_depuis: 2003
+  fluide: "Pétrole brut (Doba Basin, Tchad)"
+
+# ------------------------------------------------------------
+# TAGS DCS — 20 tags Station Kribi
+# Plages opératoires normales (à valider avec COTCO)
+# ------------------------------------------------------------
+tags_dcs:
+
+  temperature:
+    TI-1001:
+      description: "Température entrée station"
+      unite: "°C"
+      plage_normale: [35, 65]
+      alarme_haute: 70
+      feature: "T_mean"
+    TI-1002:
+      description: "Température sortie détendeur"
+      unite: "°C"
+      plage_normale: [15, 45]
+      alarme_basse: 10    # risque condensation
+      feature: "T_aval"
+    TI-1003:
+      description: "Température paroi pipe entrée"
+      unite: "°C"
+      plage_normale: [30, 60]
+      feature: "T_paroi"
+    TI-1004:
+      description: "Température ambiante Kribi"
+      unite: "°C"
+      plage_normale: [25, 35]
+      feature: "T_ambiante"
+
+  pression:
+    PI-2001:
+      description: "Pression entrée station (HP)"
+      unite: "bar"
+      plage_normale: [65, 100]
+      alarme_haute: 105
+      feature: "P_mean"
+    PI-2002:
+      description: "Pression sortie détendeur (BP)"
+      unite: "bar"
+      plage_normale: [8, 15]
+      feature: "P_aval"
+    PI-2003:
+      description: "ΔP filtre entrée"
+      unite: "bar"
+      plage_normale: [0, 5]
+      alarme_haute: 4.0   # nettoyage requis
+      feature: "dP_filtre"
+    PI-2004:
+      description: "Pression surveillance PSV"
+      unite: "bar"
+      plage_normale: [65, 110]
+      alarme_haute: 110
+      feature: "P_psv"
+    PI-2005:
+      description: "Pression corps détendeur"
+      unite: "bar"
+      plage_normale: [65, 100]
+      feature: "P_detendeur"
+
+  debit:
+    FI-3001:
+      description: "Débit volumique entrée"
+      unite: "m3/h"
+      plage_normale: [200, 800]
+      feature: "debit_vol"
+    FI-3002:
+      description: "Débit massique brut"
+      unite: "t/h"
+      plage_normale: [150, 700]
+      feature: "debit_masse"
+    FI-3003:
+      description: "Débit injection inhibiteur"
+      unite: "L/h"
+      plage_normale: [5, 50]
+      alarme_basse: 5     # sous-dosage inhibiteur
+      feature: "debit_inhib"
+
+  analyseurs:
+    AI-4001:
+      description: "% CO2 gaz associé"
+      unite: "% mol"
+      plage_normale: [0.5, 5.0]
+      alarme_haute: 4.5
+      feature: "CO2_pct"
+    AI-4002:
+      description: "H2S"
+      unite: "ppm"
+      plage_normale: [0, 500]
+      alarme_haute: 300
+      feature: "H2S_ppm"
+    AI-4003:
+      description: "BSW (Basic Sediment & Water)"
+      unite: "% vol"
+      plage_normale: [0.5, 30]
+      alarme_haute: 25
+      feature: "BSW_mean"
+    AI-4004:
+      description: "Teneur sable/particules"
+      unite: "ppm"
+      plage_normale: [0, 200]
+      alarme_haute: 150
+      feature: "sable_ppm"
+
+  corrosion_integrite:
+    CI-5001:
+      description: "Sonde corrosion ER amont"
+      unite: "mm/an"
+      plage_normale: [0, 0.5]
+      alarme_haute: 0.25   # NACE sévère
+      feature: "CR_sonde_amont"
+    CI-5002:
+      description: "Sonde corrosion ER aval"
+      unite: "mm/an"
+      plage_normale: [0, 0.5]
+      alarme_haute: 0.25
+      feature: "CR_sonde_aval"
+    CI-5003:
+      description: "Résiduel inhibiteur en ligne"
+      unite: "mg/L"
+      plage_normale: [20, 80]
+      alarme_basse: 20    # protection insuffisante
+      dose_cible: 40
+      feature: "inhib_mean"
+    CI-5004:
+      description: "Potentiel protection cathodique"
+      unite: "mV/CSE"
+      plage_normale: [-1100, -850]
+      alarme_haute: -850   # sous-protection
+      alarme_basse: -1200  # surprotection H2
+      feature: "CP_mV"
+
+# ------------------------------------------------------------
+# 8 FEATURES DÉRIVÉES — formules de calcul
+# ------------------------------------------------------------
+features_derivees:
+
+  pCO2_bar:
+    formule: "PI-2001 * AI-4001 / 100"
+    description: "Pression partielle CO2"
+    unite: "bar"
+    seuils:
+      faible: 0.5
+      modere: 2.0
+      severe: ">2.0"
+
+  CR_deWaard:
+    formule: "10^(5.8 - 1710/(TI-1001+273.15) + 0.67*log10(pCO2_bar))"
+    description: "Taux de corrosion De Waard & Milliams (1991)"
+    unite: "mm/an"
+    reference: "NORSOK M-506"
+
+  velocity_ms:
+    formule: "FI-3001 / (3600 * pi * (0.254)^2)"
+    description: "Vélocité fluide (rayon = 254mm pour D=508mm)"
+    unite: "m/s"
+
+  erosion_ratio:
+    formule: "velocity_ms / (100 / sqrt(rho_m))"
+    description: "Ratio érosif vs vitesse critique API RP 14E"
+    rho_m: 850   # kg/m3 — pétrole brut (à ajuster)
+    seuils:
+      sur: 0.5
+      surveillance: 1.0
+      erosion: ">1.0"
+
+  delta_T_detente:
+    formule: "TI-1001 - TI-1002"
+    description: "Chute de température au détendeur"
+    unite: "°C"
+    seuils:
+      faible: 10
+      moyen: 20
+      critique: ">20"   # condensation → corrosion localisée
+
+  inhibitor_efficiency:
+    formule: "CI-5003 / 40"
+    description: "Efficacité inhibiteur (dose cible 40 mg/L)"
+    seuils:
+      optimal: 0.8
+      partiel: 0.5
+      critique: "<0.5"
+
+  filter_fouling:
+    formule: "PI-2003 / 5"
+    description: "Indice colmatage filtre (ΔP max = 5 bar)"
+    seuils:
+      propre: 0.5
+      nettoyage: 0.8
+      urgent: ">0.8"
+
+  aggressivity_index:
+    formule: "pCO2_bar*0.4 + BSW/100*0.3 + sable/200*0.2 + (1-inhib_eff)*0.1"
+    description: "Indice agressivité global (composite)"
+    seuils:
+      doux: 0.5
+      modere: 1.0
+      severe: ">1.0"
+
+# ------------------------------------------------------------
+# SEUILS NORMATIFS (Type 1 — fixes)
+# ------------------------------------------------------------
+seuils_normatifs:
+
+  taux_corrosion_NACE_SP0775:
+    acceptable_mmpa: 0.025
+    faible_mmpa: 0.050
+    modere_mmpa: 0.125
+    eleve_mmpa: 0.250
+    severe_mmpa: 0.500
+    critique_mmpa: 999   # > 0.500
+
+  epaisseur_min_ASME_B313:
+    # t_min = (P*D)/(2*S*E + 2*P*0.4) + CA
+    P_bar: 100           # pression de calcul max
+    D_mm: 508
+    S_MPa: 448           # X65 = 65 ksi = 448 MPa
+    E: 1.0               # joint longitudinal soudé
+    CA_mm: 3.2           # corrosion allowance
+    # t_min calculé ≈ 8.8 mm
+
+  protection_cathodique_NACE_SP0169:
+    protection_mV_CSE: -850
+    max_mV_CSE: -1200    # limite surprotection
+
+  velocite_erosive_API_RP14E:
+    formule: "100 / sqrt(rho_m)"
+    rho_m_kgm3: 850
+
+# ------------------------------------------------------------
+# PARAMÈTRES DE SIMULATION (De Waard calibré Kribi)
+# ------------------------------------------------------------
+simulation:
+  n_points: 5000
+  random_seed: 42
+  bruit_lognormal_sigma: 0.12   # variabilité terrain Kribi
+
+  plages_kribi:
+    T_min: 35
+    T_max: 75
+    P_min: 65
+    P_max: 100
+    CO2_pct_min: 0.5
+    CO2_pct_max: 5.0
+    BSW_min: 0.5
+    BSW_max: 30
+    velocity_min: 0.3
+    velocity_max: 6.0
+    inhib_min: 5
+    inhib_max: 80
+    sable_min: 0
+    sable_max: 200
+    H2S_min: 0
+    H2S_max: 500
+
+# ------------------------------------------------------------
+# DONNÉES LABO (fréquence mensuelle)
+# ------------------------------------------------------------
+labo:
+  frequence: "mensuelle"
+  parametres:
+    pH:
+      plage: [5.5, 7.5]
+    Cl_mgL:
+      plage: [100, 5000]
+      alarme: 3000
+    Fe_mgL:
+      plage: [0, 50]      # Fe2+ dissous → indicateur corrosion active
+      alarme: 30
+    SRB_ufc_mL:
+      plage: [0, 1000]    # Sulfate-Reducing Bacteria → MIC
+      alarme: 100
+
+# ------------------------------------------------------------
+# PARAMÈTRES MODÈLES ML
+# ------------------------------------------------------------
+modeles:
+
+  xgboost:
+    target: "CR_mesure"
+    n_trials_optuna: 100
+    n_folds_walkforward: 4
+    objectif_R2: 0.85
+    objectif_MAPE: 0.15
+    fichier: "models/xgboost_cotco.pkl"
+
+  survival:
+    target: "RL_ans"
+    methode: "WeibullAFT"
+    intervalle_confiance: 0.90
+    fichier: "models/survival_model.pkl"
+
+  anomaly:
+    contamination: 0.05
+    fichier: "models/isolation_forest.pkl"
+
+  retrain:
+    scheduler: "hebdomadaire"   # lundi matin
+    seuil_derive_MAE: 2.0       # MAE_recente > seuil*2 → retrain
+    fenetre_derive_jours: 30
