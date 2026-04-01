@@ -683,7 +683,7 @@ elif page == "⏳ Remaining Life":
     df_display.columns = ["CML", "CR (mm/an)", "RL médiane (ans)",
                            "RL pessimiste (ans)", "Risque", "Inspection (mois)"]
     st.dataframe(
-        df_display.style.applymap(_style_risque, subset=["Risque"]),
+        df_display.style.map(_style_risque, subset=["Risque"]),
         use_container_width=True, hide_index=True,
     )
 
