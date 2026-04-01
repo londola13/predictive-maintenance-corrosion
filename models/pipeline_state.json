@@ -1,0 +1,9 @@
+{
+  "mode": "prestage",
+  "retrain": true,
+  "last_run": "2026-03-30T15:19:39.497886",
+  "n_lignes": 5000,
+  "sources": {
+    "simulation_DeWaard": 5000
+  }
+}
