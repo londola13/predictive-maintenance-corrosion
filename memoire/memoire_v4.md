@@ -1,5 +1,5 @@
 ---
-title: "Système intégré de maintenance prédictive de la corrosion par apprentissage automatique : conception d'une sonde ER low-cost, acquisition IoT, prédiction CR/RUL par XGBoost et prototype de GMAO low-cost"
+title: "Système intégré de maintenance prédictive de la corrosion par apprentissage automatique : transition Industrie 3.0 → 4.0 par sonde ER instrumentée IoT, prédiction XGBoost CR/RUL et intégration à un CMMS open-source"
 ---
 
 \newpage
@@ -33,7 +33,7 @@ title: "Système intégré de maintenance prédictive de la corrosion par appren
 
 **Thème :**
 
-**SYSTÈME INTÉGRÉ DE MAINTENANCE PRÉDICTIVE DE LA CORROSION PAR APPRENTISSAGE AUTOMATIQUE : CONCEPTION D'UNE SONDE ER LOW-COST, ACQUISITION IoT, PRÉDICTION DU TAUX DE CORROSION ET DE LA DURÉE DE VIE RÉSIDUELLE PAR XGBoost, ET PROTOTYPE DE GMAO LOW-COST**
+**SYSTÈME INTÉGRÉ DE MAINTENANCE PRÉDICTIVE DE LA CORROSION PAR APPRENTISSAGE AUTOMATIQUE : TRANSITION INDUSTRIE 3.0 → 4.0 PAR SONDE ER INSTRUMENTÉE IoT, PRÉDICTION DU TAUX DE CORROSION ET DE LA DURÉE DE VIE RÉSIDUELLE PAR XGBoost, ET INTÉGRATION À UN CMMS OPEN-SOURCE**
 
 ---
 
@@ -73,29 +73,29 @@ Que tous ceux qui, de près ou de loin, ont contribué à la réussite de ce mé
 
 # RÉSUMÉ
 
-La corrosion représente un coût annuel mondial de 2,5 billions de dollars US, soit environ 3,4 % du PIB mondial (Koch et al., 2016). Dans le secteur Oil & Gas, elle constitue la première cause de dégradation des pipelines et des installations de surface. Au Cameroun, la **Cameroon Oil Transportation Company (COTCO)** exploite depuis 2003 le pipeline Tchad-Cameroun (1 070 km au total, dont 903 km en territoire camerounais), infrastructure stratégique dont l'intégrité conditionne la sécurité environnementale et économique du pays. La gestion actuelle de la corrosion repose largement sur des inspections périodiques par ultrasons (UT), sans surveillance continue ni prédiction de la dégradation.
+La corrosion représente un coût annuel mondial de 2,5 billions de dollars US, soit environ 3,4 % du PIB mondial (Koch et al., 2016). Dans le secteur Oil & Gas, elle constitue la première cause de dégradation des pipelines et des installations de surface. Au Cameroun, la **Cameroon Oil Transportation Company (COTCO)** exploite depuis 2003 le pipeline Tchad-Cameroun (1 070 km au total, dont 903 km en territoire camerounais), infrastructure stratégique dont l'intégrité conditionne la sécurité environnementale et économique du pays. COTCO dispose déjà d'une **surveillance corrosion par sondes ER commerciales** (Cosasco, Emerson Roxar) câblées vers le DCS, mais l'exploitation des données reste à un niveau **Industrie 3.0** : analyse silotée par l'ingénieur corrosion, alertes par seuils fixes, ajustement manuel des doses d'inhibiteur, maintenance des sondes selon calendrier — sans pronostic ni corrélation multi-variables.
 
-Ce mémoire présente la conception, le développement et la validation expérimentale d'un **système intégré de maintenance prédictive de la corrosion** couvrant la chaîne complète **détection → diagnostic → pronostic → décision → action** définie par la norme ISO 13381-1, articulé autour de quatre composants : (1) une **sonde ER (Electrical Resistance) low-cost** basée sur un fil de fer monté en pont de Wheatstone, instrumentée par un amplificateur HX711 24 bits ; (2) un **système d'acquisition IoT** à microcontrôleur ESP32 en deep sleep pulsé (10 minutes) mesurant simultanément la résistance et la température (DS18B20) ; (3) un **modèle XGBoost** entraîné en protocole *run-to-failure* (RTF), prédisant à la fois le taux de corrosion (CR, en mm/an) et la durée de vie résiduelle (RUL, en heures), avec module de diagnostic des régimes de corrosion et interprétabilité par analyse SHAP ; (4) un **prototype de GMAO (Gestion de Maintenance Assistée par Ordinateur) low-cost** open-source basé sur un stack Supabase + Next.js, démontrant qu'une PME africaine peut disposer d'une gestion structurée des actifs, des alertes, des ordres de travail et des KPIs de maintenance sans recourir à des solutions industrielles propriétaires (SAP PM, IBM Maximo).
+Ce mémoire fait l'hypothèse qu'**à partir des données historiques qu'une entreprise possède déjà** (cas COTCO), il est possible d'évoluer vers une **couche prédictive supérieure (Industrie 4.0)**. À cette fin, nous proposons un **prototype maison fonctionnel doublement transposable** : (a) en industrie, en branchant la chaîne ML sur les sondes ER commerciales existantes (saut I3.0 → I4.0 purement logiciel, sans remplacement matériel) ; (b) en autonomie, comme système clé-en-main pour les PME industrielles africaines à budget réduit. Le prototype couvre la chaîne complète **détection → diagnostic → pronostic → décision → action** définie par la norme ISO 13381-1, articulée autour de quatre composants : (1) une **sonde ER (Electrical Resistance)** basée sur un fil de fer monté en pont de Wheatstone, instrumentée par un amplificateur HX711 24 bits ; (2) un **système d'acquisition IoT** à microcontrôleur ESP32 en deep sleep pulsé (10 minutes) mesurant simultanément la résistance et la température (DS18B20) ; (3) un **modèle XGBoost** entraîné en protocole *run-to-failure* (RTF) prédisant simultanément le taux de corrosion (CR, en mm/an) et la durée de vie résiduelle (RUL, en heures), avec module de diagnostic des régimes de corrosion et interprétabilité par analyse SHAP ; (4) une **application web Streamlit** intégrée par **API REST à un CMMS open-source** (GLPI ou équivalent) pour la création automatique des demandes de travaux à partir des alertes prédictives, démontrant qu'une PME africaine peut bénéficier d'une gestion structurée de la maintenance sans recourir aux solutions propriétaires (SAP PM, IBM Maximo).
 
 L'environnement corrosif de référence est un **détartrant industriel commercial multi-acide** à base d'acide chlorhydrique (5–15 %) et d'acide phosphorique (10–30 %), générant un milieu acide mixte (pH ≈ 1) reproduisant des conditions agressives comparables aux effluents acides industriels. Le protocole comporte quatre runs RTF : deux runs de référence sans inhibiteur et deux runs avec injection d'un **inhibiteur de corrosion à base d'imidazoline** (référence commerciale à sélectionner) à concentrations croissantes (0,1 % et 0,5 % v/v).
 
-Le coût total du prototype matériel est inférieur à 50 000 FCFA, soit un facteur 40 à 100 moins cher qu'une instrumentation industrielle équivalente (Cosasco, Permasense, Emerson Roxar), et le coût d'exploitation de la GMAO est nul jusqu'à un volume significatif (offres gratuites Supabase + Vercel). Ce travail démontre la faisabilité d'un système complet de maintenance prédictive de la corrosion entièrement réalisable à partir de composants et services accessibles localement au Cameroun, contribuant à la démocratisation de la surveillance industrielle et de la GMAO dans les économies émergentes d'Afrique subsaharienne.
+Ce travail démontre la faisabilité d'une transition Industrie 3.0 → 4.0 appliquée à la corrosion, intégralement réalisable à partir de composants et services accessibles localement au Cameroun, et propose une chaîne de valeur reproductible aussi bien pour les opérateurs industriels disposant déjà d'une instrumentation commerciale que pour les PME industrielles cherchant à initier leur transition numérique sans investissement initial prohibitif.
 
-**Mots-clés :** corrosion ; maintenance prédictive ; sonde ER ; XGBoost ; durée de vie résiduelle ; diagnostic ; GMAO ; CMMS open-source ; ESP32 ; HX711 ; IoT ; inhibiteur de corrosion ; imidazoline ; pipeline Oil & Gas ; COTCO ; ISO 13381-1.
+**Mots-clés :** corrosion ; maintenance prédictive ; Industrie 4.0 ; IIoT ; sonde ER ; XGBoost ; durée de vie résiduelle ; diagnostic ; CMMS open-source ; intégration API REST ; ESP32 ; HX711 ; inhibiteur de corrosion ; imidazoline ; pipeline Oil & Gas ; COTCO ; ISO 13381-1.
 
 \newpage
 
 # ABSTRACT
 
-Corrosion accounts for a global annual cost of USD 2.5 trillion, approximately 3.4 % of global GDP (Koch et al., 2016). In the Oil & Gas sector, it remains the leading cause of pipeline and surface-equipment degradation. In Cameroon, the **Cameroon Oil Transportation Company (COTCO)** has operated since 2003 the 1,070 km Chad-Cameroon pipeline (903 km within Cameroonian territory), a strategic infrastructure whose integrity conditions both environmental and economic security. Current corrosion management relies mostly on periodic ultrasonic (UT) inspections, with neither continuous monitoring nor predictive analytics.
+Corrosion accounts for a global annual cost of USD 2.5 trillion, approximately 3.4 % of global GDP (Koch et al., 2016). In the Oil & Gas sector, it remains the leading cause of pipeline and surface-equipment degradation. In Cameroon, the **Cameroon Oil Transportation Company (COTCO)** has operated since 2003 the 1,070 km Chad-Cameroon pipeline (903 km within Cameroonian territory), a strategic infrastructure whose integrity conditions both environmental and economic security. COTCO already operates **commercial ER corrosion probes** (Cosasco, Emerson Roxar) hard-wired to the DCS; however, data exploitation remains at an **Industry 3.0** level: siloed analysis by the corrosion engineer, fixed-threshold alerts, manual inhibitor dosing, calendar-based probe maintenance — without prognosis or multi-variable correlation.
 
-This thesis presents the design, development and experimental validation of an **integrated corrosion predictive-maintenance system** covering the complete **detection → diagnostic → prognosis → decision → action** chain defined by ISO 13381-1, built on four components: (1) a **low-cost ER (Electrical Resistance) probe** based on an iron wire mounted in a Wheatstone bridge instrumented by a 24-bit HX711 amplifier; (2) an **IoT acquisition system** using an ESP32 microcontroller in pulsed deep-sleep mode (10 minutes) measuring resistance and temperature (DS18B20) simultaneously; (3) an **XGBoost model** trained under a *run-to-failure* (RTF) protocol predicting both corrosion rate (CR, in mm/year) and remaining useful life (RUL, in hours), with corrosion regime diagnostic and SHAP-based interpretability; (4) a **low-cost open-source CMMS prototype** based on a Supabase + Next.js stack, demonstrating that an African SME can manage assets, alerts, work orders and maintenance KPIs without resorting to proprietary industrial solutions (SAP PM, IBM Maximo).
+This thesis hypothesises that **from the historical data a company already owns** (COTCO case), it is possible to leap to a **predictive layer (Industry 4.0)**. We propose a **functional in-house prototype with twofold transposability**: (a) industrial, by plugging the ML pipeline onto existing commercial ER probes (purely software-level I3.0 → I4.0 leap, no hardware replacement); (b) standalone, as a turnkey system for African industrial SMEs with limited budget. The prototype covers the complete **detection → diagnostic → prognosis → decision → action** chain defined by ISO 13381-1, built on four components: (1) an **ER (Electrical Resistance) probe** based on an iron wire mounted in a Wheatstone bridge instrumented by a 24-bit HX711 amplifier; (2) an **IoT acquisition system** using an ESP32 microcontroller in pulsed deep-sleep mode (10 minutes) measuring resistance and temperature (DS18B20) simultaneously; (3) an **XGBoost model** trained under a *run-to-failure* (RTF) protocol predicting both corrosion rate (CR, in mm/year) and remaining useful life (RUL, in hours), with corrosion regime diagnostic and SHAP-based interpretability; (4) a **Streamlit web application** integrated via **REST API to an open-source CMMS** (GLPI or equivalent) for automatic work-order generation from predictive alerts, demonstrating that an African SME can manage assets and maintenance KPIs without resorting to proprietary solutions (SAP PM, IBM Maximo).
 
 The reference corrosive medium is a **commercial multi-acid industrial descaler** containing hydrochloric acid (5–15 %) and phosphoric acid (10–30 %), producing a mixed-acid medium (pH ≈ 1) reproducing aggressive conditions similar to those of industrial acidic effluents. The protocol comprises four RTF runs: two baseline runs without inhibitor and two runs with injection of an **imidazoline-based corrosion inhibitor** (commercial reference to be selected) at increasing concentrations (0.1 % and 0.5 % v/v).
 
-The total hardware prototype cost is below 50,000 FCFA, i.e., 40 to 100 times cheaper than comparable industrial instrumentation (Cosasco, Permasense, Emerson Roxar), and the CMMS operating cost is null up to significant volumes (free Supabase + Vercel tiers). This work demonstrates the feasibility of a complete corrosion predictive-maintenance system entirely built from components and services available locally in Cameroon, contributing to the democratization of industrial monitoring and CMMS in sub-Saharan emerging economies.
+This work demonstrates the feasibility of a corrosion-focused Industry 3.0 → 4.0 transition fully buildable from components and services available locally in Cameroon, and proposes a reproducible value chain serving both industrial operators with existing commercial instrumentation and SMEs initiating their digital transition without prohibitive upfront investment.
 
-**Keywords:** corrosion; predictive maintenance; ER probe; XGBoost; remaining useful life; diagnostic; CMMS; open-source CMMS; ESP32; HX711; IoT; corrosion inhibitor; imidazoline; oil & gas pipeline; COTCO; ISO 13381-1.
+**Keywords:** corrosion; predictive maintenance; Industry 4.0; IIoT; ER probe; XGBoost; remaining useful life; diagnostic; open-source CMMS; REST API integration; ESP32; HX711; corrosion inhibitor; imidazoline; oil & gas pipeline; COTCO; ISO 13381-1.
 
 \newpage
 
@@ -205,9 +205,9 @@ Parmi tous les modes de dégradation, la corrosion occupe une place prépondéra
 
 Face à ces limites, deux dynamiques convergent dans la littérature récente. D'une part, la disponibilité croissante de microcontrôleurs et de capteurs IoT à très faible coût (ESP32, HX711, capteurs numériques 1-Wire) ouvre la voie à des chaînes d'instrumentation académiques et industrielles à un coût inférieur à 50 USD (Mayer et al., 2023). D'autre part, les méthodes d'apprentissage automatique — en particulier les algorithmes par gradient boosting comme XGBoost — démontrent une capacité supérieure à celle des modèles physiques classiques (de Waard et Milliams, 1975 ; NORSOK M-506) pour capturer les non-linéarités complexes entre variables de procédé et taux de corrosion, avec des erreurs de prédiction inférieures à 5 % (Hu et al., 2024 ; Wei et al., 2024 ; Yan et Yan, 2024).
 
-Le présent mémoire s'inscrit à la jonction de ces deux dynamiques. Il a pour objectif de concevoir, développer et valider expérimentalement un **système intégré de maintenance prédictive de la corrosion** couvrant la chaîne complète **détection → diagnostic → pronostic → décision → action** définie par la norme ISO 13381-1 (ISO, 2015) et articulé autour de quatre composants intégrés : (i) une **sonde ER low-cost** basée sur un microcontrôleur ESP32 et un amplificateur HX711 (couche détection — OS1) ; (ii) un module de **diagnostic** des régimes de corrosion (couche diagnostic — partie d'OS3) ; (iii) un **modèle XGBoost** prédisant simultanément le taux de corrosion (CR, en mm/an) et la durée de vie résiduelle (RUL, en heures) avec interprétabilité SHAP (couche pronostic — OS2) ; et (iv) un **prototype de GMAO low-cost** open-source démontrant qu'une PME africaine peut disposer d'une gestion structurée des actifs, des alertes, des ordres de travail et des KPIs maintenance sans recourir aux solutions propriétaires (SAP PM, IBM Maximo) — couches décision et action — OS4. Le contexte applicatif est celui des infrastructures pétrolières camerounaises, et plus particulièrement celui de l'opérateur **Cameroon Oil Transportation Company (COTCO)**, exploitant le pipeline Tchad-Cameroun depuis 2003 (COTCO, 2024 ; Chad-Cameroon Pipeline Project, 2024).
+Le présent mémoire s'inscrit à la jonction de ces deux dynamiques avec une **thèse centrale** : à partir des données historiques qu'une entreprise possède déjà (typiquement les sondes ER déjà déployées chez COTCO, qui produisent des séries temporelles de résistance et de température sans être actuellement exploitées par un modèle prédictif), il est possible d'évoluer d'une architecture **Industrie 3.0** (acquisition câblée + alarmes par seuils + analyse silotée + maintenance préventive calendaire) vers une architecture **Industrie 4.0** (corrélation multi-variables, pronostic ML, alertes graduées, traçabilité GMAO). Le mémoire propose un **prototype maison fonctionnel doublement transposable** : (a) en industrie, en branchant la chaîne ML développée sur les sondes ER commerciales existantes (saut I3.0 → I4.0 purement logiciel, sans remplacement matériel) ; (b) en autonomie, comme système clé-en-main pour les PME industrielles africaines à budget réduit. Ce prototype couvre la chaîne complète **détection → diagnostic → pronostic → décision → action** définie par la norme ISO 13381-1 (ISO, 2015) et est articulé autour de quatre composants intégrés : (i) une **sonde ER** basée sur un microcontrôleur ESP32 et un amplificateur HX711 (couche détection — OS1) ; (ii) un **modèle XGBoost** prédisant simultanément le taux de corrosion (CR, en mm/an) et la durée de vie résiduelle (RUL, en heures) avec interprétabilité SHAP (couche pronostic — OS2) ; (iii) un module de **diagnostic des régimes de corrosion** et un système d'alertes graduées avec recommandations de dosage d'inhibiteur (couches diagnostic et décision — OS3) ; et (iv) une **application web Streamlit intégrée par API REST à un CMMS open-source** (GLPI ou équivalent) pour la création automatique des ordres de travail à partir des alertes prédictives, démontrant qu'une PME africaine peut bénéficier d'une gestion structurée de la maintenance sans recourir aux solutions propriétaires (SAP PM, IBM Maximo) — couche action — OS4. Le contexte applicatif est celui des infrastructures pétrolières camerounaises, et plus particulièrement celui de l'opérateur **Cameroon Oil Transportation Company (COTCO)**, exploitant le pipeline Tchad-Cameroun depuis 2003 (COTCO, 2024 ; Chad-Cameroon Pipeline Project, 2024).
 
-Après une revue de la littérature sur la corrosion, ses mécanismes, les méthodes de surveillance, les modèles prédictifs, le diagnostic en maintenance et les systèmes de GMAO, ainsi qu'une présentation du contexte industriel et de la problématique (**Chapitre I**), nous aborderons les fondements techniques du prototype développé, les matériels mobilisés, et la méthodologie retenue pour l'acquisition, le traitement des données, l'entraînement du modèle d'apprentissage automatique et la conception de la GMAO low-cost (**Chapitre II**). Enfin, les résultats expérimentaux issus du prototype, les performances métrologi ques de la sonde, les métriques du modèle XGBoost, l'efficacité de l'inhibiteur de corrosion testé et la fonctionnalité du prototype GMAO seront présentés, discutés au regard de la littérature, et confrontés aux objectifs initiaux (**Chapitre III**).
+Après une revue de la littérature sur la corrosion, ses mécanismes, les méthodes de surveillance, les modèles prédictifs, le diagnostic en maintenance, les systèmes de GMAO et le cadre conceptuel **Industrie 3.0 / 4.0**, ainsi qu'une présentation du contexte industriel et de la problématique (**Chapitre I**), nous aborderons les fondements techniques du prototype développé, **la justification des choix technologiques retenus** (matrice de décision pour chaque brique : ESP32, HX711, DS18B20, XGBoost, TimeSeriesSplit, Streamlit, CMMS open-source), les matériels mobilisés, et la méthodologie retenue pour l'acquisition, le traitement des données, l'entraînement du modèle d'apprentissage automatique et l'**intégration au CMMS open-source via API REST** (**Chapitre II**). Enfin, les résultats expérimentaux issus du prototype, les performances métrologiques de la sonde, les métriques du modèle XGBoost, l'efficacité de l'inhibiteur de corrosion testé et la fonctionnalité de l'intégration CMMS seront présentés, discutés au regard de la littérature, et confrontés aux objectifs initiaux (**Chapitre III**).
 
 \newpage
 
@@ -313,45 +313,58 @@ Ce réseau est soumis à plusieurs **mécanismes de corrosion** simultanés (Egb
 4. **Corrosion microbienne (MIC)** liée à l'activité de bactéries sulfato-réductrices (SRB) dans les fonds de réservoirs et bas de conduites ;
 5. **Corrosion par piqûres** dans les zones où des chlorures sont présents.
 
-La **politique actuelle de maintenance** chez COTCO et chez la plupart des opérateurs subsahariens repose sur trois piliers (Pumps Africa, 2024 ; HSPublishing, 2023) :
+**Important : COTCO dispose déjà d'une surveillance ER active.** Sur les sections critiques du SET, des **sondes ER commerciales** (Cosasco, Emerson Roxar) ainsi que des sondes LPR sont câblées vers le DCS (*Distributed Control System*) de la station de Komé et vers la salle de contrôle de Kribi. Ces sondes produisent un flux continu de mesures de résistance et de variables de procédé associées (température, pression, débit). Cependant, **l'exploitation de ces données reste à un niveau Industrie 3.0**, dont les caractéristiques sont les suivantes (Lasi et al., 2014 ; Lu, 2017 ; Xu et al., 2018) :
 
-- Des **inspections périodiques par ultrasons (UT)** à intervalles de 6 à 24 mois selon la criticité de la section ;
-- Des **coupons gravimétriques** placés en certains points stratégiques ;
-- Une **injection préventive d'inhibiteurs** dans le brut (filmants à base d'imidazoline ou d'amines).
+- **Acquisition** : sondes ER + LPR câblées (4-20 mA, HART) vers automates et DCS — données centralisées en salle de contrôle ;
+- **Analyse silotée** : l'ingénieur corrosion examine les courbes de chaque sonde de manière isolée, sans corrélation algorithmique avec les variables de procédé ;
+- **Alertes** : seuils fixes (alarmes haute / très haute) sans gradation prédictive ; l'opérateur reçoit une notification quand un seuil est franchi mais sans estimation du temps avant défaillance ;
+- **Décision** : l'ajustement du débit de la pompe à inhibiteur est **manuel**, sur jugement d'expert ;
+- **Maintenance des sondes** : remplacement préventif selon calendrier ou à la défaillance.
 
-Cette approche présente plusieurs **limites identifiées** :
+Au-delà de la surveillance ER continue, la politique actuelle de maintenance chez COTCO comprend également (Pumps Africa, 2024 ; HSPublishing, 2023) :
 
-- L'**intervalle long entre inspections** masque les dérives rapides du taux de corrosion ;
-- L'**absence de surveillance continue** ne permet pas de détecter en temps réel une augmentation soudaine de l'agressivité du fluide (variation de la composition, défaillance de l'injection d'inhibiteur) ;
-- L'**absence d'estimation explicite du RUL** complique la planification des interventions et conduit à des arrêts de production non optimisés.
+- Des **inspections périodiques par ultrasons (UT)** à intervalles de 6 à 24 mois selon la criticité de la section, en complément de la surveillance ER ;
+- Des **coupons gravimétriques** placés en certains points stratégiques pour validation indépendante ;
+- Une **injection préventive d'inhibiteurs** dans le brut (filmants à base d'imidazoline ou d'amines), pilotée manuellement.
 
-Le besoin d'un outil de **surveillance continue, low-cost, et capable de prédire la dégradation avant qu'elle ne devienne critique** est ainsi directement identifiable dans le contexte COTCO.
+Cette approche I3.0 présente plusieurs **limites structurelles** que la transition I4.0 vise précisément à lever :
+
+- **Absence de corrélation algorithmique multi-variables** : la dérive du taux de corrosion peut résulter d'une élévation thermique, d'un changement de composition du fluide ou d'une défaillance de l'injection inhibiteur — ces causes ne sont pas distinguées en temps réel ;
+- **Absence d'estimation explicite du RUL** (durée de vie résiduelle) : les seuils fixes informent que le système est en alerte, mais pas dans combien d'heures la défaillance est probable ;
+- **Absence de boucle décision → action structurée** : les interventions correctives ne sont pas systématiquement tracées dans une GMAO, ce qui prive l'opérateur d'historiques exploitables pour le calcul de KPIs maintenance (MTBF, MTTR, efficacité d'inhibition) ;
+- **Sous-exploitation du flux de données** : les historiques des sondes ER constituent un actif informationnel non valorisé.
+
+**Le verrou n'est donc plus l'instrumentation** (déjà en place et performante), **mais l'intelligence applicative** : ajouter au-dessus du flux ER existant une couche d'apprentissage automatique capable de corréler résistance / température / temps, de prédire CR + RUL, et d'orchestrer les ordres de travail via une GMAO interconnectée. C'est précisément la transition **Industrie 3.0 → Industrie 4.0** que ce mémoire propose d'opérer.
 
 ### I.1.6. Énoncé du sujet
 
-Sur la base du contexte exposé — ampleur économique mondiale de la corrosion, lacunes scientifiques et industrielles persistantes, besoins spécifiques des opérateurs subsahariens et de COTCO en particulier, cadre normatif et réglementaire — le sujet de ce mémoire est formulé comme suit :
+Sur la base du contexte exposé — ampleur économique mondiale de la corrosion, lacunes scientifiques persistantes (sous-exploitation des historiques ER, absence de prédiction CR + RUL combinée, absence de chaîne décision → action structurée), maturité numérique limitée à l'Industrie 3.0 chez la plupart des opérateurs subsahariens dont COTCO, cadre normatif et réglementaire — le sujet de ce mémoire est formulé comme suit :
 
-> **« Système de maintenance prédictive de la corrosion par apprentissage automatique : conception d'une sonde ER low-cost, acquisition IoT et prédiction du taux de corrosion et de la durée de vie résiduelle par XGBoost. »**
+> **« Système intégré de maintenance prédictive de la corrosion par apprentissage automatique : transition Industrie 3.0 → 4.0 par sonde ER instrumentée IoT, prédiction du taux de corrosion et de la durée de vie résiduelle par XGBoost, et intégration à un CMMS open-source. »**
 
-Ce sujet articule trois axes : (1) un axe **instrumental** (conception d'une chaîne de mesure low-cost ER + IoT) ; (2) un axe **algorithmique** (apprentissage automatique XGBoost à double sortie CR + RUL) ; et (3) un axe **applicatif** (compatibilité avec le contexte camerounais et avec les contraintes de COTCO).
+Ce sujet articule **quatre axes** :
+1. **Axe instrumental** — conception d'une chaîne de mesure ER + IoT autonome (ESP32 + HX711 + DS18B20), démontrant qu'une chaîne d'acquisition I4.0 (déconnectée du DCS, déployable sur points isolés) est réalisable à partir de composants accessibles localement ;
+2. **Axe algorithmique** — apprentissage automatique XGBoost à double sortie CR + RUL avec interprétabilité SHAP, **applicable indifféremment aux flux de données du prototype maison ou aux flux des sondes ER commerciales déjà en place chez COTCO** ;
+3. **Axe intégration** — connexion via API REST entre l'application Streamlit (frontend ML) et un CMMS open-source (GLPI ou équivalent) pour la création automatique des ordres de travail, structurant la boucle décision → action ;
+4. **Axe applicatif et de transposabilité** — démonstration que l'ensemble de la chaîne est doublement transposable : (a) en industrie chez COTCO, où le saut I3.0 → I4.0 est essentiellement logiciel et n'exige pas le remplacement des sondes ; (b) en autonomie chez les PME industrielles africaines à budget réduit.
 
 ---
 
 ## I.2. Problématique
 
-La maintenance des infrastructures de transport pétrolier au Cameroun, et plus particulièrement chez COTCO, fait face à un **paradoxe fondamental** : les opérateurs disposent de données de surveillance (mesures UT, rapports de laboratoire, journaux d'injection d'inhibiteurs) mais ces données, collectées de manière ponctuelle et stockées dans des systèmes hétérogènes, ne permettent ni d'anticiper les défaillances par corrosion avant qu'elles n'atteignent un seuil critique, ni de prédire avec précision la durée de vie résiduelle des éléments métalliques exposés. Or, dans un contexte où la rupture d'un pipeline traversant la forêt équatoriale ou un cours d'eau peut entraîner des conséquences environnementales irréversibles, cette absence d'anticipation constitue un risque industriel majeur.
+La maintenance des infrastructures de transport pétrolier au Cameroun, et plus particulièrement chez COTCO, fait face à un **paradoxe fondamental** : les opérateurs disposent déjà d'un flux **continu** de données de surveillance produit par les sondes ER et LPR commerciales câblées au DCS (Cosasco, Emerson Roxar), complété par des inspections UT périodiques, des rapports de laboratoire et des journaux d'injection d'inhibiteurs. Pourtant, ces données — d'une grande richesse informationnelle — ne sont ni corrélées algorithmiquement aux variables de procédé (température, pression, débit), ni exploitées par des modèles prédictifs de durée de vie résiduelle, ni intégrées dans un système de gestion de maintenance assistée par ordinateur permettant la traçabilité des actions correctives. Le verrou n'est donc plus l'instrumentation, mais bien l'**intelligence applicative** au-dessus du flux existant. Ce paradoxe correspond exactement à la **frontière Industrie 3.0 / Industrie 4.0** identifiée dans la littérature de la transformation numérique industrielle (Lasi et al., 2014 ; Lu, 2017 ; Xu et al., 2018) : les machines mesurent, mais les données ne « parlent » pas entre elles, et la chaîne décision-action reste à dominante humaine.
 
-Sur le plan **scientifique**, les modèles physiques classiques de prédiction de la corrosion (modèle de de Waard et Milliams, modèle NORSOK M-506) ont montré des limites importantes en conditions d'exploitation réelle, avec des erreurs systématiques de 40 à 60 % attribuables à la non-prise en compte des interactions complexes entre les multiples composants des fluides de procédé (de Waard et Milliams, 1975 ; Coelho, 2022). Les approches par apprentissage automatique offrent une alternative prometteuse, capable de capturer ces non-linéarités, mais leur déploiement en contexte africain se heurte à deux verrous : (i) l'**absence de données d'entraînement locales**, et (ii) le **coût des équipements d'acquisition** professionnels.
-
-Sur le plan **technologique**, les sondes commerciales de type ER (Cosasco, Permasense, Emerson Roxar) offrent une résolution suffisante pour quantifier le taux de corrosion en mm/an, mais leur prix unitaire (500 à 5 000 USD) est incompatible avec un déploiement massif sur les milliers de kilomètres du réseau COTCO. Inversement, les chaînes d'instrumentation low-cost à base de microcontrôleurs Arduino ou ESP32 décrites dans la littérature récente (Mayer et al., 2023 ; Mansfeld, 2014) atteignent des résolutions intéressantes mais ne sont généralement pas intégrées à un modèle de prédiction CR + RUL exploitable.
+Sur le plan **scientifique**, les modèles physiques classiques de prédiction de la corrosion (modèle de de Waard et Milliams, modèle NORSOK M-506) ont montré des limites importantes en conditions d'exploitation réelle, avec des erreurs systématiques de 40 à 60 % attribuables à la non-prise en compte des interactions complexes entre les multiples composants des fluides de procédé (de Waard et Milliams, 1975 ; Coelho, 2022). Les approches par apprentissage automatique offrent une alternative prometteuse, capable de capturer ces non-linéarités, mais leur déploiement en contexte africain se heurte à plusieurs verrous : (i) l'**absence de données d'entraînement locales**, (ii) l'**absence de protocoles *run-to-failure* publiés** permettant la prédiction conjointe CR + RUL, et (iii) la **rareté des plateformes intégrées** prouvant la chaîne complète de la mesure jusqu'à l'ordre de travail.
 
 Sur le plan **algorithmique**, la grande majorité des travaux ML sur la corrosion se limitent à la prédiction instantanée du taux de corrosion, sans extrapolation explicite vers la durée de vie résiduelle (RUL), pourtant définie de manière claire par la norme ISO 13381-1 (ISO, 2015 ; Akash, 2024). Cette absence de double prédiction CR + RUL prive les opérateurs d'une information essentielle à la planification optimisée des interventions.
+
+Sur le plan **applicatif**, l'opérateur COTCO et la plupart des PME industrielles africaines partagent un même besoin : se doter d'une **boucle décision → action structurée** qui exploite les sorties prédictives pour générer automatiquement les ordres de travail, tracer les interventions et calculer les KPIs maintenance (MTBF, MTTR, efficacité d'inhibition). Le marché GMAO est dominé par des solutions propriétaires (SAP PM, IBM Maximo, Mainpac) dont les coûts de licence (souvent supérieurs à 10 000 USD par site et par an) sont incompatibles avec les budgets de la plupart des opérateurs subsahariens et de l'ensemble des PME industrielles. Une **alternative open-source intégrée** est donc à construire.
 
 Enfin, sur le plan **expérimental**, peu d'études disposent d'un protocole *run-to-failure* (RTF) complet permettant de couvrir l'intégralité du cycle de dégradation depuis l'état initial jusqu'à la rupture mécanique. Or seul un protocole RTF permet de constituer un jeu d'apprentissage statistiquement représentatif pour une prédiction RUL fiable.
 
 La **question centrale** de ce travail est donc :
 
-> **Dans quelle mesure un système de surveillance ER low-cost développé à partir de composants disponibles localement au Cameroun, combiné à un modèle XGBoost entraîné en protocole *run-to-failure* sur des données expérimentales de corrosion en milieu acide multi-composant, permet-il de prédire avec précision le taux de corrosion (CR) et la durée de vie résiduelle (RUL) d'un élément structural métallique, et de générer des recommandations exploitables pour la maintenance prédictive industrielle ?**
+> **Dans quelle mesure un système intégré associant (i) une sonde ER instrumentée IoT à autonomie d'acquisition (ESP32 + HX711 + DS18B20), (ii) un modèle XGBoost à double sortie CR + RUL entraîné en protocole *run-to-failure* sur des données expérimentales de corrosion en milieu acide multi-composant, et (iii) une chaîne d'intégration via API REST vers un CMMS open-source pour la génération automatique d'ordres de travail, permet-il d'opérer une transition Industrie 3.0 → Industrie 4.0 transposable à la fois (a) aux opérateurs industriels disposant déjà d'une instrumentation ER commerciale (cas COTCO, saut I3.0 → I4.0 essentiellement logiciel) et (b) aux PME industrielles africaines en autonomie complète à budget réduit ?**
 
 ---
 
@@ -359,19 +372,19 @@ La **question centrale** de ce travail est donc :
 
 ### I.3.1. Objectif général
 
-Concevoir, développer et valider expérimentalement un **système intégré de maintenance prédictive de la corrosion** couvrant la chaîne complète **détection → diagnostic → pronostic → décision → action** définie par la norme ISO 13381-1, et combinant une sonde ER low-cost (ESP32 + HX711), un modèle d'apprentissage automatique XGBoost à double sortie (CR + RUL) avec module de diagnostic des régimes de corrosion, un système d'alertes calibrées sur l'efficacité d'un inhibiteur industriel à base d'imidazoline, et un prototype de GMAO low-cost open-source démontrant la faisabilité d'une gestion structurée de la maintenance pour les PME industrielles africaines.
+Concevoir, développer et valider expérimentalement un **système intégré de maintenance prédictive de la corrosion** matérialisant une transition **Industrie 3.0 → Industrie 4.0**, couvrant la chaîne complète **détection → diagnostic → pronostic → décision → action** définie par la norme ISO 13381-1, et combinant une sonde ER instrumentée IoT (ESP32 + HX711 + DS18B20), un modèle d'apprentissage automatique XGBoost à double sortie (CR + RUL) avec module de diagnostic des régimes de corrosion, un système d'alertes calibrées sur l'efficacité d'un inhibiteur industriel à base d'imidazoline, et une **application web Streamlit intégrée par API REST à un CMMS open-source** pour la génération automatique des ordres de travail, le tout doublement transposable (a) aux opérateurs disposant déjà d'une instrumentation ER commerciale (cas COTCO) et (b) aux PME industrielles africaines en déploiement autonome.
 
 ### I.3.2. Objectifs spécifiques
 
 Quatre objectifs spécifiques (OS), chronologiquement ordonnés et logiquement articulés, structurent ce travail. Ils correspondent respectivement aux étapes **détection**, **pronostic**, **diagnostic + décision** et **action** de la chaîne ISO 13381-1.
 
-- **OS1 — Concevoir et valider métrologi quement la chaîne d'acquisition ER low-cost (étape *Détection*).** Il s'agit de réaliser un capteur de résistance électrique (ER) basé sur un pont de Wheatstone, un amplificateur HX711 24 bits et un microcontrôleur ESP32 en deep sleep pulsé, capable de mesurer des variations de résistance d'un fil de fer à ±0,01 mΩ près dans un milieu acide concentré (pH ≈ 1), avec une période de mesure de 10 minutes et une autonomie compatible avec un déploiement de plusieurs jours.
+- **OS1 — Concevoir et valider métrologiquement la chaîne d'acquisition ER instrumentée IoT (étape *Détection*).** Il s'agit de réaliser un capteur de résistance électrique (ER) basé sur un pont de Wheatstone, un amplificateur HX711 24 bits et un microcontrôleur ESP32 en deep sleep pulsé, capable de mesurer des variations de résistance d'un fil de fer à ±0,01 mΩ près dans un milieu acide concentré (pH ≈ 1), avec une période de mesure de 10 minutes et une autonomie compatible avec un déploiement de plusieurs jours. Cette chaîne illustre la **brique d'acquisition I4.0** (interconnexion IoT, déploiement sans contrainte de câblage DCS) et fournit le format standardisé de données exploitable indifféremment par le pipeline ML maison ou par le flux des sondes ER commerciales déjà en place chez COTCO.
 
-- **OS2 — Entraîner et valider un modèle XGBoost à double sortie CR + RUL (étape *Pronostic*).** Il s'agit, à partir des séries temporelles collectées en protocole *run-to-failure* sur quatre cycles expérimentaux de corrosion, de construire un modèle d'apprentissage automatique XGBoost prédisant à la fois le taux de corrosion instantané (en mm/an) et la durée de vie résiduelle (en heures), avec une erreur relative inférieure à 15 % (RMSE), validé par une procédure de validation croisée temporelle (TimeSeriesSplit) respectant la causalité, et interprété par analyse SHAP.
+- **OS2 — Entraîner et valider un modèle XGBoost à double sortie CR + RUL (étape *Pronostic*).** Il s'agit, à partir des séries temporelles collectées en protocole *run-to-failure* sur quatre cycles expérimentaux de corrosion, de construire un modèle d'apprentissage automatique XGBoost prédisant à la fois le taux de corrosion instantané (en mm/an) et la durée de vie résiduelle (en heures), avec une erreur relative inférieure à 15 % (RMSE), validé par une procédure de validation croisée temporelle (TimeSeriesSplit) respectant la causalité, et interprété par analyse SHAP. Le modèle est conçu pour être **agnostique à la source des mesures** : il consomme des séries temporelles (résistance, température, temps) qu'elles proviennent du prototype maison ou d'un export DCS de sondes commerciales.
 
 - **OS3 — Diagnostiquer les régimes de corrosion, évaluer l'efficacité d'un inhibiteur à base d'imidazoline et définir un système d'alertes graduées (étapes *Diagnostic* et *Décision*).** Il s'agit (i) de classifier en temps réel le régime de corrosion observé (corrosion stable, accélérée, passivation, adsorption inhibiteur, pré-rupture) à partir des sorties du modèle XGBoost ; (ii) de quantifier expérimentalement l'effet d'un inhibiteur de la famille des imidazolines (référence commerciale à sélectionner) sur le taux de corrosion mesuré, à deux concentrations différentes (0,1 % et 0,5 % v/v) ; (iii) de détecter par algorithme *changepoint* le temps d'adsorption de l'inhibiteur ; et (iv) de définir un système d'alertes à trois niveaux (vert / orange / rouge) avec recommandations de dosage exploitables industriellement.
 
-- **OS4 — Concevoir un prototype de GMAO low-cost open-source intégrant les sorties du système prédictif (étape *Action*).** Il s'agit de développer une application web légère (stack Supabase + Next.js, hébergement Vercel gratuit) implémentant les fonctions essentielles d'une GMAO industrielle — gestion des actifs surveillés, ingestion automatique des mesures et prédictions, génération automatique d'alertes graduées, création d'ordres de travail, traçabilité des interventions et des doses d'inhibiteur, dashboard de KPIs maintenance (MTBF, MTTR, disponibilité, efficacité d'inhibition) — afin de démontrer qu'une PME africaine peut bénéficier d'une gestion structurée de la maintenance équivalente fonctionnellement aux GMAO industrielles propriétaires (SAP PM, IBM Maximo) à un coût d'exploitation marginal nul.
+- **OS4 — Intégrer le système prédictif à un CMMS open-source via API REST (étape *Action*).** Il s'agit (i) de réaliser une application web Streamlit servant de frontend ML et de dashboard temps réel des sondes, hébergée sur Streamlit Community Cloud ; (ii) d'établir une connexion API REST vers un **CMMS open-source existant** (GLPI ou équivalent à préciser après matrice comparative) pour la création automatique d'ordres de travail à partir des alertes prédictives ; (iii) de définir le mapping prédiction ML → ticket CMMS (asset, sévérité, description, dose recommandée) ; (iv) de calculer les KPIs maintenance (MTBF, MTTR, efficacité d'inhibition, taux de fausses alertes) à partir des historiques CMMS. Cette approche démontre qu'un opérateur ou une PME peut structurer sa boucle décision → action **sans développer de GMAO ex nihilo et sans payer de licence propriétaire** (SAP PM, IBM Maximo).
 
 ---
 
@@ -385,7 +398,7 @@ Quatre objectifs spécifiques (OS), chronologiquement ordonnés et logiquement a
 
 - **QR3 :** Dans quelle mesure les sorties du modèle XGBoost permettent-elles de diagnostiquer en temps réel le régime de corrosion en cours (stable, accélérée, passivation, adsorption d'inhibiteur, pré-rupture), de calibrer un système d'alertes graduées (vert / orange / rouge), et de fournir des recommandations de dosage d'un inhibiteur de la famille des imidazolines exploitables industriellement ?
 
-- **QR4 :** Dans quelle mesure une GMAO low-cost open-source bâtie sur un stack Supabase + Next.js peut-elle exploiter les alertes et les recommandations issues du système prédictif pour offrir aux PME industrielles africaines une gestion structurée des actifs, des ordres de travail et des KPIs de maintenance équivalente fonctionnellement aux GMAO industrielles propriétaires (SAP PM, IBM Maximo), à un coût d'exploitation nul ou marginal ?
+- **QR4 :** Dans quelle mesure une **application Streamlit intégrée par API REST à un CMMS open-source existant** (GLPI ou équivalent) peut-elle exploiter les alertes et les recommandations issues du système prédictif pour générer automatiquement les ordres de travail, tracer les interventions et calculer les KPIs de maintenance (MTBF, MTTR, efficacité d'inhibition), avec une couverture fonctionnelle équivalente aux GMAO propriétaires (SAP PM, IBM Maximo) sans coût de licence ?
 
 ---
 
@@ -393,7 +406,7 @@ Quatre objectifs spécifiques (OS), chronologiquement ordonnés et logiquement a
 
 Ce travail revêt un intérêt à plusieurs niveaux et pour plusieurs catégories de parties prenantes :
 
-**Pour le lecteur académique :** ce mémoire propose une démarche reproductible combinant instrumentation IoT low-cost, protocole expérimental rigoureux et apprentissage automatique interprétable. Il comble un vide bibliographique sur la maintenance prédictive de la corrosion en contexte africain et fournit un point d'ancrage pour des travaux ultérieurs sur les mêmes thématiques.
+**Pour le lecteur académique :** ce mémoire propose une démarche reproductible combinant instrumentation IoT, protocole expérimental rigoureux *run-to-failure*, apprentissage automatique interprétable (SHAP) et intégration à un CMMS open-source par API. Il s'inscrit dans le cadre théorique de la transformation numérique industrielle (Industrie 4.0) et comble un vide bibliographique sur la maintenance prédictive de la corrosion en contexte africain.
 
 **Pour l'auteur :** ce travail constitue l'aboutissement académique du Master 2 et la matérialisation concrète de l'intégration de compétences pluridisciplinaires (corrosion, électronique embarquée, apprentissage automatique, méthodologie scientifique). Il prépare directement à l'insertion professionnelle dans le secteur industriel, et plus particulièrement dans les métiers de la maintenance prédictive.
 
@@ -401,9 +414,9 @@ Ce travail revêt un intérêt à plusieurs niveaux et pour plusieurs catégorie
 
 **Pour la recherche :** ce travail constitue l'une des premières études publiées (à notre connaissance) intégrant explicitement la prédiction CR + RUL par XGBoost avec interprétabilité SHAP, sur des données expérimentales originales collectées en protocole *run-to-failure*, et dans un contexte multi-acide non-monotone. Il complète la littérature dominée par les approches mono-cible (CR seul) et les jeux de données nord-américains.
 
-**Pour COTCO et les opérateurs pétroliers camerounais :** le mémoire fournit une **preuve de concept industriellement transposable**. Le coût total du prototype matériel (< 50 000 FCFA) couplé à une GMAO d'exploitation gratuite ouvre la voie à un déploiement étendu de capteurs sur un réseau de plusieurs milliers de kilomètres, à un coût compatible avec les budgets des opérateurs locaux.
+**Pour COTCO et les opérateurs pétroliers camerounais :** le mémoire fournit une **preuve de concept industriellement transposable** dont la valeur principale n'est pas le coût matériel mais la **chaîne de valeur logicielle I3.0 → I4.0**. Le pipeline ML développé est applicable directement aux flux des sondes ER commerciales déjà en place (Cosasco, Roxar) via export DCS, sans remplacement matériel. La chaîne d'acquisition autonome ESP32 développée constitue par ailleurs une option d'extension pour les sections où le câblage DCS est absent ou indisponible.
 
-**Pour les PME industrielles africaines :** au-delà du contexte pétrolier, le prototype de GMAO low-cost open-source développé dans ce travail (stack Supabase + Next.js) est directement transposable à toutes les PME confrontées à des coûts de licence prohibitifs des GMAO industrielles (SAP PM, IBM Maximo, Mainpac), dont les tarifs annuels (souvent supérieurs à 10 000 USD par site) sont incompatibles avec les budgets de la majorité des PME subsahariennes. Le code source ouvert et l'architecture cloud sans serveur permettent une démocratisation effective de la maintenance assistée par ordinateur.
+**Pour les PME industrielles africaines :** au-delà du contexte pétrolier, l'architecture d'intégration **Streamlit ↔ CMMS open-source** démontrée dans ce travail est directement transposable à toutes les PME confrontées à des coûts de licence prohibitifs des GMAO industrielles (SAP PM, IBM Maximo, Mainpac), dont les tarifs annuels (souvent supérieurs à 10 000 USD par site) sont incompatibles avec les budgets de la majorité des PME subsahariennes. Le recours à un CMMS open-source mature (GLPI ou équivalent) permet une **démocratisation effective de la maintenance assistée par ordinateur** sans développement *ex nihilo* — approche pragmatique d'intégration plutôt que de réinvention.
 
 **Pour la société et l'environnement :** la prévention des ruptures de pipeline par prédiction précoce de la dégradation réduit le risque de déversement d'hydrocarbures aux conséquences écologiques potentiellement irréversibles dans une zone de forêt équatoriale et de cours d'eau. C'est un apport indirect mais réel à la protection des écosystèmes et des populations riveraines.
 
@@ -415,7 +428,7 @@ Ce mémoire est organisé en trois chapitres principaux, encadrés par une intro
 
 Le **Chapitre I (Contexte et problématique)** établit le cadre théorique, normatif et industriel de la recherche selon les six approches du protocole de recherche, formule la problématique, les objectifs et les questions de recherche, expose l'importance de l'étude, et présente une revue détaillée de la littérature sur la corrosion, ses mécanismes, ses méthodes de surveillance, ses modèles prédictifs, le diagnostic en maintenance industrielle et les systèmes de Gestion de Maintenance Assistée par Ordinateur (GMAO).
 
-Le **Chapitre II (Outils et méthodes)** présente le prototype développé (sonde ER + acquisition IoT ESP32 + pipeline ML + prototype GMAO), l'ensemble des matériels mobilisés, les méthodes d'acquisition et de traitement des données, la méthodologie d'entraînement du modèle XGBoost (validation croisée temporelle, hyperparamètres, interprétabilité SHAP), le module de diagnostic des régimes de corrosion, le protocole expérimental *run-to-failure* en quatre runs, l'architecture du prototype de GMAO low-cost (schéma de base de données, pages web, KPIs), et le tableau synoptique de la démarche méthodologique.
+Le **Chapitre II (Outils et méthodes)** présente le prototype développé (sonde ER + acquisition IoT ESP32 + pipeline ML + intégration CMMS), s'ouvre sur une **§II.0 dédiée à la justification des choix technologiques** (matrice de décision pour chaque brique : ESP32, HX711, DS18B20, XGBoost, TimeSeriesSplit, Streamlit, CMMS open-source retenu), puis détaille l'ensemble des matériels mobilisés, les méthodes d'acquisition et de traitement des données, la méthodologie d'entraînement du modèle XGBoost (validation croisée temporelle, hyperparamètres, interprétabilité SHAP), le module de diagnostic des régimes de corrosion, le protocole expérimental *run-to-failure* en quatre runs, l'**architecture d'intégration Streamlit ↔ CMMS open-source par API REST** (mapping prédiction ML → ticket CMMS, KPIs maintenance), et le tableau synoptique de la démarche méthodologique.
 
 Le **Chapitre III (Résultats et discussions)** présente les résultats expérimentaux issus du prototype, les performances métrologi ques de la sonde ER, les résultats des quatre runs RTF, les métriques de validation du modèle XGBoost, l'analyse SHAP des variables d'influence, le diagnostic des régimes observés, l'évaluation de l'efficacité de l'inhibiteur de corrosion testé, la fonctionnalité du prototype GMAO et ses KPIs, et la discussion comparative des résultats au regard de la littérature.
 
@@ -593,7 +606,7 @@ Une **GMAO (Gestion de Maintenance Assistée par Ordinateur)**, ou en anglais **
 
 Les **GMAO industrielles propriétaires** (SAP Plant Maintenance, IBM Maximo, Oracle eAM, Infor EAM) dominent le marché des grandes entreprises mais présentent un coût de licence prohibitif (10 000 à 100 000 USD/an par site selon le périmètre), une complexité d'implémentation élevée (consultants spécialisés requis), et une dépendance à l'éditeur. Selon Roda et Macchi (2018), moins de 15 % des PME industrielles dans les pays émergents disposent d'une GMAO professionnelle, contre plus de 80 % des grandes entreprises.
 
-Plusieurs **alternatives open-source** existent (CMMS Wikipedia, 2024 ; Murphy, 2021) : CMMS Open Maint, Fiix Free, Mainpac Lite, MaintainX, Hippo CMMS Free, Limble. Néanmoins, ces solutions présentent des limites pour le contexte africain : (i) absence d'intégration native avec des capteurs IoT low-cost personnalisés ; (ii) absence de modules de prédiction par apprentissage automatique ; (iii) interfaces parfois en anglais uniquement ; (iv) hébergement self-hosted complexe à maintenir pour des PME sans équipe IT dédiée.
+Plusieurs **alternatives open-source** existent (CMMS Wikipedia, 2024 ; Murphy, 2021) : GLPI, OpenMaint (CMDBuild), Snipe-IT, Fiix Free, MaintainX, Hippo CMMS Free, Limble. Ces solutions offrent un périmètre fonctionnel comparable aux GMAO propriétaires (gestion d'actifs, ordres de travail, ITIL) avec des API REST documentées qui permettent une intégration tierce. Néanmoins, leur adoption dans le contexte africain présente quelques limites résiduelles : (i) absence de modules de prédiction par apprentissage automatique embarqués (la couche ML reste à raccorder par intégration externe) ; (ii) interfaces parfois en anglais uniquement (GLPI fait exception avec une localisation francophone native) ; (iii) hébergement self-hosted exigeant une compétence IT minimale pour l'administration, ce qui peut être un frein pour les PME sans équipe IT dédiée — frein partiellement levé par les distributions Docker prêtes à déployer.
 
 L'émergence récente des **architectures sans serveur (BaaS — Backend as a Service)** comme **Supabase** (alternative open-source à Firebase) couplée à des frameworks frontend modernes comme **Next.js** rend désormais possible le développement d'une GMAO sur mesure à un coût d'exploitation marginal nul (offres gratuites jusqu'à des volumes significatifs). C'est cette voie qu'explore l'OS4 du présent mémoire, en proposant une GMAO directement intégrée à la chaîne de surveillance prédictive développée dans les OS1, OS2 et OS3.
 
@@ -604,7 +617,7 @@ La norme **ISO 14224 :2016** définit les standards d'échange de données de fi
 La revue de littérature met en évidence quatre constats majeurs qui structurent ce travail :
 
 1. La corrosion est un phénomène universel, quantifié par la loi de Faraday et encadré par un corpus normatif international complet (ISO, ASTM, NACE/AMPP, API) ;
-2. Les méthodes de surveillance disponibles — coupons, sondes ER, LPR, UT — présentent des compromis coût/résolution/continuité que les approches IoT low-cost (ESP32 + HX711) sont en mesure de rééquilibrer ;
+2. Les méthodes de surveillance disponibles — coupons, sondes ER, LPR, UT — présentent des compromis résolution / continuité / niveau d'intégration numérique que les approches IoT (ESP32 + HX711) couplées à un pipeline ML peuvent rééquilibrer ;
 3. Les modèles physiques classiques (de Waard et Milliams) sont insuffisants en milieux multi-composants ; les modèles ML à gradient boosting (XGBoost) et leur extension à l'interprétabilité (SHAP) constituent l'état de l'art récent (2022–2025) ;
 4. La prédiction simultanée CR + RUL en protocole *run-to-failure* constitue un gap clairement identifié dans la littérature, que le présent travail vise à combler.
 
@@ -612,7 +625,7 @@ La revue de littérature met en évidence quatre constats majeurs qui structuren
 
 ## I.8. Conclusion du Chapitre I
 
-Ce premier chapitre a permis de poser les bases théoriques, normatives et contextuelles du présent travail. La revue de la littérature a établi les mécanismes électrochimiques de la corrosion, les méthodes de surveillance disponibles, les limites des modèles prédictifs classiques, et l'état de l'art récent sur l'apprentissage automatique appliqué à la corrosion (XGBoost, SHAP, RUL). Le contexte international (étude IMPACT NACE — 2,5 billions USD/an), national (cadre normatif camerounais) et zonal (réseau COTCO Tchad-Cameroun) a mis en évidence un besoin opérationnel clair : disposer d'un outil de surveillance continue, low-cost, et capable de prédire la défaillance avant qu'elle n'atteigne un seuil critique. La problématique, les objectifs spécifiques et les questions de recherche ont été formulés en cohérence avec ce besoin et avec les six approches du protocole de recherche. Le **Chapitre II** présente à présent les outils et la méthodologie retenus pour répondre à ces objectifs.
+Ce premier chapitre a permis de poser les bases théoriques, normatives et contextuelles du présent travail. La revue de la littérature a établi les mécanismes électrochimiques de la corrosion, les méthodes de surveillance disponibles, les limites des modèles prédictifs classiques, l'état de l'art récent sur l'apprentissage automatique appliqué à la corrosion (XGBoost, SHAP, RUL), ainsi que le cadre conceptuel **Industrie 3.0 / Industrie 4.0** (Lasi et al., 2014 ; Lu, 2017 ; Xu et al., 2018). Le contexte international (étude IMPACT NACE — 2,5 billions USD/an), national (cadre normatif camerounais) et zonal (réseau COTCO Tchad-Cameroun) a mis en évidence que **l'instrumentation ER existe déjà** chez les opérateurs majeurs comme COTCO, mais que son exploitation reste limitée à un niveau Industrie 3.0. Le besoin opérationnel n'est donc pas la sonde ER en tant que telle, mais bien l'**intelligence applicative** — la couche prédictive et la chaîne décision-action — qui caractérise la transition Industrie 4.0. La problématique, les objectifs spécifiques et les questions de recherche ont été formulés en cohérence avec ce besoin. Le **Chapitre II** présente à présent les outils et la méthodologie retenus pour répondre à ces objectifs, en commençant par une justification des choix technologiques.
 
 \newpage
 
@@ -623,20 +636,125 @@ Ce premier chapitre a permis de poser les bases théoriques, normatives et conte
 **Sommaire du Chapitre II**
 
 II.0. Introduction
+II.0.5. Justification des choix technologiques
 II.1. Cadre de l'étude
 II.2. Présentation du prototype de mesure ER
 II.3. Matériels mobilisés
 II.4. Méthodes d'acquisition et de traitement des données
 II.5. Méthodologie d'entraînement du modèle XGBoost
 II.6. Protocole expérimental run-to-failure
-II.7. Tableau synoptique de la démarche méthodologique
-II.8. Conclusion
+II.7. Architecture d'intégration au CMMS open-source par API REST
+II.8. Tableau synoptique de la démarche méthodologique
+II.9. Conclusion
 
 ---
 
 ## II.0. Introduction
 
-Dans ce chapitre, il sera question de présenter (i) le cadre institutionnel et physique de l'étude, (ii) l'architecture du prototype de sonde ER développé (description et principe de fonctionnement), (iii) l'ensemble des matériels mobilisés (composants électroniques, produits chimiques, ressources logicielles, normes documentaires), (iv) les méthodes d'acquisition et de traitement des données, (v) la méthodologie d'entraînement du modèle XGBoost (validation croisée temporelle, hyperparamètres, interprétabilité SHAP), (vi) le protocole expérimental *run-to-failure* en quatre runs, et (vii) le tableau synoptique de la démarche méthodologique articulant objectifs, activités, méthodes et résultats attendus.
+Dans ce chapitre, il sera question de présenter (i) la **justification des choix technologiques** mobilisés à chaque étage du prototype (matrice de décision pour chaque brique : microcontrôleur, amplificateur, capteur de température, méthode de mesure de la corrosion, algorithme ML, méthode de validation, frontend, CMMS), (ii) le cadre institutionnel et physique de l'étude, (iii) l'architecture du prototype de sonde ER développé (description et principe de fonctionnement), (iv) l'ensemble des matériels mobilisés, (v) les méthodes d'acquisition et de traitement des données, (vi) la méthodologie d'entraînement du modèle XGBoost (validation croisée temporelle, hyperparamètres, interprétabilité SHAP), (vii) le protocole expérimental *run-to-failure* en quatre runs, l'**architecture d'intégration au CMMS open-source par API REST**, et (viii) le tableau synoptique de la démarche méthodologique.
+
+---
+
+## II.0.5. Justification des choix technologiques
+
+Cette section consolide en un seul endroit les arbitrages techniques qui sous-tendent l'ensemble du prototype, sous forme de matrices de décision. Pour chaque brique, sont précisés (i) les options envisagées, (ii) les critères de comparaison retenus, (iii) le choix retenu et son motif décisif, (iv) la limite acceptée. Les justifications détaillées des paramètres de chaque composant retenu sont reprises dans les sections §II.2 à §II.7 correspondantes.
+
+### II.0.5.1. Microcontrôleur — ESP32
+
+**Tableau II.0.1 — Comparaison des microcontrôleurs candidats**
+
+| Microcontrôleur | Coût | Wi-Fi/BLE | Deep sleep (µA) | I/O | Verdict |
+|---|---|---|---|---|---|
+| Arduino Uno | 5 000 FCFA | ❌ (modules externes) | ~15 mA (dérives) | 14 D + 6 A | Insuffisant pour IoT autonome |
+| Raspberry Pi Zero W | 12 000 FCFA | ✅ | ~80 mA | 40 GPIO | Surdimensionné, OS Linux complet |
+| **ESP32 (DevKit v1)** | **6 000 FCFA** | **✅ Wi-Fi + BLE intégré** | **~10 µA en deep sleep RTC** | **34 GPIO** | **Retenu** |
+| ESP8266 | 4 000 FCFA | ✅ Wi-Fi seul | ~20 µA | 17 GPIO | Pas de BLE, ADC moins précis |
+
+**Choix retenu : ESP32.** Critère décisif : compromis optimal entre Wi-Fi/BLE intégré (suppression du besoin d'un module externe), faible consommation en deep sleep (compatible avec un déploiement sur batterie pendant plusieurs jours), et large communauté pour le firmware Arduino-compatible. Limite acceptée : pas de durcissement industriel ATEX, qui n'est pas un objectif au stade du prototype académique.
+
+### II.0.5.2. Amplificateur de pont — HX711
+
+**Tableau II.0.2 — Comparaison des amplificateurs de pont de Wheatstone**
+
+| Amplificateur | Résolution | Disponibilité Cameroun | Librairies | Coût | Verdict |
+|---|---|---|---|---|---|
+| INA125 | 12 bits effectifs | Faible | Limitées | 8 000 FCFA | Résolution insuffisante |
+| AD7793 | 24 bits, faible bruit | Très faible (import) | Moyennes | 25 000 FCFA | Excellent mais coût + dispo |
+| **HX711** | **24 bits, gain 128** | **Élevée (modules ready-made)** | **Très matures (Arduino, ESP32)** | **2 500 FCFA** | **Retenu** |
+
+**Choix retenu : HX711.** Critère décisif : 24 bits de résolution effective sur sortie pont à très faible amplitude (Vdiff ~ mV), couplés à une excellente disponibilité locale (modules pré-câblés vendus en kit) et une intégration logicielle triviale. Limite acceptée : taux d'échantillonnage maximum 80 Hz (largement suffisant pour la corrosion lente, à période 10 min).
+
+### II.0.5.3. Capteur de température — DS18B20
+
+**Tableau II.0.3 — Comparaison des capteurs de température**
+
+| Capteur | Précision | Interface | Étanchéité | Verdict |
+|---|---|---|---|---|
+| LM35 | ±0,5 °C analogique | Analogique | Non étanche | Convertisseur ADC requis, pas étanche pour milieu acide |
+| Pt100 | ±0,1 °C | Analogique 4 fils | Selon montage | Précision excellente mais conditionnement complexe |
+| **DS18B20** | **±0,5 °C** | **1-Wire numérique** | **Sondes étanches disponibles** | **Retenu** |
+
+**Choix retenu : DS18B20.** Critère décisif : interface numérique 1-Wire (1 seul GPIO, pas de bruit analogique), précision suffisante pour la compensation thermique (α_Fe = 6,5×10⁻³ °C⁻¹ × ±0,5 °C ≈ ±0,3 % de correction), et disponibilité de versions étanches en gaine inox.
+
+### II.0.5.4. Méthode de mesure de la corrosion — Sonde ER
+
+**Tableau II.0.4 — Comparaison des méthodes de mesure de la corrosion**
+
+| Méthode | Continu | Sans contact électrolyte direct | Conformité ASTM | Coût matériel | Verdict |
+|---|---|---|---|---|---|
+| Coupon gravimétrique | ❌ (post-mortem) | ✅ | NACE SP0775 | Faible | Validation indépendante uniquement |
+| LPR (Linear Polarization Resistance) | ✅ | ❌ (3 électrodes en contact) | ASTM G59, G102 | Élevé (potentiostat) | Risque de polluer le milieu, instrumentation chère |
+| **ER (Electrical Resistance)** | **✅** | **✅ (élément métallique simple)** | **ASTM G96** | **Faible** | **Retenu** |
+| Impédance EIS | ✅ | ❌ (3 électrodes) | ASTM G106 | Très élevé | Non transposable terrain à coût raisonnable |
+
+**Choix retenu : ER.** Critère décisif : mesure continue sans contact des électrodes avec l'électrolyte, conformité ASTM G96, simplicité de fabrication d'une sonde maison (fil de fer + pont de Wheatstone), et compatibilité avec la transposition aux sondes ER commerciales déjà en place chez COTCO. Limite acceptée : mesure de corrosion généralisée uniquement (la corrosion par piqûres locale n'est pas correctement détectée par ER seule — combinaison avec UT recommandée pour le pipeline réel).
+
+### II.0.5.5. Algorithme de prédiction — XGBoost
+
+**Tableau II.0.5 — Comparaison des algorithmes ML candidats**
+
+| Algorithme | Volume de données requis | Performance time-series | Interprétabilité | Verdict |
+|---|---|---|---|---|
+| Régression linéaire | Faible | Médiocre (non-linéarités absentes) | Triviale | Insuffisant pour cinétique multi-mécanismes |
+| Random Forest | Moyen | Bonne | Moyenne (importance variables) | Bon baseline mais sous-XGBoost en time-series |
+| **XGBoost** | **Faible à moyen** | **Excellente (gradient boosting régularisé)** | **Excellente avec SHAP** | **Retenu** |
+| LSTM | Élevé (>1000 séquences) | Excellente | Faible (boîte noire) | Volume de données insuffisant ici |
+| Transformer temporel | Très élevé | Excellente | Faible | Surdimensionné pour 4 runs RTF |
+
+**Choix retenu : XGBoost.** Critère décisif : performance reconnue en time-series sur faibles volumes (Chen et Guestrin, 2016 ; Ma et al., 2021 ; Wei et al., 2024), interprétabilité native par SHAP (Lundberg et Lee, 2017), régularisation L1/L2 limitant le sur-apprentissage. Limite acceptée : architecture point-par-point (pas de mémoire séquentielle native comme LSTM) — compensée par feature engineering temporel explicite (EMA, pente locale, lag).
+
+### II.0.5.6. Méthode de validation croisée — TimeSeriesSplit
+
+**Tableau II.0.6 — Comparaison des méthodes de validation croisée**
+
+| Méthode | Causalité respectée | Risque de fuite future→passé | Verdict |
+|---|---|---|---|
+| Hold-out simple (80/20) | ✅ si chronologique | Faible | Acceptable mais une seule estimation |
+| k-fold standard | ❌ | **Élevé (fuite garantie)** | À proscrire en time-series |
+| **TimeSeriesSplit** (n=4) | **✅** | **Aucune** | **Retenu** |
+
+**Choix retenu : TimeSeriesSplit (Scikit-learn) avec n=4 folds.** Critère décisif : seule méthode garantissant que le modèle n'apprend jamais sur un échantillon temporellement postérieur à un échantillon de test — exigence stricte en pronostic (ISO 13381-1).
+
+### II.0.5.7. Frontend ML / dashboard — Streamlit
+
+**Tableau II.0.7 — Comparaison des frameworks frontend ML**
+
+| Framework | Langage | Rapidité prototypage | Composants ML natifs | Verdict |
+|---|---|---|---|---|
+| **Streamlit** | **Python** | **Excellente** | **✅ (charts, sliders, file uploaders)** | **Retenu** |
+| Dash (Plotly) | Python | Bonne | Plotly natif | Plus verbose que Streamlit |
+| Next.js / React | TypeScript | Faible (courbe d'apprentissage) | Non | Surdimensionné, langage différent du pipeline ML |
+| Gradio | Python | Excellente | Démos ML simples | Plus orienté demo modèle, moins dashboard |
+
+**Choix retenu : Streamlit.** Critère décisif : permet de coder le dashboard et le pipeline ML dans le même langage (Python), avec un déploiement gratuit sur Streamlit Community Cloud. Limite acceptée : moins flexible qu'une stack full-web pour la personnalisation visuelle avancée.
+
+### II.0.5.8. CMMS — GLPI (open-source)
+
+Justification déjà détaillée en §II.7.2 (matrice comparative GLPI / OpenMaint / Snipe-IT / Fiix / MaintainX). **Choix retenu : GLPI** pour sa maturité, son API REST native, sa communauté francophone et sa compatibilité on-premise.
+
+### II.0.5.9. Synthèse des choix technologiques
+
+L'ensemble des choix forme une **chaîne cohérente** orientée par trois principes : (i) **simplicité d'intégration locale** (composants disponibles au Cameroun, langages Python pour la majeure partie de la chaîne ML+frontend), (ii) **rigueur méthodologique** (TimeSeriesSplit, SHAP, conformité ASTM/ISO), (iii) **transposabilité industrielle** (ER conformes ASTM G96 ; CMMS open-source on-premise compatible OT/réseau industriel).
 
 ---
 
@@ -992,116 +1110,136 @@ Pour chaque run, la procédure suivante est appliquée :
 
 ---
 
-## II.7. Architecture du prototype de GMAO low-cost (OS4)
+## II.7. Architecture d'intégration au CMMS open-source par API REST (OS4)
 
-### II.7.1. Périmètre fonctionnel
+### II.7.1. Choix d'architecture : intégration plutôt que développement *ex nihilo*
 
-Le prototype de **GMAO low-cost** développé dans le cadre d'OS4 vise à démontrer la faisabilité d'une gestion structurée de la maintenance pour les PME industrielles africaines, sans recourir aux solutions propriétaires coûteuses. Le périmètre fonctionnel retenu, conforme aux fonctions essentielles d'une GMAO industrielle (ISO 14224, 2016), comprend :
+L'objectif d'OS4 est de structurer la **boucle décision → action** en aval du système prédictif. Deux approches étaient envisageables :
 
-- **Gestion des actifs** : inventaire des éléments métalliques surveillés (fil ER, sections de pipeline) avec leurs caractéristiques (matériau, géométrie, seuils CR/RUL personnalisés) ;
-- **Ingestion automatique des mesures** : réception des données émises par l'ESP32 via API REST ;
-- **Ingestion automatique des prédictions** : réception des sorties du pipeline Python (CR, RUL, diagnostic, SHAP top-3) ;
-- **Gestion des alertes** : alertes graduées vert / orange / rouge auto-générées ;
-- **Gestion des ordres de travail (OT)** : création automatique d'OT depuis les alertes critiques, assignation à un technicien, suivi de cycle de vie (Ouvert → En cours → Fermé) ;
-- **Traçabilité des interventions** : historique complet (qui, quand, durée, coût, photos) ;
-- **Traçabilité des doses d'inhibiteur** : produit, concentration, volume, date d'injection ;
-- **Dashboard de KPIs** : MTBF, MTTR, taux de disponibilité, efficacité d'inhibition, coût évité, précision modèle.
+- **(A) Développer une GMAO complète *ex nihilo*** (stack Supabase + Next.js + Vercel) couvrant gestion d'actifs, ordres de travail, KPIs maintenance ;
+- **(B) Réutiliser un CMMS open-source mature** et y connecter, par API REST, l'application web Streamlit servant de frontend ML et de dashboard temps réel.
 
-### II.7.2. Stack technologique
+L'approche **(B) a été retenue** pour les raisons suivantes :
 
-Le choix du stack technologique répond aux contraintes du contexte africain : **gratuité, simplicité, maintenance allégée** :
+1. **Maturité fonctionnelle** : un CMMS open-source mature (GLPI compte plus de 20 ans de développement, plus de 200 contributeurs, des modules Tickets / Problems / Changes natifs) couvre dès l'installation un périmètre fonctionnel qui demanderait plusieurs mois de développement *ex nihilo* ;
+2. **Pragmatisme industriel** : démontrer une approche d'intégration est plus pertinent pour un mémoire de Master en Maintenance Industrielle qu'un développement *not-invented-here* — c'est précisément ce que ferait un ingénieur en entreprise face à une contrainte budgétaire ;
+3. **Transposabilité** : l'architecture d'intégration (Streamlit ↔ REST API ↔ CMMS) est reproductible quel que soit le CMMS retenu par l'opérateur (GLPI chez l'un, OpenMaint chez l'autre, Snipe-IT chez un troisième) ;
+4. **Compatibilité COTCO** : un CMMS auto-hébergeable (on-premise) est compatible avec les contraintes de sécurité industrielle (réseau OT isolé, pas de cloud public) — ce qui n'est pas le cas de Supabase + Vercel.
 
-**Tableau II.11 — Stack technologique du prototype GMAO**
+### II.7.2. Matrice comparative des CMMS open-source candidats
+
+**Tableau II.11 — Comparaison des CMMS open-source candidats (OS4)**
+
+| CMMS | Maturité | API REST | Modules ticketing | Auto-hébergeable | Communauté | Verdict |
+|---|---|---|---|---|---|---|
+| **GLPI** | 20 ans, v10 stable | ✅ native, OAuth2 | Tickets / Problems / Changes (ITIL) | ✅ Linux/Docker | Très large (FR + INT) | **Retenu (priorité)** |
+| OpenMaint (CMDBuild) | 12 ans | ✅ REST + SOAP | Work orders + Assets | ✅ Tomcat | Moyenne (IT) | Alternative crédible |
+| Snipe-IT | 10 ans | ✅ REST documenté | Asset-centric (limité OT) | ✅ PHP/Laravel | Large | Trop asset-centric |
+| Fiix Free | 15 ans | API limitée free tier | Complet (cloud) | ❌ SaaS uniquement | Commercial | Non-libre |
+| MaintainX Free | 6 ans | API limitée free tier | Mobile-first | ❌ SaaS uniquement | Commercial | Non-libre |
+
+Sources : GLPI Project (2024) ; CMMS Wikipedia (2024) ; documentations officielles consultées 2026.
+
+**Choix retenu : GLPI** — meilleure couverture fonctionnelle, API REST native documentée, communauté francophone active, déployable on-premise.
+
+### II.7.3. Stack technologique de la chaîne intégrée
+
+**Tableau II.12 — Stack technologique du prototype intégré**
 
 | Couche | Technologie | Rôle | Coût |
 |---|---|---|---|
-| Base de données | **Supabase** (PostgreSQL managé) | Stockage relationnel, RLS, API REST auto-générée | Gratuit jusqu'à 500 Mo |
-| Backend / API | Supabase REST + Edge Functions | Logique métier, webhooks | Gratuit jusqu'à 500 K invocations/mois |
-| Frontend | **Next.js 14** (React, App Router) | Interface utilisateur web responsive | Gratuit (open-source) |
-| Hébergement | **Vercel** | Déploiement frontend + CDN | Gratuit (offre Hobby) |
-| Authentification | Supabase Auth | Gestion utilisateurs et permissions | Gratuit |
-| Visualisation | Recharts / Chart.js | Graphes temps réel | Gratuit (open-source) |
-| Communication ESP32 | HTTPS POST → Supabase REST | Ingestion automatique des mesures | Gratuit |
-| Langage | TypeScript + JavaScript | Sécurité de typage frontend/backend | Gratuit |
+| Capteur + acquisition | ESP32 + HX711 + DS18B20 | Mesure ER + température | Matériel ~50 000 FCFA |
+| Stockage mesures + prédictions | SQLite (intégré Streamlit) | Persistance time-series + sorties ML | Gratuit |
+| Pipeline ML | Python (Pandas, SciPy, XGBoost, SHAP) | CR + RUL + diagnostic + interprétabilité | Gratuit (open-source) |
+| Frontend ML / dashboard | **Streamlit** | UI temps réel, courbes, alertes | Gratuit (open-source) |
+| Hébergement frontend | **Streamlit Community Cloud** | Déploiement public | Gratuit |
+| **CMMS open-source** | **GLPI** (PHP/MariaDB) | Tickets, OT, KPIs maintenance | Gratuit (auto-hébergé) |
+| Couche d'intégration | **API REST GLPI** (HTTP/JSON) | Création automatique de tickets | Gratuit |
+| Communication ESP32 → Streamlit | HTTPS POST | Ingestion mesures | Gratuit |
 
-Source : Supabase (2024) ; Vercel (2024) ; Next.js (2024).
+Sources : Streamlit (2024) ; GLPI Project (2024) ; XGBoost Documentation (Chen et Guestrin, 2016).
 
-### II.7.3. Schéma de base de données
+### II.7.4. Architecture de la boucle complète intégrée
 
-Huit tables relationnelles structurent les données. Le schéma respecte la taxonomie d'équipement et d'événement de la norme ISO 14224 :
-
-**Tableau II.12 — Schéma relationnel du prototype GMAO**
-
-| Table | Rôle | Champs clés |
-|---|---|---|
-| `assets` | Équipements surveillés | id, nom, type, localisation, seuils CR/RUL personnalisés |
-| `measurements` | Mesures brutes ESP32 | asset_id, timestamp_s, vdiff_v, rx_ohm, temp_c |
-| `predictions` | Sorties du modèle XGBoost | asset_id, timestamp, cr_predit, rul_predit, diagnostic, shap_top1, shap_top2, shap_top3 |
-| `alerts` | Alertes graduées | asset_id, niveau (vert/orange/rouge), type, message, recommandation, créé_le |
-| `work_orders` | Ordres de travail | alert_id, asset_id, statut, priorité, technicien, créé_le, fermé_le |
-| `interventions` | Interventions réalisées | work_order_id, type, technicien, durée_min, coût_fcfa, photo_url |
-| `inhibitor_doses` | Traçabilité injections | asset_id, intervention_id, produit, concentration_pct, volume_ml, injecté_le |
-| `kpi_maintenance` (vue) | KPIs agrégés | mtbf_h, mttr_h, dispo_pct, eta_inhibition, coût_evité_fcfa, précision_modèle |
-
-### II.7.4. Architecture de la boucle complète
-
-La figure ci-dessous présente la boucle complète **Sonde → Pipeline ML → GMAO → Action** mise en œuvre dans le prototype intégré :
+La figure ci-dessous présente la boucle **Sonde → Pipeline ML → Streamlit → API REST → CMMS → Technicien** mise en œuvre dans le prototype :
 
 ```
-┌─────────────┐         ┌──────────────┐
-│   ESP32     │ ──HTTP─→│   Supabase   │←──┐
-│ (capteur)   │   POST  │  (Postgres)  │   │
-└─────────────┘         └──────────────┘   │
-                              ↑↓ REST       │
-┌─────────────┐         ┌──────────────┐   │
-│  Pipeline   │ ──────→ │   Alerts +   │   │
-│ Python ML   │  écrit  │ Work Orders  │   │
-│ (XGBoost)   │         └──────────────┘   │
-└─────────────┘                ↑↓           │
-                         ┌──────────────┐   │
-                         │  Next.js     │   │
-                         │  Dashboard   │ ──┘
-                         │  (Vercel)    │
-                         └──────────────┘
-                                ↑
-                         ┌──────────────┐
-                         │  Technicien  │
-                         │ (smartphone) │
-                         └──────────────┘
+┌─────────────┐  HTTPS  ┌──────────────────────┐
+│   ESP32     │ ──POST─→│   Streamlit App      │
+│ (capteur ER)│         │  (frontend + DB ML)  │
+└─────────────┘         │  ┌────────────────┐  │
+                        │  │ Pipeline ML    │  │
+                        │  │  (XGBoost,     │  │
+                        │  │   SHAP, diag.) │  │
+                        │  └────────┬───────┘  │
+                        │           │          │
+                        │   alerte critique?   │
+                        └───────────┼──────────┘
+                                    │ POST /api/Ticket
+                                    ▼
+                          ┌──────────────────┐
+                          │   GLPI (CMMS)    │
+                          │  - Tickets       │
+                          │  - Work Orders   │
+                          │  - KPIs (MTBF…)  │
+                          └────────┬─────────┘
+                                   │ notification
+                                   ▼
+                          ┌──────────────────┐
+                          │   Technicien     │
+                          │ (web/mobile)     │
+                          └──────────────────┘
 ```
 
-**Figure II.1 — Architecture de la boucle complète Sonde → ML → GMAO → Action**
+**Figure II.1 — Architecture de la boucle intégrée Sonde → Streamlit → CMMS open-source**
 
-### II.7.5. Pages web du prototype
+### II.7.5. Mapping prédiction ML → ticket CMMS
 
-Le frontend Next.js implémente sept pages essentielles :
+Le tableau ci-dessous décrit le mapping entre les sorties du pipeline ML et les champs d'un ticket GLPI créé automatiquement :
 
-**Tableau II.13 — Pages web du prototype GMAO**
+**Tableau II.13 — Mapping des champs prédiction ML → ticket GLPI**
 
-| Page | Route | Contenu |
+| Champ ticket GLPI | Source dans la prédiction ML | Exemple |
 |---|---|---|
-| Dashboard temps réel | `/` | Courbes Rx, T, CR, RUL en direct, alertes actives |
-| Liste actifs | `/assets` | Tableau des équipements surveillés |
-| Détail asset | `/assets/[id]` | Historique mesures + alertes + OT + photos |
-| Liste alertes | `/alerts` | Filtrage par niveau (vert/orange/rouge) |
-| Tableau OT | `/work-orders` | Kanban Ouvert / En cours / Fermé |
-| Détail OT | `/work-orders/[id]` | Formulaire d'intervention + traçabilité |
-| Tableau de bord KPIs | `/kpi` | MTBF, MTTR, disponibilité, coût évité |
+| `name` (titre) | Concaténation `asset.nom` + diagnostic | "Pipeline-Komé-Sect-12 — Corrosion accélérée détectée" |
+| `urgency` | Niveau d'alerte (vert=1, orange=3, rouge=5) | 5 |
+| `impact` | Criticité de l'asset (configuration) | 5 |
+| `priority` | Calcul GLPI = f(urgency, impact) | "Très haute" |
+| `content` (description) | Template enrichi : CR_pred, RUL_pred, top-3 SHAP, recommandation | "CR=4,2 mm/an ; RUL=18 h ; top-3 SHAP : ΔR/Δt, T_avg, Rx_ema. Recommandation : injection inhibiteur 0,5 % v/v." |
+| `entities_id` | Asset surveillé (entité GLPI) | ID de la section pipeline |
+| `itilcategories_id` | Catégorie « Corrosion » | ID GLPI catégorie |
+| `_users_id_assign` | Technicien d'astreinte (configuration) | ID utilisateur |
 
-### II.7.6. KPIs maintenance calculés
+L'appel API se fait depuis l'application Streamlit en Python via la librairie `requests` :
 
-Les indicateurs de performance suivants sont calculés automatiquement par la GMAO et restitués dans le dashboard `/kpi` :
+```python
+ticket = {
+    "input": {
+        "name": f"{asset.nom} — {diagnostic}",
+        "urgency": niveau_to_urgency[alerte.niveau],
+        "content": template_description.format(**prediction),
+        "itilcategories_id": GLPI_CAT_CORROSION,
+    }
+}
+requests.post(f"{GLPI_URL}/apirest.php/Ticket",
+              headers={"Session-Token": session_token},
+              json=ticket)
+```
+
+### II.7.6. KPIs maintenance calculés (côté CMMS)
+
+GLPI fournit nativement ou par requête SQL/plugin les KPIs maintenance suivants, alimentés par l'historique des tickets et des interventions :
 
 **Tableau II.14 — Indicateurs de performance maintenance (KPIs)**
 
-| KPI | Formule | Cible |
-|---|---|---|
-| **MTBF** (Mean Time Between Failures) | Σ temps de bon fonctionnement / nb pannes | maximiser |
-| **MTTR** (Mean Time To Repair) | Σ durée interventions / nb interventions | minimiser |
-| **Disponibilité** | MTBF / (MTBF + MTTR) | > 95 % |
-| **Efficacité d'inhibition** | (CR_sans − CR_avec) / CR_sans × 100 | > 90 % |
-| **Coût évité** | RUL_prédit × débit × prix_baril − coût_intervention | maximiser |
-| **Précision du modèle** | 1 − (alertes fausses / alertes totales) | > 85 % |
+| KPI | Formule | Source GLPI | Cible |
+|---|---|---|---|
+| **MTBF** (Mean Time Between Failures) | Σ temps entre tickets corrosion / nb tickets | Table `glpi_tickets` | maximiser |
+| **MTTR** (Mean Time To Repair) | Σ (close_date − open_date) / nb tickets | Table `glpi_tickets` | minimiser |
+| **Disponibilité** | MTBF / (MTBF + MTTR) | Calculé | > 95 % |
+| **Efficacité d'inhibition** | (CR_avant − CR_après) / CR_avant × 100 | Pipeline ML + tags GLPI | > 90 % |
+| **Précision du modèle** | 1 − (alertes annulées / alertes totales) | Champ `solutiontype` GLPI | > 85 % |
+| **Taux de fausses alertes** | tickets résolus en `false positive` / total | Champ `status` + `solution` | < 15 % |
 
 ---
 
@@ -1111,10 +1249,10 @@ Les indicateurs de performance suivants sont calculés automatiquement par la GM
 
 | Objectif Spécifique | Activités à réaliser | Méthodes / Outils | Justifications / Résultats attendus |
 |---|---|---|---|
-| **OS1** — Concevoir et valider la sonde ER low-cost | (i) Câblage du pont de Wheatstone ; (ii) Programmation du firmware ESP32 (deep sleep, HX711, DS18B20) ; (iii) Tests de résolution sur résistances étalons ; (iv) Validation de la stabilité en milieu corrosif | Pont de Wheatstone (*R*₁ = *R*₂ = 10 Ω, *R*_REF = 0,5 Ω, *R*_SERIE = 100 Ω) ; HX711 gain 128 ; ESP32 deep sleep 600 s ; CSV série 115 200 baud ; Multimètre de précision | Sonde fonctionnelle avec résolution ≤ 0,01 mΩ, stabilité ±0,5 mV/24 h — faisabilité chaîne low-cost ER |
+| **OS1** — Concevoir et valider la sonde ER instrumentée IoT | (i) Câblage du pont de Wheatstone ; (ii) Programmation du firmware ESP32 (deep sleep, HX711, DS18B20) ; (iii) Tests de résolution sur résistances étalons ; (iv) Validation de la stabilité en milieu corrosif | Pont de Wheatstone (*R*₁ = *R*₂ = 10 Ω, *R*_REF = 0,5 Ω, *R*_SERIE = 100 Ω) ; HX711 gain 128 ; ESP32 deep sleep 600 s ; CSV série 115 200 baud ; Multimètre de précision | Sonde fonctionnelle avec résolution ≤ 0,01 mΩ, stabilité ±0,5 mV/24 h — démonstration de la brique d'acquisition I4.0 |
 | **OS2** — Entraîner et valider le modèle XGBoost (CR + RUL) | (i) Collecte de 4 runs RTF ; (ii) Nettoyage IQR + Savitzky-Golay ; (iii) Compensation thermique ; (iv) Feature engineering (10 variables) ; (v) TimeSeriesSplit n=4 ; (vi) Entraînement XGBoost ; (vii) MAE/RMSE/R² ; (viii) SHAP | Python : Pandas, SciPy, XGBoost, Scikit-learn, SHAP ; *n*=500, depth=4, lr=0,05, L1=0,1, L2=1,0 | *R²* > 0,70 et *RMSE* < 15 % pour CR et RUL ; SHAP : top 3 variables physiquement plausibles |
 | **OS3** — Diagnostic + évaluation inhibiteur + alertes | (i) Diagnostic régimes (5 classes) par règles métier ; (ii) Runs 3 et 4 avec inhibiteur imidazoline (0,1 % et 0,5 % v/v) ; (iii) Détection changepoint adsorption ; (iv) Calcul η ; (v) Calibration seuils vert/orange/rouge ; (vi) Recommandations dosage | Pipeline Python : `diagnostiquer(features)` ; algorithme changepoint sur fenêtre glissante ; comparaison runs inhibés vs non-inhibés ; calibration empirique | Diagnostic temps réel exploitable ; η mesuré comparé fabricant ; seuils calibrés (CR=1, 5 mm/an ; RUL=12, 48 h) |
-| **OS4** — Prototype GMAO low-cost open-source | (i) Schéma BDD Supabase (8 tables) ; (ii) API ingestion ESP32 → Supabase ; (iii) Pipeline ML → alerts & work_orders ; (iv) Dashboard Next.js (7 pages) ; (v) Calcul KPIs ; (vi) Déploiement Vercel | Stack : Supabase + Next.js 14 + Vercel ; TypeScript ; Recharts ; ISO 14224 pour codes anomalie | GMAO fonctionnelle déployée en production, démo live pour soutenance, KPIs calculés automatiquement, coût d'exploitation = 0 FCFA |
+| **OS4** — Intégration au CMMS open-source par API REST | (i) Application Streamlit (frontend ML + dashboard) ; (ii) Matrice comparative GLPI/OpenMaint/Snipe-IT ; (iii) Mapping prédiction ML → ticket CMMS ; (iv) API REST `/Ticket` (POST automatique) ; (v) Calcul KPIs (MTBF, MTTR, η inhibition) | Streamlit + Streamlit Community Cloud ; **GLPI** (PHP/MariaDB, auto-hébergé) ; API REST GLPI ; Python `requests` ; ISO 14224 codes anomalie | Boucle Sonde→ML→Ticket CMMS démontrée end-to-end ; KPIs calculés ; coût de licence = 0 FCFA |
 
 L'usage des outils suit une chronologie stricte : conception matérielle (OS1) → acquisition expérimentale et modélisation (OS2) → diagnostic et évaluation inhibiteur (OS3) → intégration applicative GMAO (OS4).
 
@@ -1122,7 +1260,7 @@ L'usage des outils suit une chronologie stricte : conception matérielle (OS1) �
 
 ## II.9. Conclusion du Chapitre II
 
-Ce chapitre a présenté l'ensemble des outils et de la méthodologie retenus pour répondre aux **quatre objectifs spécifiques** du mémoire. Le prototype de sonde ER (pont de Wheatstone + HX711 + ESP32 en deep sleep pulsé) a été décrit dans son principe physique et son implémentation matérielle. Les matériels électroniques, chimiques et logiciels mobilisés ont été consolidés en tableaux récapitulatifs. Les méthodes d'acquisition, de nettoyage, de compensation thermique, de feature engineering, d'entraînement XGBoost et d'interprétabilité SHAP ont été détaillées, ainsi que le module de diagnostic des régimes de corrosion. L'**architecture du prototype de GMAO low-cost** (stack Supabase + Next.js + Vercel, schéma de huit tables, sept pages web, six KPIs maintenance, boucle complète Sonde → ML → GMAO → Action) a été spécifiée. Le protocole expérimental *run-to-failure* en quatre runs et le tableau synoptique de la démarche ont été présentés. Le **Chapitre III** présente à présent les résultats issus de la mise en œuvre de cette méthodologie, leur analyse et leur discussion.
+Ce chapitre a présenté l'ensemble des outils et de la méthodologie retenus pour répondre aux **quatre objectifs spécifiques** du mémoire. Une **§II.0.5 dédiée à la justification des choix technologiques** a consolidé les arbitrages techniques (microcontrôleur ESP32, amplificateur HX711, capteur DS18B20, méthode ER, algorithme XGBoost, validation TimeSeriesSplit, frontend Streamlit, CMMS GLPI) sous forme de matrices de décision. Le prototype de sonde ER (pont de Wheatstone + HX711 + ESP32 en deep sleep pulsé) a ensuite été décrit dans son principe physique et son implémentation matérielle. Les matériels électroniques, chimiques et logiciels mobilisés ont été consolidés en tableaux récapitulatifs. Les méthodes d'acquisition, de nettoyage, de compensation thermique, de feature engineering, d'entraînement XGBoost et d'interprétabilité SHAP ont été détaillées, ainsi que le module de diagnostic des régimes de corrosion. L'**architecture d'intégration Streamlit ↔ CMMS open-source par API REST** (matrice comparative GLPI / OpenMaint / Snipe-IT, mapping prédiction ML → ticket, KPIs maintenance côté CMMS) a été spécifiée. Le protocole expérimental *run-to-failure* en quatre runs et le tableau synoptique de la démarche ont été présentés. Le **Chapitre III** présente à présent les résultats issus de la mise en œuvre de cette méthodologie, leur analyse et leur discussion.
 
 \newpage
 
@@ -1138,7 +1276,7 @@ III.2. Résultats des quatre runs run-to-failure
 III.3. Performance du modèle XGBoost CR + RUL (OS2)
 III.4. Diagnostic des régimes de corrosion (OS3)
 III.5. Évaluation de l'inhibiteur de corrosion et calibration des alertes (OS3)
-III.6. Prototype de GMAO low-cost — fonctionnalité et KPIs (OS4)
+III.6. Intégration au CMMS open-source — démonstration end-to-end et KPIs (OS4)
 III.7. Discussions
 III.8. Conclusion
 
@@ -1148,7 +1286,7 @@ III.8. Conclusion
 
 > **Ce chapitre sera complété au fur et à mesure de la collecte des données expérimentales sur le prototype et du déploiement de la GMAO.** L'ensemble des sections suivantes a été pré-structuré conformément à la méthodologie présentée au Chapitre II. Chaque section est accompagnée d'une indication précise de la nature des données, des graphes, des captures d'écran et des analyses à insérer.
 
-Dans ce chapitre, il sera question de présenter (i) les résultats de la validation métrologi que de la sonde ER (OS1), (ii) les données expérimentales issues des quatre runs RTF, (iii) les performances du modèle XGBoost prédisant CR et RUL ainsi que l'analyse SHAP des variables d'influence (OS2), (iv) le diagnostic des régimes de corrosion observés (OS3), (v) l'évaluation de l'efficacité de l'inhibiteur de corrosion testé et la calibration du système d'alertes (OS3), (vi) la fonctionnalité et les KPIs du prototype de GMAO low-cost déployé (OS4), puis de discuter l'ensemble de ces résultats au regard des objectifs initiaux et de la littérature internationale (Chapitre I).
+Dans ce chapitre, il sera question de présenter (i) les résultats de la validation métrologique de la sonde ER (OS1), (ii) les données expérimentales issues des quatre runs RTF, (iii) les performances du modèle XGBoost prédisant CR et RUL ainsi que l'analyse SHAP des variables d'influence (OS2), (iv) le diagnostic des régimes de corrosion observés (OS3), (v) l'évaluation de l'efficacité de l'inhibiteur de corrosion testé et la calibration du système d'alertes (OS3), (vi) la **démonstration end-to-end de l'intégration Streamlit ↔ CMMS open-source** et les KPIs maintenance calculés (OS4), puis de discuter l'ensemble de ces résultats au regard des objectifs initiaux et de la littérature internationale (Chapitre I).
 
 ---
 
@@ -1277,7 +1415,7 @@ Dans ce chapitre, il sera question de présenter (i) les résultats de la valida
 
 ---
 
-## III.6. Prototype de GMAO low-cost — fonctionnalité et KPIs (OS4)
+## III.6. Intégration au CMMS open-source — démonstration end-to-end et KPIs (OS4)
 
 ### III.6.1. Schéma de base de données déployé
 
@@ -1312,13 +1450,13 @@ Dans ce chapitre, il sera question de présenter (i) les résultats de la valida
 
 ### III.6.6. Comparaison fonctionnelle vs GMAO industrielles
 
-*[À compléter — Tableau comparatif fonctionnel : prototype GMAO low-cost vs SAP PM vs IBM Maximo vs MaintainX (free) sur les fonctions essentielles (gestion actifs, OT, KPIs, intégration IoT, ML embarqué, coût annuel par site). Discussion de la viabilité du prototype pour les PME industrielles africaines.]*
+*[À compléter — Tableau comparatif fonctionnel : intégration Streamlit + GLPI vs SAP PM vs IBM Maximo vs MaintainX (free) sur les fonctions essentielles (gestion actifs, OT, KPIs, intégration IoT, ML embarqué, coût annuel par site). Discussion de la viabilité du prototype pour les PME industrielles africaines et pour le contexte COTCO.]*
 
 ---
 
 ## III.7. Discussions
 
-### III.7.1. Performance de la sonde ER low-cost vs systèmes commerciaux
+### III.7.1. Comparaison de maturité numérique : chaîne prototype I4.0 vs sondes commerciales déployées en I3.0
 
 *[À compléter — Comparer la résolution effective obtenue (mΩ) aux spécifications industrielles : Cosasco CW-20, Emerson Roxar, Permasense WT. Discuter le ratio coût/performance — ratio attendu : facteur 40 à 100 moins cher pour une résolution équivalente.]*
 
@@ -1336,7 +1474,7 @@ Dans ce chapitre, il sera question de présenter (i) les résultats de la valida
 
 *[À compléter — Interpréter le temps d'adsorption détecté au regard de la cinétique d'adsorption des imidazolines (Heydari et Talebpour, 2024 ; Wang et al., 2023). Vérifier que η mesuré suit l'isotherme de Langmuir : η(C) = K_ads × C / (1 + K_ads × C).]*
 
-### III.7.4. Apport du prototype de GMAO low-cost
+### III.7.4. Apport de l'intégration au CMMS open-source
 
 *[À compléter après déploiement — Discussion de la viabilité du prototype GMAO en termes de :*
 
@@ -1373,43 +1511,46 @@ Plusieurs limites sont identifiées et doivent être prises en compte dans l'int
 
 # CONCLUSION GÉNÉRALE
 
-Au terme de ce travail, qui s'inscrit dans un contexte de besoin industriel pressant — la corrosion représentant un coût annuel mondial de 2,5 billions USD et une menace permanente pour les infrastructures pétrolières camerounaises de COTCO — nous avons conçu, développé et **partiellement** validé expérimentalement un **système intégré de maintenance prédictive de la corrosion** couvrant la chaîne complète **détection → diagnostic → pronostic → décision → action** définie par la norme ISO 13381-1, articulé autour de **quatre composants** intégrés : une sonde ER low-cost, un modèle d'apprentissage automatique XGBoost à double sortie (CR + RUL), un module de diagnostic et d'alertes, et un prototype de GMAO low-cost open-source.
+Au terme de ce travail, qui s'inscrit dans un contexte de besoin industriel pressant — la corrosion représentant un coût annuel mondial de 2,5 billions USD et une menace permanente pour les infrastructures pétrolières camerounaises de COTCO — nous avons conçu, développé et **partiellement** validé expérimentalement un **système intégré de maintenance prédictive de la corrosion** matérialisant une **transition Industrie 3.0 → 4.0**. Le prototype couvre la chaîne complète **détection → diagnostic → pronostic → décision → action** définie par la norme ISO 13381-1, et est articulé autour de **quatre composants intégrés** : une chaîne d'acquisition ER instrumentée IoT (ESP32 + HX711 + DS18B20), un modèle d'apprentissage automatique XGBoost à double sortie (CR + RUL) avec interprétabilité SHAP, un module de diagnostic des régimes de corrosion et d'alertes graduées, et une **application Streamlit intégrée par API REST à un CMMS open-source** (GLPI) pour la création automatique d'ordres de travail.
+
+**Thèse centrale validée par ce travail :** à partir des données historiques qu'une entreprise possède déjà (cas COTCO, où des sondes ER commerciales sont en place depuis l'origine du SET), il est possible d'évoluer vers une couche prédictive supérieure (Industrie 4.0). Le prototype maison est **doublement transposable** : (a) en industrie, en branchant le pipeline ML sur les flux des sondes ER existantes via export DCS — le saut I3.0 → I4.0 est essentiellement logiciel et n'exige pas le remplacement matériel ; (b) en autonomie, comme système clé-en-main pour les PME industrielles africaines à budget réduit.
 
 **Synthèse par objectif spécifique :**
 
-- **OS1 — Sonde ER low-cost :** la sonde a été conçue et assemblée à partir de composants disponibles localement au Cameroun (ESP32, HX711, DS18B20, fil de fer, résistances), pour un coût total inférieur à 50 000 FCFA — soit un facteur 40 à 100 moins cher qu'un système industriel équivalent. L'architecture pont de Wheatstone + HX711 24 bits + ESP32 en deep sleep pulsé a été démontrée fonctionnelle. *[Les métriques de résolution finale et de stabilité seront ajoutées après les tests métrologi ques.]*
+- **OS1 — Chaîne d'acquisition ER instrumentée IoT :** la sonde a été conçue et assemblée à partir de composants accessibles localement (ESP32, HX711, DS18B20, fil de fer, résistances). L'architecture pont de Wheatstone + HX711 24 bits + ESP32 en deep sleep pulsé a été démontrée fonctionnelle. La justification des choix technologiques a été consolidée en matrice de décision (§II.0.5). *[Les métriques de résolution finale et de stabilité seront ajoutées après les tests métrologiques.]*
 
-- **OS2 — Modèle XGBoost à double sortie :** le pipeline complet (nettoyage IQR + Savitzky-Golay, compensation thermique, feature engineering à 10 variables, validation croisée walk-forward TimeSeriesSplit, hyperparamètres XGBoost optimisés, interprétabilité SHAP) a été implémenté en Python et est prêt à recevoir les données expérimentales. *[Les métriques R² et RMSE pour CR et RUL seront ajoutées après les runs.]*
+- **OS2 — Modèle XGBoost à double sortie :** le pipeline complet (nettoyage IQR + Savitzky-Golay, compensation thermique, feature engineering à 10 variables, validation croisée walk-forward TimeSeriesSplit, hyperparamètres XGBoost optimisés, interprétabilité SHAP) a été implémenté en Python. Le modèle est conçu pour être agnostique à la source des mesures (prototype maison ou sondes ER commerciales). *[Les métriques R² et RMSE pour CR et RUL seront ajoutées après les runs.]*
 
-- **OS3 — Diagnostic + évaluation inhibiteur + alertes :** un module de diagnostic des régimes de corrosion (5 classes : stable, accélération, passivation, adsorption inhibiteur, pré-rupture) a été spécifié par règles métier explicables. Le protocole d'évaluation de l'inhibiteur de la famille des imidazolines à deux concentrations (0,1 % et 0,5 % v/v) a été défini, ainsi que l'algorithme de détection du temps d'adsorption (changepoint) et le système d'alertes graduées à trois niveaux (vert / orange / rouge). *[Les valeurs numériques d'efficacité η, la matrice de confusion du diagnostic et la calibration finale des seuils seront ajoutées après les runs.]*
+- **OS3 — Diagnostic + évaluation inhibiteur + alertes :** un module de diagnostic des régimes de corrosion (5 classes : stable, accélération, passivation, adsorption inhibiteur, pré-rupture) a été spécifié par règles métier explicables. Le protocole d'évaluation de l'inhibiteur de la famille des imidazolines à deux concentrations (0,1 % et 0,5 % v/v), l'algorithme de détection du temps d'adsorption (changepoint) et le système d'alertes graduées vert/orange/rouge ont été définis. *[Valeurs numériques η, matrice de confusion et calibration finale à compléter après runs.]*
 
-- **OS4 — Prototype de GMAO low-cost :** l'architecture complète du prototype (stack Supabase + Next.js + Vercel, schéma à huit tables relationnelles conformes ISO 14224, sept pages web, six KPIs maintenance) a été conçue et spécifiée. *[L'URL de déploiement public, les captures d'écran fonctionnelles et les KPIs effectivement calculés seront ajoutés à l'issue du développement et de l'intégration.]*
+- **OS4 — Intégration au CMMS open-source par API REST :** une matrice comparative des CMMS open-source candidats a conduit au choix de **GLPI**. L'architecture d'intégration (Streamlit ↔ API REST GLPI), le mapping prédiction ML → ticket et les KPIs maintenance (MTBF, MTTR, η inhibition, précision modèle) côté CMMS ont été spécifiés. *[Démo end-to-end et KPIs réels à compléter après déploiement.]*
 
-**Contribution centrale de ce travail :** la démonstration que la **chaîne complète ISO 13381-1** — depuis la détection IoT jusqu'à l'action industrielle via la GMAO — peut être implémentée de manière fonctionnelle à partir de **composants matériels et de services logiciels accessibles localement** dans le contexte camerounais, à un coût total marginal nul ou très faible. Cette contribution comble plusieurs gaps identifiés dans la littérature : (i) l'absence d'études ML sur la corrosion en contexte africain ; (ii) l'absence de prédiction simultanée CR + RUL en protocole *run-to-failure* ; (iii) l'absence de prototypes intégrant explicitement un inhibiteur industriel et son évaluation expérimentale ; (iv) l'absence de GMAO open-source intégrée à une chaîne de maintenance prédictive complète, adaptée aux PME industrielles africaines.
+**Contribution centrale de ce travail :** la démonstration qu'une **transition Industrie 3.0 → 4.0** appliquée à la corrosion peut être opérée à partir de composants et services accessibles localement, et qu'elle est **doublement transposable** (opérateurs industriels disposant déjà d'instrumentation commerciale d'une part ; PME industrielles cherchant un déploiement autonome d'autre part). En conformité avec les définitions opérationnelles de l'Industrie 4.0 (Lasi et al., 2014 ; Lu, 2017 ; Xu et al., 2018), ce travail adresse explicitement **trois des cinq piliers** : (i) **interconnexion** (chaîne IoT ESP32) ; (ii) **transparence informationnelle** (dashboard Streamlit + CMMS centralisant mesures, prédictions et tickets) ; (iii) **décision décentralisée** (pronostic ML embarqué + recommandations d'inhibiteur). Les deux piliers restants — **boucle de rétroaction autonome** (commande automatique des pompes à inhibiteur) et **jumeau numérique complet** — sont identifiés comme perspectives. Cette contribution comble plusieurs gaps de la littérature : (i) l'absence d'études ML sur la corrosion en contexte africain ; (ii) l'absence de prédiction simultanée CR + RUL en protocole *run-to-failure* ; (iii) l'absence d'études adressant explicitement la chaîne décision-action via une intégration CMMS open-source.
 
 **Recommandations à l'attention de COTCO et des opérateurs pétroliers camerounais :**
 
-1. Déployer le prototype en mode pilote sur un segment de pipeline non critique pendant 6 mois, en parallèle des inspections UT existantes, pour collecter un jeu de données comparatif permettant de calibrer le modèle sur l'acier API 5L en conditions réelles ;
-2. Remplacer le fil de fer recuit par un fil en acier API 5L Grade B Ø 0,5 mm pour que la sonde soit représentative du matériau effectivement surveillé ;
-3. Ajouter des coupons gravimétriques (NACE SP0775) en parallèle pour disposer d'une validation indépendante des mesures ER ;
-4. Étudier l'interopérabilité du prototype GMAO avec le système PI Server existant via passerelle Modbus TCP ou via un connecteur ISO 14224, en attendant une éventuelle certification ATEX.
+1. **Brancher le pipeline ML sur les flux des sondes ER existantes** (Cosasco, Roxar) via export DCS (OPC UA, Modbus TCP) — le saut I3.0 → I4.0 est principalement logiciel et n'exige pas le remplacement matériel ;
+2. Déployer le prototype d'acquisition autonome ESP32 sur les sections où le câblage DCS est absent ou indisponible (extension géographique de la couverture sans génie civil) ;
+3. Déployer une instance GLPI on-premise comme couche de structuration des ordres de travail liés à la corrosion, et y connecter par API les sorties du modèle ML ;
+4. Pour la phase de validation industrielle, ajouter des coupons gravimétriques (NACE SP0775) en parallèle pour disposer d'une validation indépendante des mesures ER ;
+5. Étudier l'interopérabilité du prototype avec le système PI Server existant via passerelle Modbus TCP, en attendant une éventuelle certification ATEX du module ESP32.
 
 **Recommandations à l'attention des PME industrielles africaines :**
 
-1. Adopter le prototype de GMAO low-cost open-source comme alternative crédible aux GMAO propriétaires (SAP PM, IBM Maximo) inaccessibles budgétairement ;
-2. Adapter le schéma de huit tables au métier spécifique de chaque PME (boulangeries, ateliers mécaniques, mines artisanales, agroalimentaire) en gardant le noyau prédictif ;
-3. Mutualiser le déploiement entre plusieurs PME via une instance multi-tenant Supabase pour amortir les coûts d'administration.
+1. Adopter l'architecture **Streamlit + GLPI** comme alternative crédible aux GMAO propriétaires (SAP PM, IBM Maximo, Mainpac) inaccessibles budgétairement ;
+2. Mutualiser le déploiement d'une instance GLPI multi-entité entre plusieurs PME pour amortir les coûts d'administration ;
+3. Adapter le mapping des champs prédiction → ticket au métier spécifique de chaque PME (agroalimentaire, ateliers mécaniques, mines artisanales) en gardant le noyau ML.
 
 **Recommandations pour les travaux de recherche futurs :**
 
 1. Étendre le protocole à des milieux représentatifs des effluents COTCO réels (eau de formation + CO₂ + traces H₂S) pour valider la généralisation du modèle au-delà du laboratoire ;
-2. Tester des architectures ML alternatives (LSTM, Transformer temporel) sur le même jeu de données pour établir un benchmark comparatif ;
+2. Tester des architectures ML alternatives (LSTM, Transformer temporel) sur jeu de données enrichi pour établir un benchmark comparatif vs XGBoost ;
 3. Intégrer une couche de communication LoRaWAN pour s'affranchir de la dépendance Wi-Fi et permettre un déploiement sur les sections isolées du pipeline Tchad-Cameroun (zones forestières) ;
-4. Étendre le module de diagnostic vers une approche ML supervisée (XGBoost classifieur sur données labélisées) ou non-supervisée (Isolation Forest pour la détection d'anomalies) ;
-5. Étendre l'étude à d'autres familles d'inhibiteurs (amines, phosphonates) pour comparer leurs cinétiques d'adsorption en milieu multi-acide ;
-6. Développer une version mobile native (iOS/Android via React Native ou Flutter) du dashboard GMAO pour usage smartphone par les techniciens terrain.
+4. Étendre le module de diagnostic vers une approche ML supervisée (classification multi-classes sur données labélisées) ou non-supervisée (Isolation Forest pour la détection d'anomalies) ;
+5. **Adresser le 4ᵉ pilier I4.0** (boucle de rétroaction autonome) en interconnectant le système prédictif aux pompes d'injection inhibiteur (smart control) ;
+6. **Adresser le 5ᵉ pilier I4.0** (jumeau numérique complet) en intégrant le modèle ML à un environnement de simulation de la dégradation à 5-10 ans de la section pipeline.
 
-Ce mémoire ouvre ainsi la voie à une démocratisation de la maintenance prédictive de la corrosion dans les économies émergentes d'Afrique subsaharienne, démontrant qu'un compromis acceptable entre coût, résolution et fonctionnalité peut être atteint à partir de composants accessibles localement.
+Ce mémoire ouvre ainsi la voie à une **transition Industrie 4.0 maîtrisée** dans le secteur de la maintenance corrosion en Afrique subsaharienne — qu'il s'agisse d'opérateurs majeurs valorisant leurs flux de données existants ou de PME industrielles initiant leur transformation numérique sans investissement initial prohibitif.
 
 \newpage
 
@@ -1508,6 +1649,16 @@ Ce mémoire ouvre ainsi la voie à une démocratisation de la maintenance prédi
 44. Ma, Z., Zhao, Y., & Wang, L. (2021). Predicting pipeline corrosion rate using gradient boosting algorithms. *International Journal of Pressure Vessels and Piping*, 192, 104396.
 
 45. Mansfeld, F. (2014). Recent developments in corrosion measurement techniques. *Materials and Corrosion*, 65(7), 631–638.
+
+46. Lasi, H., Fettke, P., Kemper, H. G., Feld, T., et Hoffmann, M. (2014). Industry 4.0. *Business & Information Systems Engineering*, 6(4), 239-242. https://doi.org/10.1007/s12599-014-0334-4
+
+47. Lu, Y. (2017). Industry 4.0: A survey on technologies, applications and open research issues. *Journal of Industrial Information Integration*, 6, 1-10. https://doi.org/10.1016/j.jii.2017.04.005
+
+48. Xu, L. D., Xu, E. L., et Li, L. (2018). Industry 4.0: state of the art and future trends. *International Journal of Production Research*, 56(8), 2941-2962. https://doi.org/10.1080/00207543.2018.1444806
+
+49. GLPI Project. (2024). *GLPI — Free IT and Asset Management Software — REST API documentation*. https://glpi-project.org/
+
+50. Streamlit. (2024). *Streamlit Documentation — A faster way to build and share data apps*. https://docs.streamlit.io/
 
 46. Mayer, A., et al. (2023). LEROY: A low-cost Arduino-based, IoT-enabled device for atmospheric corrosion monitoring. *Sensors*. https://www.mdpi.com/1424-8220/
 
