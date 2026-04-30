@@ -829,6 +829,8 @@ Pour détecter des variations de résistance de l'ordre du dixième de milliohm 
 | Bras 3 | Résistance de référence *R*_REF | 0,5 Ω (1 % précision) | Bras passif (fil protégé) |
 | Bras 4 | Résistance active *R*ₓ(t) | ≈ 0,13 Ω initial | Fil ER exposé au milieu |
 
+![Figure II.2 — Pont de Wheatstone instrumenté par HX711 (Rx = fil de fer immergé dans le milieu corrosif)](figures/fig_ii2_wheatstone.png){ width=75% }
+
 La tension différentielle aux bornes du pont est donnée par :
 
 $$V_{diff} = V_{exc,eff} \cdot \left( \frac{R_x}{R_2 + R_x} - \frac{R_{REF}}{R_1 + R_{REF}} \right)$$
@@ -865,6 +867,8 @@ L'**ESP32 DevKit V1** est un microcontrôleur bi-cœur Wi-Fi + Bluetooth (Espres
 6. **Power-down HX711** (SCK HIGH > 60 µs) ;
 7. **Programmation du deep sleep** suivant (600 secondes = 10 minutes) ;
 8. **Mise en deep sleep**.
+
+![Figure II.3 — Cycle de fonctionnement ESP32 en deep sleep pulsé](figures/fig_ii3_cycle_esp32.png){ width=95% }
 
 La **persistance locale** entre cycles de deep sleep est assurée par la mémoire RTC (variables `RTC_DATA_ATTR`) qui conserve le compteur de mesures, la dernière valeur de *R*ₓ et l'horodatage de la dernière transmission. La **persistance distante** des mesures est assurée côté Supabase dans la table `measurements` (voir Annexe F). En cas d'échec Wi-Fi, la mesure est mise en file d'attente en mémoire RTC et retransmise au cycle suivant. Le **payload JSON** émis est :
 
@@ -963,6 +967,8 @@ Le tableau ci-dessous consolide la totalité des matériels mobilisés dans le c
 ## II.4. Méthodes d'acquisition et de traitement des données
 
 La méthodologie de traitement des données suit une chaîne en cinq étapes successives, implémentée dans le script Python `corrosion_pipeline.py`.
+
+![Figure II.4 — Pipeline Python de traitement des données (5 étapes)](figures/fig_ii4_pipeline.png){ width=95% }
 
 ### II.4.1. Acquisition
 
@@ -1771,7 +1777,7 @@ def feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
 
 ## Annexe C — Schéma de câblage de la sonde ER
 
-*[Schéma à compléter]*
+![Figure C.1 — Schéma de câblage complet : ESP32 + HX711 + Pont de Wheatstone + DS18B20 + cellule HDPE](figures/fig_c1_cablage.png){ width=95% }
 
 ## Annexe D — Fiche de sécurité Detar Plus (résumé)
 
@@ -1796,6 +1802,10 @@ L'**inhibiteur de corrosion** retenu pour ce travail appartient à la famille de
 - **Stockage** : récipient hermétique, à l'abri de la chaleur.
 
 ## Annexe F — Schéma de base de données du prototype GMAO
+
+![Figure F.1 — Schéma relationnel (ERD) de la base Supabase : 8 tables, clés étrangères en cardinalité 1 — *](figures/fig_f1_erd.png){ width=95% }
+
+**Définitions SQL des tables :**
 
 ```sql
 -- 8 tables relationnelles (Supabase / PostgreSQL)
