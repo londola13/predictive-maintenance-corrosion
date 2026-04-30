@@ -217,15 +217,15 @@ Après une revue de la littérature sur la corrosion, ses mécanismes, les méth
 
 **Sommaire du Chapitre I**
 
-I.0. Introduction
-I.1. Contexte et justification (suivant les six approches du protocole de recherche)
-I.2. Problématique
-I.3. Objectifs de l'étude
-I.4. Questions de recherche
-I.5. Importance de cette étude
-I.6. Organisation du travail
-I.7. Revue de la littérature
-I.8. Conclusion
+- I.0. Introduction
+- I.1. Contexte et justification (suivant les six approches du protocole de recherche)
+- I.2. Problématique
+- I.3. Objectifs de l'étude
+- I.4. Questions de recherche
+- I.5. Importance de cette étude
+- I.6. Organisation du travail
+- I.7. Revue de la littérature
+- I.8. Conclusion
 
 ---
 
@@ -635,17 +635,17 @@ Ce premier chapitre a permis de poser les bases théoriques, normatives et conte
 
 **Sommaire du Chapitre II**
 
-II.0. Introduction
-II.0.5. Justification des choix technologiques
-II.1. Cadre de l'étude
-II.2. Présentation du prototype de mesure ER
-II.3. Matériels mobilisés
-II.4. Méthodes d'acquisition et de traitement des données
-II.5. Méthodologie d'entraînement du modèle XGBoost
-II.6. Protocole expérimental run-to-failure
-II.7. Architecture d'intégration au CMMS open-source par API REST
-II.8. Tableau synoptique de la démarche méthodologique
-II.9. Conclusion
+- II.0. Introduction
+- II.0.5. Justification des choix technologiques
+- II.1. Cadre de l'étude
+- II.2. Présentation du prototype de mesure ER
+- II.3. Matériels mobilisés
+- II.4. Méthodes d'acquisition et de traitement des données
+- II.5. Méthodologie d'entraînement du modèle XGBoost
+- II.6. Protocole expérimental run-to-failure
+- II.7. Architecture d'intégration au CMMS open-source par API REST
+- II.8. Tableau synoptique de la démarche méthodologique
+- II.9. Conclusion
 
 ---
 
@@ -1270,15 +1270,15 @@ Ce chapitre a présenté l'ensemble des outils et de la méthodologie retenus po
 
 **Sommaire du Chapitre III**
 
-III.0. Introduction
-III.1. Validation métrologi que de la sonde ER (OS1)
-III.2. Résultats des quatre runs run-to-failure
-III.3. Performance du modèle XGBoost CR + RUL (OS2)
-III.4. Diagnostic des régimes de corrosion (OS3)
-III.5. Évaluation de l'inhibiteur de corrosion et calibration des alertes (OS3)
-III.6. Intégration au CMMS open-source — démonstration end-to-end et KPIs (OS4)
-III.7. Discussions
-III.8. Conclusion
+- III.0. Introduction
+- III.1. Validation métrologique de la sonde ER (OS1)
+- III.2. Résultats des quatre runs run-to-failure
+- III.3. Performance du modèle XGBoost CR + RUL (OS2)
+- III.4. Diagnostic des régimes de corrosion (OS3)
+- III.5. Évaluation de l'inhibiteur de corrosion et calibration des alertes (OS3)
+- III.6. Intégration au CMMS open-source — démonstration end-to-end et KPIs (OS4)
+- III.7. Discussions
+- III.8. Conclusion
 
 ---
 
