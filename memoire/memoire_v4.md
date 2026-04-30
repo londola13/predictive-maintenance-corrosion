@@ -16,10 +16,8 @@ title: "Système intégré de maintenance prédictive de la corrosion par appren
 
 **MINISTÈRE DE L'ENSEIGNEMENT SUPÉRIEUR**
 
-**UNIVERSITÉ DE DOUALA**
-
-**ÉCOLE NATIONALE SUPÉRIEURE POLYTECHNIQUE DE DOUALA**
-*(ENSPD)*
+**ÉCOLE SUPÉRIEURE TECHNIQUE LASALLE**
+*(ESTL)*
 
 **Département de Génie Industriel et Maintenance**
 
@@ -58,7 +56,7 @@ title: "Système intégré de maintenance prédictive de la corrosion par appren
 
 # REMERCIEMENTS
 
-Au terme de notre formation pour l'obtention du Master II en Maintenance Industrielle, nous tenons à exprimer notre sincère reconnaissance à l'ensemble du corps professoral de l'École Nationale Supérieure Polytechnique de Douala, qui par la qualité de leur enseignement et de leur encadrement, nous a permis de terminer avec succès cette formation en ingénierie. En l'occurrence :
+Au terme de notre formation pour l'obtention du Master II en Maintenance Industrielle, nous tenons à exprimer notre sincère reconnaissance à l'ensemble du corps professoral de l'École Supérieure Technique Lasalle, qui par la qualité de leur enseignement et de leur encadrement, nous a permis de terminer avec succès cette formation en ingénierie. En l'occurrence :
 
 - À notre **encadreur académique**, pour ses conseils éclairés, sa rigueur scientifique et sa disponibilité tout au long de la rédaction de ce mémoire ;
 - À notre **superviseur**, pour son approche méthodologique et la qualité de ses remarques structurantes ;
@@ -81,7 +79,17 @@ L'environnement corrosif de référence est un **détartrant industriel commerci
 
 Ce travail démontre la faisabilité d'une transition Industrie 3.0 → 4.0 appliquée à la corrosion, intégralement réalisable à partir de composants et services accessibles localement au Cameroun, et propose une chaîne de valeur reproductible aussi bien pour les opérateurs industriels disposant déjà d'une instrumentation commerciale que pour les PME industrielles cherchant à initier leur transition numérique sans investissement initial prohibitif.
 
-**Mots-clés :** corrosion ; maintenance prédictive ; Industrie 4.0 ; IIoT ; sonde ER ; XGBoost ; durée de vie résiduelle ; diagnostic ; CMMS open-source ; intégration API REST ; ESP32 ; HX711 ; inhibiteur de corrosion ; imidazoline ; pipeline Oil & Gas ; COTCO ; ISO 13381-1.
+**Mots clés**
+
+Maintenance prédictive
+
+Corrosion industrielle
+
+Industrie 4.0
+
+Apprentissage automatique
+
+Intégration CMMS
 
 \newpage
 
@@ -95,7 +103,17 @@ The reference corrosive medium is a **commercial multi-acid industrial descaler*
 
 This work demonstrates the feasibility of a corrosion-focused Industry 3.0 → 4.0 transition fully buildable from components and services available locally in Cameroon, and proposes a reproducible value chain serving both industrial operators with existing commercial instrumentation and SMEs initiating their digital transition without prohibitive upfront investment.
 
-**Keywords:** corrosion; predictive maintenance; Industry 4.0; IIoT; ER probe; XGBoost; remaining useful life; diagnostic; open-source CMMS; REST API integration; ESP32; HX711; corrosion inhibitor; imidazoline; oil & gas pipeline; COTCO; ISO 13381-1.
+**Keywords**
+
+Predictive maintenance
+
+Industrial corrosion
+
+Industry 4.0
+
+Machine learning
+
+CMMS integration
 
 \newpage
 
@@ -119,7 +137,7 @@ This work demonstrates the feasibility of a corrosion-focused Industry 3.0 → 4
 | EIS | Electrochemical Impedance Spectroscopy |
 | EN | Norme Européenne |
 | ER | Electrical Resistance (Résistance Électrique) |
-| ENSPD | École Nationale Supérieure Polytechnique de Douala |
+| ESTL | École Supérieure Technique Lasalle |
 | ESP32 | Microcontrôleur bi-cœur Wi-Fi + Bluetooth (Espressif) |
 | FBE | Fusion-Bonded Epoxy (revêtement pipeline) |
 | FePO₄ | Phosphate de fer (III) |
@@ -410,7 +428,7 @@ Ce travail revêt un intérêt à plusieurs niveaux et pour plusieurs catégorie
 
 **Pour l'auteur :** ce travail constitue l'aboutissement académique du Master 2 et la matérialisation concrète de l'intégration de compétences pluridisciplinaires (corrosion, électronique embarquée, apprentissage automatique, méthodologie scientifique). Il prépare directement à l'insertion professionnelle dans le secteur industriel, et plus particulièrement dans les métiers de la maintenance prédictive.
 
-**Pour l'École Nationale Supérieure Polytechnique de Douala (ENSPD) :** le mémoire contribue au rayonnement scientifique de l'institution en démontrant la capacité de ses étudiants à produire des prototypes intégrés et fonctionnels mobilisant des outils numériques avancés à partir de composants accessibles localement. Il s'inscrit pleinement dans la mission de formation d'ingénieurs adaptés aux contextes africains.
+**Pour l'École Supérieure Technique Lasalle (ESTL) :** le mémoire contribue au rayonnement scientifique de l'institution en démontrant la capacité de ses étudiants à produire des prototypes intégrés et fonctionnels mobilisant des outils numériques avancés à partir de composants accessibles localement. Il s'inscrit pleinement dans la mission de formation d'ingénieurs adaptés aux contextes africains.
 
 **Pour la recherche :** ce travail constitue l'une des premières études publiées (à notre connaissance) intégrant explicitement la prédiction CR + RUL par XGBoost avec interprétabilité SHAP, sur des données expérimentales originales collectées en protocole *run-to-failure*, et dans un contexte multi-acide non-monotone. Il complète la littérature dominée par les approches mono-cible (CR seul) et les jeux de données nord-américains.
 
@@ -762,7 +780,7 @@ L'ensemble des choix forme une **chaîne cohérente** orientée par trois princi
 
 ### II.1.1. Cadre institutionnel
 
-Le présent travail est réalisé dans le cadre du **Master 2 Professionnel en Maintenance Industrielle** du Département de Génie Industriel et Maintenance de l'**École Nationale Supérieure Polytechnique de Douala (ENSPD)**. La validation expérimentale est conduite en laboratoire à Douala. La projection industrielle vise le contexte applicatif de la **Cameroon Oil Transportation Company (COTCO)**, exploitant le pipeline Tchad-Cameroun depuis 2003 (COTCO, 2024).
+Le présent travail est réalisé dans le cadre du **Master 2 Professionnel en Maintenance Industrielle** du Département de Génie Industriel et Maintenance de l'**École Supérieure Technique Lasalle (ESTL)**. La validation expérimentale est conduite en laboratoire à Douala. La projection industrielle vise le contexte applicatif de la **Cameroon Oil Transportation Company (COTCO)**, exploitant le pipeline Tchad-Cameroun depuis 2003 (COTCO, 2024).
 
 ### II.1.2. Cadre physique du prototype
 
@@ -843,16 +861,24 @@ L'**ESP32 DevKit V1** est un microcontrôleur bi-cœur Wi-Fi + Bluetooth (Espres
 2. **Initialisation** des bibliothèques HX711 et DallasTemperature ;
 3. **Lecture HX711** : moyenne sur 10 échantillons → *R*ₓ ;
 4. **Lecture DS18B20** : conversion 12 bits (0,0625 °C) → *T* ;
-5. **Émission CSV** sur le port série (115 200 baud) ;
+5. **Connexion Wi-Fi** et **envoi HTTPS POST** vers la base de données **Supabase** (PostgreSQL managé) via son API REST PostgREST, payload JSON ;
 6. **Power-down HX711** (SCK HIGH > 60 µs) ;
 7. **Programmation du deep sleep** suivant (600 secondes = 10 minutes) ;
 8. **Mise en deep sleep**.
 
-La **persistance des données** entre cycles de deep sleep est assurée par la mémoire RTC (variables `RTC_DATA_ATTR`), qui conserve : le compteur de mesures, la dernière valeur de *R*ₓ, et l'état d'envoi de l'en-tête CSV. Le **format CSV** émis est :
+La **persistance locale** entre cycles de deep sleep est assurée par la mémoire RTC (variables `RTC_DATA_ATTR`) qui conserve le compteur de mesures, la dernière valeur de *R*ₓ et l'horodatage de la dernière transmission. La **persistance distante** des mesures est assurée côté Supabase dans la table `measurements` (voir Annexe F). En cas d'échec Wi-Fi, la mesure est mise en file d'attente en mémoire RTC et retransmise au cycle suivant. Le **payload JSON** émis est :
 
+```json
+{
+  "timestamp_s": 1714500000,
+  "vdiff_v": -1.23e-6,
+  "rx_ohm": 0.132156,
+  "temp_c": 26.44,
+  "delta_r_per_h": 2.7e-7
+}
 ```
-Timestamp_s;Vdiff_V;Rx_Ohm;Temp_C;DeltaR_Ohm_per_h
-```
+
+Le **code source du firmware** est versionné sur **GitHub** (dépôt `londola13/predictive-maintenance-corrosion`, répertoire `firmware/`), de même que l'ensemble du pipeline Python ML, le code de l'application Streamlit, les notebooks d'analyse et le présent mémoire — assurant traçabilité, reproductibilité et historisation des évolutions tout au long du projet.
 
 ---
 
@@ -940,16 +966,9 @@ La méthodologie de traitement des données suit une chaîne en cinq étapes suc
 
 ### II.4.1. Acquisition
 
-Le firmware ESP32 produit un fichier CSV au format suivant (séparateur point-virgule, encodage UTF-8) :
+Les mesures émises par l'ESP32 sont écrites en temps réel dans la table `measurements` de la base **Supabase** (PostgreSQL managé) via son API REST PostgREST. Le pipeline Python charge ensuite ces données par requête SQL paramétrée (`SELECT … WHERE asset_id = … ORDER BY timestamp_s`) et les convertit en `DataFrame` Pandas pour traitement. Les colonnes consommées sont : `timestamp_s`, `vdiff_v`, `rx_ohm`, `temp_c`, `delta_r_per_h`.
 
-```
-Timestamp_s;Vdiff_V;Rx_Ohm;Temp_C;DeltaR_Ohm_per_h
-600;-0.00000123;0.132156;26.44;0.00000000
-1200;-0.00000118;0.132201;26.50;0.00027000
-...
-```
-
-Une mesure est émise toutes les 600 secondes (10 minutes). Pour un run de 48 heures, cela représente 288 points de mesure ; pour un run de 72 heures, 432 points.
+Une mesure est émise toutes les 600 secondes (10 minutes). Pour un run de 48 heures, cela représente 288 points de mesure ; pour un run de 72 heures, 432 points. L'historique complet est ainsi centralisé sur Supabase et accessible aussi bien à l'application Streamlit qu'aux notebooks d'analyse, sans manipulation manuelle de fichiers.
 
 ### II.4.2. Nettoyage du signal
 
@@ -1092,10 +1111,10 @@ Le choix d'un protocole **run-to-failure (RTF)** est fondé sur la nécessité d
 Pour chaque run, la procédure suivante est appliquée :
 
 1. **Préparation de la cellule** : nettoyage du récipient HDPE, découpe d'un fil de fer neuf (longueur 1,1 m, diamètre 0,3 mm), nettoyage à l'acétone, séchage, mesure de *R*₀ au multimètre de précision, vérification du pH par pH-mètre papier ;
-2. **Câblage de la sonde** : montage du fil dans le pont, connexion HX711 → ESP32, vérification du format CSV sur le moniteur série Arduino ;
-3. **Démarrage de l'acquisition** : immersion du fil dans le Detar Plus, lancement de l'enregistrement CSV ;
-4. **Surveillance périodique** toutes les 2 à 4 heures : vérification que l'acquisition se poursuit (LED ESP32, données CSV cohérentes) ;
-5. **Détection de la fin de run** : la rupture du fil est identifiée par divergence de *R*ₓ vers +∞. Arrêt de l'acquisition et export du fichier CSV ;
+2. **Câblage de la sonde** : montage du fil dans le pont, connexion HX711 → ESP32, vérification de la bonne réception des premiers points dans la table Supabase `measurements` via l'application Streamlit ;
+3. **Démarrage de l'acquisition** : immersion du fil dans le Detar Plus, déclenchement du run dans Supabase (`runs.started_at`) et début de l'envoi périodique des mesures par l'ESP32 ;
+4. **Surveillance périodique** toutes les 2 à 4 heures : vérification que l'acquisition se poursuit (LED ESP32, points apparaissant en continu dans le dashboard Streamlit) ;
+5. **Détection de la fin de run** : la rupture du fil est identifiée par divergence de *R*ₓ vers +∞. Clôture du run dans Supabase (`runs.ended_at`) et export ponctuel des mesures pour analyse hors-ligne ;
 6. **Post-run** : photographie de la cellule et du fil corrodé, nettoyage et préparation du run suivant.
 
 ### II.6.4. Seuils d'alerte et recommandations d'inhibiteur
@@ -1161,37 +1180,9 @@ Sources : Streamlit (2024) ; GLPI Project (2024) ; XGBoost Documentation (Chen e
 
 ### II.7.4. Architecture de la boucle complète intégrée
 
-La figure ci-dessous présente la boucle **Sonde → Pipeline ML → Streamlit → API REST → CMMS → Technicien** mise en œuvre dans le prototype :
+**Figure II.1 — Architecture de la boucle intégrée Sonde → Supabase → Streamlit → CMMS open-source**
 
-```
-┌─────────────┐  HTTPS  ┌──────────────────────┐
-│   ESP32     │ ──POST─→│   Streamlit App      │
-│ (capteur ER)│         │  (frontend + DB ML)  │
-└─────────────┘         │  ┌────────────────┐  │
-                        │  │ Pipeline ML    │  │
-                        │  │  (XGBoost,     │  │
-                        │  │   SHAP, diag.) │  │
-                        │  └────────┬───────┘  │
-                        │           │          │
-                        │   alerte critique?   │
-                        └───────────┼──────────┘
-                                    │ POST /api/Ticket
-                                    ▼
-                          ┌──────────────────┐
-                          │   GLPI (CMMS)    │
-                          │  - Tickets       │
-                          │  - Work Orders   │
-                          │  - KPIs (MTBF…)  │
-                          └────────┬─────────┘
-                                   │ notification
-                                   ▼
-                          ┌──────────────────┐
-                          │   Technicien     │
-                          │ (web/mobile)     │
-                          └──────────────────┘
-```
-
-**Figure II.1 — Architecture de la boucle intégrée Sonde → Streamlit → CMMS open-source**
+*[Figure à compléter]*
 
 ### II.7.5. Mapping prédiction ML → ticket CMMS
 
@@ -1731,8 +1722,8 @@ Ce mémoire ouvre ainsi la voie à une **transition Industrie 4.0 maîtrisée** 
 ```cpp
 // ─────────────────────────────────────────────────────────
 // Corrosion Monitor — ESP32 + HX711 + DS18B20
-// M2 Maintenance Industrielle — ENSPD Douala
-// Cycle : wake → mesure → CSV série → deep sleep 10 min
+// M2 Maintenance Industrielle — ESTL Douala
+// Cycle : wake → mesure → POST Supabase → deep sleep 10 min
 // ─────────────────────────────────────────────────────────
 
 #include "HX711.h"
@@ -1782,7 +1773,7 @@ def feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
 
 ## Annexe C — Schéma de câblage de la sonde ER
 
-*[Schéma à insérer : ESP32 DevKit V1, HX711, pont de Wheatstone (R1, R2, R_REF, Rx), DS18B20 avec pull-up 4,7 kΩ, résistance série 100 Ω.]*
+*[Schéma à compléter]*
 
 ## Annexe D — Fiche de sécurité Detar Plus (résumé)
 
