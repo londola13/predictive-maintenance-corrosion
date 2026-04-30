@@ -48,3 +48,4 @@ fill_*.py
 
 # Streamlit
 .streamlit/secrets.toml
+memoire/~$*.docx
