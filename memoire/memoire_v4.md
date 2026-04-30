@@ -56,7 +56,7 @@ title: "Système intégré de maintenance prédictive de la corrosion par appren
 
 # REMERCIEMENTS
 
-Au terme de notre formation pour l'obtention du Master II en Maintenance Industrielle, nous tenons à exprimer notre sincère reconnaissance à l'ensemble du corps professoral de l'École Supérieure Technique Lasalle, qui par la qualité de leur enseignement et de leur encadrement, nous a permis de terminer avec succès cette formation en ingénierie. En l'occurrence :
+Au terme de notre formation pour l'obtention du Master II en Maintenance Industrielle, nous tenons à exprimer notre sincère reconnaissance à l'ensemble du corps professoral de l'École Supérieure Technique La Salle, qui par la qualité de leur enseignement et de leur encadrement, nous a permis de terminer avec succès cette formation en ingénierie. En l'occurrence :
 
 - À notre **encadreur académique**, pour ses conseils éclairés, sa rigueur scientifique et sa disponibilité tout au long de la rédaction de ce mémoire ;
 - À notre **superviseur**, pour son approche méthodologique et la qualité de ses remarques structurantes ;
@@ -137,7 +137,7 @@ CMMS integration
 | EIS | Electrochemical Impedance Spectroscopy |
 | EN | Norme Européenne |
 | ER | Electrical Resistance (Résistance Électrique) |
-| ESTL | École Supérieure Technique Lasalle |
+| ESTL | École Supérieure Technique La Salle |
 | ESP32 | Microcontrôleur bi-cœur Wi-Fi + Bluetooth (Espressif) |
 | FBE | Fusion-Bonded Epoxy (revêtement pipeline) |
 | FePO₄ | Phosphate de fer (III) |
@@ -428,7 +428,7 @@ Ce travail revêt un intérêt à plusieurs niveaux et pour plusieurs catégorie
 
 **Pour l'auteur :** ce travail constitue l'aboutissement académique du Master 2 et la matérialisation concrète de l'intégration de compétences pluridisciplinaires (corrosion, électronique embarquée, apprentissage automatique, méthodologie scientifique). Il prépare directement à l'insertion professionnelle dans le secteur industriel, et plus particulièrement dans les métiers de la maintenance prédictive.
 
-**Pour l'École Supérieure Technique Lasalle (ESTL) :** le mémoire contribue au rayonnement scientifique de l'institution en démontrant la capacité de ses étudiants à produire des prototypes intégrés et fonctionnels mobilisant des outils numériques avancés à partir de composants accessibles localement. Il s'inscrit pleinement dans la mission de formation d'ingénieurs adaptés aux contextes africains.
+**Pour l'École Supérieure Technique La Salle (ESTL) :** le mémoire contribue au rayonnement scientifique de l'institution en démontrant la capacité de ses étudiants à produire des prototypes intégrés et fonctionnels mobilisant des outils numériques avancés à partir de composants accessibles localement. Il s'inscrit pleinement dans la mission de formation d'ingénieurs adaptés aux contextes africains.
 
 **Pour la recherche :** ce travail constitue l'une des premières études publiées (à notre connaissance) intégrant explicitement la prédiction CR + RUL par XGBoost avec interprétabilité SHAP, sur des données expérimentales originales collectées en protocole *run-to-failure*, et dans un contexte multi-acide non-monotone. Il complète la littérature dominée par les approches mono-cible (CR seul) et les jeux de données nord-américains.
 
@@ -780,7 +780,7 @@ L'ensemble des choix forme une **chaîne cohérente** orientée par trois princi
 
 ### II.1.1. Cadre institutionnel
 
-Le présent travail est réalisé dans le cadre du **Master 2 Professionnel en Maintenance Industrielle** du Département de Génie Industriel et Maintenance de l'**École Supérieure Technique Lasalle (ESTL)**. La validation expérimentale est conduite en laboratoire à Douala. La projection industrielle vise le contexte applicatif de la **Cameroon Oil Transportation Company (COTCO)**, exploitant le pipeline Tchad-Cameroun depuis 2003 (COTCO, 2024).
+Le présent travail est réalisé dans le cadre du **Master 2 Professionnel en Maintenance Industrielle** du Département de Génie Industriel et Maintenance de l'**École Supérieure Technique La Salle (ESTL)**. La validation expérimentale est conduite en laboratoire à Douala. La projection industrielle vise le contexte applicatif de la **Cameroon Oil Transportation Company (COTCO)**, exploitant le pipeline Tchad-Cameroun depuis 2003 (COTCO, 2024).
 
 ### II.1.2. Cadre physique du prototype
 
@@ -1180,9 +1180,7 @@ Sources : Streamlit (2024) ; GLPI Project (2024) ; XGBoost Documentation (Chen e
 
 ### II.7.4. Architecture de la boucle complète intégrée
 
-**Figure II.1 — Architecture de la boucle intégrée Sonde → Supabase → Streamlit → CMMS open-source**
-
-*[Figure à compléter]*
+![Figure II.1 — Architecture de la boucle intégrée Sonde ER → Supabase → Streamlit → CMMS open-source](figures/fig_ii1_architecture.png){ width=80% }
 
 ### II.7.5. Mapping prédiction ML → ticket CMMS
 
