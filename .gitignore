@@ -49,3 +49,6 @@ fill_*.py
 # Streamlit
 .streamlit/secrets.toml
 memoire/~$*.docx
+
+# Firmware — credentials (ne jamais committer)
+firmware/secrets.h
