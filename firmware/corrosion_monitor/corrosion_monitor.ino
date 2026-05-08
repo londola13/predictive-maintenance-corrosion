@@ -41,11 +41,6 @@ const float R2       = 10.0;
 const float R_REF    = 0.5;
 const float V_ALIM   = 3.3;
 
-// ── Calibration offset ───────────────────────────────────────────────────────
-// Si multimètre (4 fils) donne Rx_ref et HX711 donne Rx_hx711 au démarrage,
-// régler : RX_OFFSET = Rx_ref - Rx_hx711  (ex: 0.6 - 0.5 = +0.1)
-// Mettre à 0.0 pour désactiver.
-const double RX_OFFSET = 0.1;   // Ω — ajuster selon ta mesure multimètre
 const float R_PONT_EQUIV = (R1 + R_REF);
 const float V_EXC_EFF    = V_ALIM * R_PONT_EQUIV / (R_SERIE + R_PONT_EQUIV);
 
@@ -130,7 +125,7 @@ double lire_resistance() {
   double ratio_rx   = (v_diff_raw / V_EXC_EFF) + ratio_ref;
 
   if (ratio_rx <= 0.0 || ratio_rx >= 1.0) return last_Rx;
-  return R2 * ratio_rx / (1.0 - ratio_rx) + RX_OFFSET;
+  return R2 * ratio_rx / (1.0 - ratio_rx);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
