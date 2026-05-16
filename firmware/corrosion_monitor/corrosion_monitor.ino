@@ -13,7 +13,7 @@
  * Brochage :
  *   HX711 DOUT  → GPIO 21
  *   HX711 SCK   → GPIO 22
- *   DS18B20 DQ  → GPIO 4  (pull-up 4.7 kΩ vers 3.3V obligatoire)
+ *   DS18B20 DQ  → GPIO 19  (pull-up 4.7 kΩ vers 3.3V obligatoire)
  *   R_série 100Ω → entre 3.3V et E+ du pont
  *
  * Bibliothèques requises (Arduino Library Manager) :
@@ -48,7 +48,7 @@
 // ── Brochage ─────────────────────────────────────────────────────────────────
 #define HX711_DOUT_PIN   21
 #define HX711_SCK_PIN    22
-#define ONE_WIRE_BUS      4
+#define ONE_WIRE_BUS     19   // DS18B20 DQ
 
 // ── Paramètres pont de Wheatstone ────────────────────────────────────────────
 const double R_SERIE  = 100.0;
@@ -66,7 +66,6 @@ const double R_PONT_EQUIV = (R1 + R_REF);
 const double V_EXC_EFF    = V_ALIM * R_PONT_EQUIV / (R_SERIE + R_PONT_EQUIV);
 
 // ── Timing ───────────────────────────────────────────────────────────────────
-// Période de mesure en millisecondes (30s pour runs RTF en milieu acide pH≈1)
 #define MEASURE_INTERVAL_MS  30000UL
 #define MESURES_PAR_CYCLE    10
 #define WIFI_TIMEOUT_MS      15000
@@ -82,10 +81,10 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 Preferences prefs;
 
-// ── État global (persistant en RAM tant que l'ESP32 est alimenté) ─────────────
+// ── État global ───────────────────────────────────────────────────────────────
 static double last_Rx        = 0.0;
 static bool   first_measure  = true;
-static char   run_id[64]     = "";   // UUID lu depuis NVS
+static char   run_id[64]     = "";
 
 // ── Prototypes ───────────────────────────────────────────────────────────────
 bool   init_wifi();
@@ -102,8 +101,7 @@ void setup() {
   Serial.println("\n=== Corrosion Monitor — Mode Loop Labo ===");
   Serial.printf("Periode mesure : %lu s\n", MEASURE_INTERVAL_MS / 1000UL);
 
-  // Lire run_id depuis NVS
-  prefs.begin("corrosion", true);  // read-only
+  prefs.begin("corrosion", true);
   String rid = prefs.getString("run_id", "");
   prefs.end();
   if (rid.length() > 0) {
@@ -113,14 +111,12 @@ void setup() {
     Serial.println("WARN : run_id absent du NVS. Lancer set_run_id.py avant de demarrer.");
   }
 
-  // Wi-Fi
   if (!init_wifi()) {
     Serial.println("FATAL : Wi-Fi indisponible. Reboot dans 10s.");
     delay(10000);
     ESP.restart();
   }
 
-  // NTP — sync unique au boot
   if (!init_ntp()) {
     Serial.println("FATAL : NTP indisponible. Timestamps invalides. Reboot dans 10s.");
     delay(10000);
@@ -129,11 +125,9 @@ void setup() {
 
   Serial.println("Setup OK — demarrage boucle de mesure...\n");
 
-  // Init HX711 une seule fois
   scale.begin(HX711_DOUT_PIN, HX711_SCK_PIN);
   scale.set_gain(128);
 
-  // Init DS18B20
   sensors.begin();
   sensors.setResolution(12);
 }
@@ -142,7 +136,6 @@ void setup() {
 void loop() {
   unsigned long t_debut = millis();
 
-  // ── 1. Timestamp NTP ───────────────────────────────────────────────────────
   time_t ts = get_epoch();
   if (ts == 0) {
     Serial.println("WARN : epoch=0, NTP non synchronise. Mesure ignoree.");
@@ -150,11 +143,9 @@ void loop() {
     return;
   }
 
-  // ── 2. Mesures physiques ───────────────────────────────────────────────────
   double Rx          = lire_resistance();
   float  temperature = lire_temperature();
 
-  // ── 3. ΔR/h avec dt réel (pas de constante codée en dur) ──────────────────
   double delta_R_per_h = 0.0;
   if (!first_measure && last_Rx > 1e-9)
     delta_R_per_h = (Rx - last_Rx) / DT_HOURS;
@@ -165,7 +156,6 @@ void loop() {
   Serial.printf("[%ld] Rx=%.6f Ohm  T=%.2f C  dR/h=%.8f Ohm/h\n",
                 (long)ts, Rx, temperature, delta_R_per_h);
 
-  // ── 4. POST Supabase (avec retry) ─────────────────────────────────────────
   bool ok = false;
   for (int attempt = 1; attempt <= POST_RETRY_MAX && !ok; attempt++) {
     ok = envoyer_supabase(ts, Rx, temperature, delta_R_per_h);
@@ -176,7 +166,6 @@ void loop() {
   }
   Serial.println(ok ? "  Supabase OK" : "  Supabase ECHEC apres 3 tentatives");
 
-  // ── 5. Attendre le reste de la période ────────────────────────────────────
   unsigned long elapsed = millis() - t_debut;
   if (elapsed < MEASURE_INTERVAL_MS)
     delay(MEASURE_INTERVAL_MS - elapsed);
@@ -187,14 +176,11 @@ bool init_wifi() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Wi-Fi");
-
   unsigned long t0 = millis();
   while (WiFi.status() != WL_CONNECTED && millis() - t0 < WIFI_TIMEOUT_MS) {
-    delay(300);
-    Serial.print(".");
+    delay(300); Serial.print(".");
   }
   Serial.println();
-
   if (WiFi.status() == WL_CONNECTED) {
     Serial.printf("IP : %s\n", WiFi.localIP().toString().c_str());
     return true;
@@ -205,7 +191,6 @@ bool init_wifi() {
 // =============================================================================
 bool init_ntp() {
   configTime(0, 0, "pool.ntp.org", "time.nist.gov");
-
   Serial.print("NTP sync");
   unsigned long t0 = millis();
   struct tm ti;
@@ -213,12 +198,11 @@ bool init_ntp() {
     if (getLocalTime(&ti)) {
       Serial.println(" OK");
       Serial.printf("Heure : %04d-%02d-%02d %02d:%02d:%02d UTC\n",
-                    ti.tm_year + 1900, ti.tm_mon + 1, ti.tm_mday,
+                    ti.tm_year+1900, ti.tm_mon+1, ti.tm_mday,
                     ti.tm_hour, ti.tm_min, ti.tm_sec);
       return true;
     }
-    delay(500);
-    Serial.print(".");
+    delay(500); Serial.print(".");
   }
   Serial.println(" TIMEOUT");
   return false;
@@ -242,11 +226,8 @@ double lire_resistance() {
 
   long reading = scale.read_average(MESURES_PAR_CYCLE);
 
-  // Conversion lecture ADC → tension différentielle
-  // Référence ADC = AVDD du HX711 (mesurer au multimètre, pas V_EXC_EFF)
   double v_diff_raw = (double)reading * V_REF_HX711 / (128.0 * 8388608.0);
 
-  // Reconstruction Rx depuis le modèle du pont
   double ratio_ref = R_REF / (R1 + R_REF);
   double ratio_rx  = (v_diff_raw / V_EXC_EFF) + ratio_ref;
 
@@ -260,8 +241,7 @@ double lire_resistance() {
 // =============================================================================
 float lire_temperature() {
   sensors.requestTemperatures();
-  delay(760);  // attente conversion 12 bits
-
+  delay(760);
   float t = sensors.getTempCByIndex(0);
   if (t == DEVICE_DISCONNECTED_C || t == 85.0f) {
     Serial.println("WARN : DS18B20 deconnecte ou erreur lecture");
@@ -272,7 +252,6 @@ float lire_temperature() {
 
 // =============================================================================
 bool envoyer_supabase(time_t ts, double rx, float temp, double delta_r_h) {
-  // Recalcul v_diff depuis Rx pour stockage (cohérence avec lecture)
   double ratio_rx  = rx / (R2 + rx);
   double ratio_ref = R_REF / (R1 + R_REF);
   double v_diff    = V_EXC_EFF * (ratio_rx - ratio_ref);
@@ -293,7 +272,7 @@ bool envoyer_supabase(time_t ts, double rx, float temp, double delta_r_h) {
   String url = String(SUPABASE_URL) + "/rest/v1/" + TABLE_NAME;
 
   WiFiClientSecure client;
-  client.setInsecure();  // accepter le certificat Supabase sans CA store
+  client.setInsecure();
 
   HTTPClient http;
   http.begin(client, url);
