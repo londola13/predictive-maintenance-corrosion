@@ -16,6 +16,8 @@ Usage :
 """
 
 import argparse
+import os
+import sys
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -29,7 +31,7 @@ warnings.filterwarnings("ignore")
 
 # ── Constantes physiques ──────────────────────────────────────────────────────
 RHO_FER   = 1.0e-7   # résistivité électrique du fer (Ω·m)
-L_FIL     = 1.1      # longueur du fil (m)
+L_FIL     = 2.0      # longueur du fil (m) — Run #2 : meme fil que Run #1 (~2m, 180cm immerges)
 ALPHA_FER = 6.5e-3   # coefficient thermique de résistance du fer (1/°C)
 T_REF     = 25.0     # température de référence pour compensation (°C)
 HEURES_PAR_AN = 8760.0
@@ -137,12 +139,13 @@ def calculer_CR(df: pd.DataFrame) -> pd.DataFrame:
     df["dr_dt_m_per_h"] = dr_h / dt_h.replace(0, np.nan)
     df["CR_mm_an"] = np.abs(df["dr_dt_m_per_h"]) * HEURES_PAR_AN * 1000.0
     # Lisser le CR (très bruité sur dérivée brute)
+    CR_MAX = 2000.0  # µm/an — écrête la phase d'emballement (valeurs aberrantes pré-rupture)
     if len(df) >= 5:
         df["CR_lisse"] = savgol_filter(
             df["CR_mm_an"].fillna(0), window_length=5, polyorder=2
-        ).clip(0)
+        ).clip(0, CR_MAX)
     else:
-        df["CR_lisse"] = df["CR_mm_an"].clip(0)
+        df["CR_lisse"] = df["CR_mm_an"].clip(0, CR_MAX)
     return df
 
 
@@ -188,7 +191,7 @@ def feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def calculer_RUL(df: pd.DataFrame, r_critique_fraction: float = 0.1) -> pd.DataFrame:
+def calculer_RUL(df: pd.DataFrame, r_critique_fraction: float = 0.15) -> pd.DataFrame:
     """
     RUL = temps restant avant que le rayon atteigne r_critique.
     r_critique = r0 × r_critique_fraction (10% du rayon initial = rupture imminente)
@@ -423,7 +426,9 @@ def main():
     os.makedirs("plots",  exist_ok=True)
 
     parser = argparse.ArgumentParser(description="Pipeline Corrosion ML")
-    parser.add_argument("--csv",   type=str, required=True, help="Fichier CSV du run")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--csv",    type=str, help="Fichier CSV du run")
+    group.add_argument("--run-id", type=str, help="UUID du run Supabase")
     parser.add_argument("--mode",  type=str, default="train",
                         choices=["train", "predict", "analyse"])
     parser.add_argument("--model", type=str, default="models/xgb_cr.pkl")
@@ -432,7 +437,20 @@ def main():
                         help="Dose AC PROTECT 106 (% v/v)")
     args = parser.parse_args()
 
-    df = traiter_run(args.csv, ph_run=args.ph, dose_inhibiteur=args.dose)
+    if args.run_id:
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+        from src.etl.fetch_supabase import fetch_run
+        import tempfile
+        raw = fetch_run(args.run_id)
+        tmp = tempfile.NamedTemporaryFile(suffix=".csv", delete=False, mode="w")
+        raw.to_csv(tmp, sep=";", index=False)
+        tmp.close()
+        csv_path = tmp.name
+        print(f"  {len(raw)} mesures récupérées depuis Supabase (run {args.run_id})")
+    else:
+        csv_path = args.csv
+
+    df = traiter_run(csv_path, ph_run=args.ph, dose_inhibiteur=args.dose)
 
     if args.mode == "analyse":
         # Analyse seule (pas de ML) — utile pendant la phase de collecte
@@ -447,11 +465,11 @@ def main():
 
     elif args.mode == "train":
         print("\n  Mode entraînement (run unique) — pour multi-runs, adapter le script")
-        X, y_cr  = preparer_dataset([df], "CR_lisse")
-        X, y_rul = preparer_dataset([df], "RUL_h")
+        X_cr,  y_cr  = preparer_dataset([df], "CR_lisse")
+        X_rul, y_rul = preparer_dataset([df], "RUL_h")
 
-        modele_cr,  _ = entrainer_modele(X, y_cr,  "CR (mm/an)")
-        modele_rul, _ = entrainer_modele(X, y_rul, "RUL (h)")
+        modele_cr,  _ = entrainer_modele(X_cr,  y_cr,  "CR (mm/an)")
+        modele_rul, _ = entrainer_modele(X_rul, y_rul, "RUL (h)")
 
         sauvegarder_modele(modele_cr,  "models/xgb_cr.pkl")
         sauvegarder_modele(modele_rul, "models/xgb_rul.pkl")

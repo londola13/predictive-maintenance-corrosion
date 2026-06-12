@@ -19,8 +19,9 @@ optuna>=3.4.0
 shap>=0.43.0
 
 # Dashboard
-streamlit>=1.28.0
+streamlit>=1.37.0   # st.fragment(run_every=...) pour la page Live
 plotly>=5.15.0
+requests>=2.31.0
 
 # Visualisation
 matplotlib>=3.7.0

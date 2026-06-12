@@ -52,3 +52,6 @@ memoire/~$*.docx
 
 # Firmware — credentials (ne jamais committer)
 firmware/secrets.h
+firmware/**/secrets.h
+firmware/**/secrets*.h
+firmware/secrets*.h

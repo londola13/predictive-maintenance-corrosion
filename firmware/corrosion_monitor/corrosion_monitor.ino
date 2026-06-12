@@ -1,27 +1,24 @@
 /*
  * Corrosion Monitor — ESP32 + HX711 + DS18B20
  * Mode : loop labo (secteur, pas de deep sleep)
- * Période : 30 s
+ * Periode : 30 s
  *
- * Run actif : Run #1 RTF — baseline sans inhibiteur
- * run_id    : 0621172f-c502-4fa3-8954-f2921f644c19
+ * Run actif : Run #14 RTF — HCl brut, fil au fond, sans inhibiteur (repetition Run #1)
+ * run_id    : 83760a06-b2c8-4730-8368-18babfcae3e1
+ *
+ * MONTAGE : 2 fils + shunt + R_lift (version v3)
+ *   Topologie : VCC -> R_shunt -> fil ER -> R_lift -> GND
+ *   R_lift remonte le common mode HX711 a ~1.7V (necessaire pour le PGA)
+ *   I = (VCC - V_wire) / (R_shunt + R_lift) ~ 1.75 mA
+ *   R_fil = V_sense / I (loi d'Ohm)
  *
  * Brochage :
- *   HX711 DOUT  → GPIO 21
- *   HX711 SCK   → GPIO 22
- *   DS18B20 DQ  → GPIO 19  (pull-up 4.7 kΩ vers 3.3V obligatoire)
- *   R_série 100Ω → entre 3.3V et E+ du pont
- *
- * Bibliothèques requises (Arduino Library Manager) :
- *   - HX711 by Bogdan Necula
- *   - DallasTemperature by Miles Burton
- *   - OneWire by Jim Studt
- *   - ArduinoJson by Benoit Blanchon (v6.x)
- *   - WiFiClientSecure (inclus dans ESP32 Arduino core)
- *
- * Calibration V_REF_HX711 :
- *   Mesurer la tension AVDD du module HX711 au multimètre (pin VCC).
- *   Remplacer V_REF_HX711 avec votre mesure avant de flasher.
+ *   HX711 DOUT -> GPIO 21
+ *   HX711 SCK  -> GPIO 22
+ *   DS18B20 DQ -> GPIO 19  (pull-up 4.7 kOhm vers 3.3V obligatoire)
+ *   HX711 A+   -> entre R_shunt et le fil
+ *   HX711 A-   -> entre le fil et R_lift
+ *   ESP32 3V3  -> R_shunt 970 -> [fil] -> R_lift 970 -> GND
  */
 
 #include "HX711.h"
@@ -32,32 +29,30 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include <time.h>
-#include "secrets.h"   // WIFI_SSID, WIFI_PASSWORD, SUPABASE_URL, SUPABASE_KEY
+#include "secrets.h"
 
-// ── Identifiant run et sonde ──────────────────────────────────────────────────
 #define ASSET_ID   "sonde-01"
 #define TABLE_NAME "cr_measurements"
-#define RUN_ID     "0621172f-c502-4fa3-8954-f2921f644c19"
+#define RUN_ID     "83760a06-b2c8-4730-8368-18babfcae3e1"
 
-// ── Brochage ─────────────────────────────────────────────────────────────────
 #define HX711_DOUT_PIN   21
 #define HX711_SCK_PIN    22
 #define ONE_WIRE_BUS     19
 
-// ── Paramètres pont de Wheatstone ────────────────────────────────────────────
-const double R_SERIE  = 100.0;
-const double R1       = 10.0;
-const double R2       = 10.0;
-const double R_REF    = 0.5;
-const double V_ALIM   = 3.3;
+// ========== MONTAGE 2 FILS + SHUNT + R_LIFT ==========
+const double VCC_VOLTS    = 3.45;      // tension ESP32 3V3 mesuree au multimetre
+const double R_SHUNT_OHM  = 970.0;     // R_shunt cote VCC (mesure reelle)
+const double R_LIFT_OHM   = 970.0;     // R_lift cote GND (pour common mode HX711)
+const int    HX711_GAIN   = 64;        // gain 64 -> plage +/-40 mV
+const double V_REF_HX711  = 4.2987;    // AVDD du HX711 (mesurer au multimetre)
 
-// Référence ADC = AVDD du HX711 — mesurer au multimètre sur pin VCC du module
-const double V_REF_HX711 = 4.2987;  // à ajuster avec votre mesure
+// Calibration empirique du HX711 (compense atteanuation systematique du module)
+// Reference : R_test=8.2 Ohm donne Rx_brut=0.243 Ohm -> facteur 8.2/0.243 = 33.7
+const double HX711_CAL_FACTOR = 33.7;
 
-const double R_PONT_EQUIV = (R1 + R_REF);
-const double V_EXC_EFF    = V_ALIM * R_PONT_EQUIV / (R_SERIE + R_PONT_EQUIV);
+// Longueur immergee / longueur totale entre B et A
+const double L_IMMERGE_FRAC = 180.0 / 200.0;  // 180 cm immerges sur 200 cm totaux (Run #11)
 
-// ── Timing ───────────────────────────────────────────────────────────────────
 #define MEASURE_INTERVAL_MS  30000UL
 #define MESURES_PAR_CYCLE    10
 #define WIFI_TIMEOUT_MS      15000
@@ -66,92 +61,75 @@ const double V_EXC_EFF    = V_ALIM * R_PONT_EQUIV / (R_SERIE + R_PONT_EQUIV);
 
 const double DT_HOURS = (MEASURE_INTERVAL_MS / 1000.0) / 3600.0;
 
-// ── Objets ───────────────────────────────────────────────────────────────────
 HX711 scale;
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
-// ── État global ───────────────────────────────────────────────────────────────
 static double last_Rx       = 0.0;
 static bool   first_measure = true;
+static double last_v_sense  = 0.0;
+static double last_I_A      = 0.0;
 
-// ── Prototypes ───────────────────────────────────────────────────────────────
 bool   init_wifi();
+void   ensure_wifi();
 bool   init_ntp();
 time_t get_epoch();
 double lire_resistance();
 float  lire_temperature();
-bool   envoyer_supabase(time_t ts, double rx, float temp, double delta_r_h);
+bool   envoyer_supabase(time_t ts, double rx, float temp, double delta_r_h, double delta_r_imm_h);
 
-// =============================================================================
 void setup() {
   Serial.begin(115200);
   delay(200);
   Serial.println("\n=== Corrosion Monitor — Mode Loop Labo ===");
   Serial.printf("Periode : %lu s | run_id : %s\n", MEASURE_INTERVAL_MS / 1000UL, RUN_ID);
 
-  if (!init_wifi()) {
-    Serial.println("FATAL : Wi-Fi indisponible. Reboot dans 10s.");
-    delay(10000);
-    ESP.restart();
-  }
-
-  if (!init_ntp()) {
-    Serial.println("FATAL : NTP indisponible. Reboot dans 10s.");
-    delay(10000);
-    ESP.restart();
-  }
+  if (!init_wifi()) { delay(10000); ESP.restart(); }
+  if (!init_ntp())  { delay(10000); ESP.restart(); }
 
   Serial.println("Setup OK — demarrage boucle de mesure...\n");
 
   scale.begin(HX711_DOUT_PIN, HX711_SCK_PIN);
-  scale.set_gain(128);
+  scale.set_gain(HX711_GAIN);
   sensors.begin();
   sensors.setResolution(12);
 }
 
-// =============================================================================
 void loop() {
   unsigned long t_debut = millis();
 
   time_t ts = get_epoch();
-  if (ts == 0) {
-    Serial.println("WARN : epoch=0, mesure ignoree.");
-    delay(MEASURE_INTERVAL_MS);
-    return;
-  }
+  if (ts == 0) { delay(MEASURE_INTERVAL_MS); return; }
 
-  double Rx         = lire_resistance();
+  double Rx          = lire_resistance();
   float  temperature = lire_temperature();
 
   double delta_R_per_h = 0.0;
   if (!first_measure && last_Rx > 1e-9)
     delta_R_per_h = (Rx - last_Rx) / DT_HOURS;
 
-  last_Rx       = Rx;
-  first_measure = false;
+  double delta_R_imm_per_h = delta_R_per_h / L_IMMERGE_FRAC;
 
-  Serial.printf("[%ld] Rx=%.6f Ohm  T=%.2f C  dR/h=%.8f Ohm/h\n",
-                (long)ts, Rx, temperature, delta_R_per_h);
+  last_Rx = Rx; first_measure = false;
+
+  Serial.printf("[%ld] Rx=%.6f Ohm  T=%.2f C  dR/h=%.8f  dR_imm/h=%.8f Ohm/h\n",
+                (long)ts, Rx, temperature, delta_R_per_h, delta_R_imm_per_h);
 
   bool ok = false;
-  for (int attempt = 1; attempt <= POST_RETRY_MAX && !ok; attempt++) {
-    ok = envoyer_supabase(ts, Rx, temperature, delta_R_per_h);
-    if (!ok) {
-      Serial.printf("  POST echec (tentative %d/%d)\n", attempt, POST_RETRY_MAX);
-      delay(2000);
-    }
+  for (int i = 1; i <= POST_RETRY_MAX && !ok; i++) {
+    ok = envoyer_supabase(ts, Rx, temperature, delta_R_per_h, delta_R_imm_per_h);
+    if (!ok) { Serial.printf("  POST echec (%d/%d)\n", i, POST_RETRY_MAX); delay(2000); }
   }
-  Serial.println(ok ? "  Supabase OK" : "  Supabase ECHEC apres 3 tentatives");
+  Serial.println(ok ? "  Supabase OK" : "  Supabase ECHEC");
 
   unsigned long elapsed = millis() - t_debut;
-  if (elapsed < MEASURE_INTERVAL_MS)
-    delay(MEASURE_INTERVAL_MS - elapsed);
+  if (elapsed < MEASURE_INTERVAL_MS) delay(MEASURE_INTERVAL_MS - elapsed);
 }
 
-// =============================================================================
 bool init_wifi() {
   WiFi.mode(WIFI_STA);
+  WiFi.setAutoReconnect(true);
+  WiFi.persistent(true);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Wi-Fi");
   unsigned long t0 = millis();
@@ -166,7 +144,16 @@ bool init_wifi() {
   return false;
 }
 
-// =============================================================================
+void ensure_wifi() {
+  if (WiFi.status() == WL_CONNECTED) return;
+  Serial.print("WiFi perdu, reconnexion");
+  unsigned long t0 = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - t0 < WIFI_TIMEOUT_MS) {
+    delay(300); Serial.print(".");
+  }
+  Serial.println(WiFi.status() == WL_CONNECTED ? " OK" : " ECHEC");
+}
+
 bool init_ntp() {
   configTime(0, 0, "pool.ntp.org", "time.nist.gov");
   Serial.print("NTP sync");
@@ -182,76 +169,72 @@ bool init_ntp() {
     }
     delay(500); Serial.print(".");
   }
-  Serial.println(" TIMEOUT");
-  return false;
+  Serial.println(" TIMEOUT"); return false;
 }
 
-// =============================================================================
 time_t get_epoch() {
   struct tm ti;
   if (!getLocalTime(&ti)) return 0;
   return mktime(&ti);
 }
 
-// =============================================================================
 double lire_resistance() {
   unsigned long t0 = millis();
   while (!scale.is_ready() && millis() - t0 < 3000) delay(10);
-  if (!scale.is_ready()) {
-    Serial.println("WARN : HX711 non pret, renvoi last_Rx");
-    return last_Rx;
-  }
+  if (!scale.is_ready()) { Serial.println("  [DEBUG] HX711 NOT READY"); return last_Rx; }
 
   long reading = scale.read_average(MESURES_PAR_CYCLE);
+  // Tension aux bornes du fil (entre HX711 A+ et A-)
+  double v_sense = (double)reading * V_REF_HX711 / ((double)HX711_GAIN * 8388608.0);
 
-  double v_diff_raw = (double)reading * V_REF_HX711 / (128.0 * 8388608.0);
-  double ratio_ref  = R_REF / (R1 + R_REF);
-  double ratio_rx   = (v_diff_raw / V_EXC_EFF) + ratio_ref;
+  // Courant reel : I = (VCC - V_test) / (R_shunt + R_lift)
+  double I_A = (VCC_VOLTS - v_sense) / (R_SHUNT_OHM + R_LIFT_OHM);
+  if (I_A < 1e-6) I_A = VCC_VOLTS / (R_SHUNT_OHM + R_LIFT_OHM);
 
-  if (ratio_rx <= 0.0 || ratio_rx >= 1.0) {
-    Serial.printf("WARN : ratio_rx hors domaine (%.4f), renvoi last_Rx\n", ratio_rx);
-    return last_Rx;
-  }
-  return R2 * ratio_rx / (1.0 - ratio_rx);
+  // Resistance du fil = V / I (avec calibration empirique HX711)
+  double Rx = (v_sense / I_A) * HX711_CAL_FACTOR;
+
+  last_v_sense = v_sense;
+  last_I_A = I_A;
+
+  Serial.printf("  [DEBUG] raw=%ld  v_sense=%.6f V (%.3f mV)  I=%.6f A (%.3f mA)  Rx=%.6f Ohm\n",
+                reading, v_sense, v_sense * 1000.0, I_A, I_A * 1000.0, Rx);
+
+  if (Rx < 0.001 || Rx > 100.0) return last_Rx;
+  return Rx;
 }
 
-// =============================================================================
 float lire_temperature() {
   sensors.requestTemperatures();
   delay(760);
   float t = sensors.getTempCByIndex(0);
-  if (t == DEVICE_DISCONNECTED_C || t == 85.0f) {
-    Serial.println("WARN : DS18B20 deconnecte ou erreur lecture");
-    return -999.0f;
-  }
+  if (t == DEVICE_DISCONNECTED_C || t == 85.0f) return -999.0f;
   return t;
 }
 
-// =============================================================================
-bool envoyer_supabase(time_t ts, double rx, float temp, double delta_r_h) {
-  double ratio_rx  = rx / (R2 + rx);
-  double ratio_ref = R_REF / (R1 + R_REF);
-  double v_diff    = V_EXC_EFF * (ratio_rx - ratio_ref);
+bool envoyer_supabase(time_t ts, double rx, float temp, double delta_r_h, double delta_r_imm_h) {
+  double v_diff = last_v_sense;
 
-  StaticJsonDocument<320> doc;
-  doc["asset_id"]      = ASSET_ID;
-  doc["run_id"]        = RUN_ID;
-  doc["timestamp_s"]   = (long)ts;
-  doc["vdiff_v"]       = v_diff;
-  doc["rx_ohm"]        = rx;
-  doc["temp_c"]        = temp;
-  doc["delta_r_per_h"] = delta_r_h;
+  StaticJsonDocument<384> doc;
+  doc["asset_id"]          = ASSET_ID;
+  doc["run_id"]            = RUN_ID;
+  doc["timestamp_s"]       = (long)ts;
+  doc["vdiff_v"]           = v_diff;
+  doc["rx_ohm"]            = rx;
+  doc["temp_c"]            = temp;
+  doc["delta_r_per_h"]     = delta_r_h;
+  doc["delta_r_imm_per_h"] = delta_r_imm_h;
 
   String payload;
   serializeJson(doc, payload);
 
-  String url = String(SUPABASE_URL) + "/rest/v1/" + TABLE_NAME;
+  ensure_wifi();
+  if (WiFi.status() != WL_CONNECTED) return false;
 
   WiFiClientSecure client;
   client.setInsecure();
-
   HTTPClient http;
-  http.begin(client, url);
+  http.begin(client, String(SUPABASE_URL) + "/rest/v1/" + TABLE_NAME);
   http.addHeader("Content-Type",  "application/json");
   http.addHeader("apikey",        SUPABASE_KEY);
   http.addHeader("Authorization", String("Bearer ") + SUPABASE_KEY);

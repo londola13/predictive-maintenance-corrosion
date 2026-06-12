@@ -14,13 +14,16 @@ MODE FUSION     : données réelles entreprise + PHMSA + SPE + simulation (produ
 """
 
 import json
+import os
 import sys
 import joblib
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
+import requests
 import streamlit as st
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
@@ -178,6 +181,91 @@ with st.sidebar:
         st.success("🔗 FUSION\nPublic + Données réelles")
     else:
         st.info("📂 PRÉ-STAGE\nPHMSA + SPE + De Waard")
+
+    st.divider()
+
+    # ── SUPABASE LIVE ─────────────────────────────────────────────────────────
+    st.markdown("**Sonde ESP32 — Runs RTF**")
+
+    SUPA_URL = os.environ.get("SUPABASE_URL", "https://gdlopwhzigndkmmmuzwr.supabase.co")
+    SUPA_KEY = os.environ.get("SUPABASE_KEY", "")
+    _supa_headers = {"apikey": SUPA_KEY, "Authorization": f"Bearer {SUPA_KEY}"}
+
+    @st.cache_data(ttl=30)
+    def _fetch_runs():
+        try:
+            r = requests.get(
+                f"{SUPA_URL}/rest/v1/cr_runs",
+                headers=_supa_headers,
+                params={"order": "started_at.desc", "select": "run_id,started_at,status,inhibitor_pct,notes"},
+                timeout=5,
+            )
+            r.raise_for_status()
+            return r.json()
+        except Exception:
+            return []
+
+    @st.cache_data(ttl=30)
+    def _fetch_live(run_id: str) -> pd.DataFrame:
+        try:
+            r = requests.get(
+                f"{SUPA_URL}/rest/v1/cr_measurements",
+                headers=_supa_headers,
+                params={"run_id": f"eq.{run_id}", "order": "timestamp_s.asc",
+                        "select": "timestamp_s,rx_ohm,temp_c,delta_r_per_h"},
+                timeout=10,
+            )
+            r.raise_for_status()
+            return pd.DataFrame(r.json())
+        except Exception:
+            return pd.DataFrame()
+
+    runs = _fetch_runs()
+    run_options = {
+        f"Run {i+1} — {r['status']} | {r.get('notes','')[:20]}": r["run_id"]
+        for i, r in enumerate(reversed(runs))
+    } if runs else {}
+
+    selected_run_label = st.selectbox("Sélectionner un run", ["— aucun —"] + list(run_options.keys()))
+    selected_run_id = run_options.get(selected_run_label, None)
+
+    # Boutons Start / Stop
+    col_a, col_b = st.columns(2)
+    with col_a:
+        if st.button("▶ Start Run", use_container_width=True):
+            try:
+                resp = requests.post(
+                    f"{SUPA_URL}/rest/v1/cr_runs",
+                    headers={**_supa_headers, "Content-Type": "application/json", "Prefer": "return=representation"},
+                    json={"asset_id": "sonde-01", "started_at": datetime.now(timezone.utc).isoformat(), "status": "active"},
+                    timeout=5,
+                )
+                resp.raise_for_status()
+                new_id = resp.json()[0]["run_id"]
+                st.success(f"Run démarré\n`{new_id[:8]}...`")
+                st.cache_data.clear()
+            except Exception as e:
+                st.error(f"Erreur: {e}")
+    with col_b:
+        if st.button("⏹ Stop Run", use_container_width=True, disabled=not selected_run_id):
+            try:
+                requests.patch(
+                    f"{SUPA_URL}/rest/v1/cr_runs?run_id=eq.{selected_run_id}",
+                    headers={**_supa_headers, "Content-Type": "application/json", "Prefer": "return=minimal"},
+                    json={"ended_at": datetime.now(timezone.utc).isoformat(), "status": "completed"},
+                    timeout=5,
+                ).raise_for_status()
+                st.success("Run terminé")
+                st.cache_data.clear()
+            except Exception as e:
+                st.error(f"Erreur: {e}")
+
+    if selected_run_id:
+        df_live = _fetch_live(selected_run_id)
+        if not df_live.empty:
+            st.caption(f"{len(df_live)} mesures — dernière Rx : {pd.to_numeric(df_live['rx_ohm'], errors='coerce').iloc[-1]:.4f} Ω")
+        else:
+            st.caption("Aucune mesure pour ce run")
 
     st.divider()
 
