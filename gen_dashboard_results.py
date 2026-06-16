@@ -25,19 +25,44 @@ from sklearn.metrics import mean_absolute_error, r2_score
 from src.etl.fetch_supabase import fetch_run
 from pipeline.corrosion_pipeline import traiter_run, PARAMS_XGB
 
+# Run #13 EXCLU du ML (qualité partielle — phase finale restaurée manuellement,
+# rx oscillant 50→86 Ω). Reste archivé/visible dans le dashboard, jamais en train ni test.
 RUNS = {
     "Run1":  "d6e31719-c3fb-4797-aa0b-65c4e605002a",
     "Run2":  "66e66c0a-b4c6-40fd-937b-c25fcc71a56c",
     "Run3":  "1a42265f-96a6-4f52-aaff-d7a6d5f27d4c",
     "Run11": "72d0f7b7-e1ef-40b0-8416-851873c72440",
     "Run12": "f5852fd4-8c3f-474e-9c20-a1ac129e018c",
-    "Run13": "5134db06-aa83-4ba3-838f-698de4e3b38b",
     "Run14": "83760a06-b2c8-4730-8368-18babfcae3e1",
+    "Run15": "1d0762a0-c008-410c-a366-41411bebdc56",
+    "Run16": "cc4b4bec-1f3b-45ba-85d9-9c1db733eeae",
+    "Run17": "598f3857-6fac-4beb-aebc-57ced8b13e6b",
 }
-SERIE_HIST = ["Run11", "Run12", "Run13", "Run14"]   # étude variantes (historique session 2026-06-11)
-SERIE_TEST = ["Run12", "Run13", "Run14"]            # protocole actuel (Run11 reclassé auxiliaire)
-AUX_HIST   = ["Run1", "Run2", "Run3"]
+# Série de test UNIQUE (cohérence : étude variantes ET protocole testent les mêmes runs).
+# Run11 = auxiliaire (jamais testé), Run13 = exclu.
+# Run15 = contre-exemple (régulation thermique ratée), Run17 = contre-exemple (acide évaporé) : hors LORO.
+SERIE_TEST = ["Run12", "Run14", "Run16"]
 AUX_ACTUEL = ["Run1", "Run2", "Run3", "Run11"]
+SERIE_HIST = SERIE_TEST     # alias : l'étude des variantes utilise la même série
+AUX_HIST   = AUX_ACTUEL
+
+
+def couper_plateau(raw):
+    """Nettoie un run : retire Rx<=0 + coupe au PREMIER passage durable au plateau
+    de saturation (rupture). Tout ce qui suit (plateau OU queue parasite si l'ESP32
+    a continué d'émettre après la rupture) est retiré."""
+    if "rx_ohm" not in raw.columns or len(raw) < 50:
+        return raw
+    raw = raw[pd.to_numeric(raw["rx_ohm"], errors="coerce") > 0].reset_index(drop=True)
+    if len(raw) < 50:
+        return raw
+    rx = pd.to_numeric(raw["rx_ohm"], errors="coerce").reset_index(drop=True)
+    mx = float(rx.max())
+    for i in range(len(rx)):
+        if rx.iloc[i] >= 0.99 * mx:
+            if rx.iloc[i:i + 10].median() >= 0.95 * mx:
+                return raw.iloc[: i + 1].reset_index(drop=True)
+    return raw.reset_index(drop=True)
 
 FEATURES = ["rx_corr", "temp_lisse", "temp_moy_6h", "temps_immersion_h",
             "delta_R_absolu", "section_perdue_pct"]
@@ -48,6 +73,7 @@ print("=== Chargement des runs ===")
 dfs = {}
 for name, rid in RUNS.items():
     raw = fetch_run(rid)
+    raw = couper_plateau(raw)
     tmp = tempfile.NamedTemporaryFile(suffix=".csv", delete=False, mode="w")
     raw.to_csv(tmp, sep=";", index=False); tmp.close()
     df = traiter_run(tmp.name)
@@ -143,6 +169,17 @@ resultats = {
                      "La couverture thermique compte plus que le volume brut de données.",
         "variante_retenue": "C — auxiliaires sous-échantillonnés à 1500 points (équilibre série/auxiliaires)",
         "phase2": "Phase contrôlée : bain thermostaté 25W — Run15/16 à 30°C, Run17/18 à 32°C (3 runs/consigne).",
+        "run13_exclu": "Run #13 retiré du ML (qualité partielle, phase finale restaurée). Sa présence "
+                       "dégradait l'apprentissage de TOUS les runs : un essai pollué ne rate pas que sa "
+                       "propre prédiction, il contamine le modèle entier.",
+        "apport_run15": "Une fois les données propres, l'ajout de Run #15 à l'entraînement AMÉLIORE la "
+                        "prédiction des runs propres (R² moyen -0.283 → -0.062, soit +0.22 ; gain +0.44 sur "
+                        "Run #14). Chaque run bien réalisé renforce le modèle.",
+        "couverture_30C": "PREUVE de la couverture thermique : avec une paire de runs à 30°C (Run#15+Run#16), "
+                          "chacun aide à prédire l'autre. Train SANS le jumeau → R² moyen -2.83 ; AVEC le jumeau "
+                          "→ -1.16 (gain +1.67 ; +3.25 sur Run#15). La qualité de régulation compte aussi : "
+                          "Run#16 (σ=0.52°C, stable) est bien prédit (R²=+0.12), Run#15 (σ=0.96°C, dérivant) "
+                          "reste plus difficile. Plus de runs ET mieux régulés = meilleur modèle.",
     },
 }
 

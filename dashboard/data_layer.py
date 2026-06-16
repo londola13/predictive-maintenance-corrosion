@@ -61,14 +61,34 @@ RUNS_REGISTRY = {
         "note": "Run propre — meilleur score ML (R² = 0.43 en LORO variante C)",
     },
     "5134db06-aa83-4ba3-838f-698de4e3b38b": {
-        "label": "Run #13", "condition": "HCl brut", "groupe": "Série test",
+        "label": "Run #13", "condition": "HCl brut", "groupe": "Archive (exclu ML)",
         "temp": "31.3 °C", "duree": "12.6 h", "phase": "Série répétition",
-        "note": "Qualité partielle — phase finale restaurée manuellement",
+        "note": "EXCLU du ML — qualité partielle (phase finale restaurée, rx oscillant 50→86 Ω). "
+                "Conservé pour transparence, jamais en entraînement ni test.",
     },
     "83760a06-b2c8-4730-8368-18babfcae3e1": {
         "label": "Run #14", "condition": "HCl brut", "groupe": "Série test",
         "temp": "31.7 °C", "duree": "13.6 h", "phase": "Série répétition",
         "note": "Run propre — clôturé au dernier point avant plateau",
+    },
+    "1d0762a0-c008-410c-a366-41411bebdc56": {
+        "label": "Run #15", "condition": "HCl brut", "groupe": "Série test",
+        "temp": "30.2 °C", "duree": "10.9 h", "phase": "Phase 2 contrôlée",
+        "note": "1er run phase contrôlée (bain-marie consigne 30°C) — T° dérive 31→28°C, "
+                "régulation imparfaite — rupture nette 10.9h",
+    },
+    "cc4b4bec-1f3b-45ba-85d9-9c1db733eeae": {
+        "label": "Run #16", "condition": "HCl brut", "groupe": "Série test",
+        "temp": "30.1 °C", "duree": "12.3 h", "phase": "Phase 2 contrôlée",
+        "note": "2e run plage 30°C — régulation EXCELLENTE (σ=0.52°C, plat, bien mieux que Run#15) — "
+                "rupture nette 12.3h — forme la paire répétable 30°C avec Run#15",
+    },
+    "598f3857-6fac-4beb-aebc-57ced8b13e6b": {
+        "label": "Run #17", "condition": "HCl brut (évaporé)", "groupe": "Contre-exemple (concentration)",
+        "temp": "29.9 °C", "duree": "19.8 h", "phase": "Phase 2 contrôlée",
+        "note": "CONTRE-EXEMPLE concentration — régulation thermique PARFAITE (σ=0.55°C) mais acide laissé "
+                ">1h à l'air avant immersion → HCl évaporé → concentration plus basse → cinétique 2× lente "
+                "(19.8h, rupture 45Ω). Hors LORO. Prouve que la concentration est un facteur à contrôler.",
     },
 }
 
@@ -85,9 +105,32 @@ def charger_run_brut(run_id: str) -> pd.DataFrame:
 
 
 @st.cache_data(ttl=3600, show_spinner="Traitement du signal (pipeline)…")
+def couper_plateau_saturation(raw: pd.DataFrame) -> pd.DataFrame:
+    """Nettoie un run brut pour le pipeline :
+    1. retire les points Rx<=0 (aberrants au démarrage / débranchement ESP32) ;
+    2. coupe au PREMIER passage durable au plateau de saturation (Rx >=99% du max
+       confirmé sur les points suivants = rupture / circuit ouvert). Tout ce qui suit
+       la rupture (plateau OU queue parasite si l'ESP32 a continué d'émettre) est retiré.
+    Ne touche pas un emballement réel (montée progressive) : seul le plateau franc coupe."""
+    if "rx_ohm" not in raw.columns or len(raw) < 50:
+        return raw
+    raw = raw[pd.to_numeric(raw["rx_ohm"], errors="coerce") > 0].reset_index(drop=True)
+    if len(raw) < 50:
+        return raw
+    rx = pd.to_numeric(raw["rx_ohm"], errors="coerce").reset_index(drop=True)
+    mx = float(rx.max())
+    for i in range(len(rx)):
+        if rx.iloc[i] >= 0.99 * mx:
+            # confirmer un plateau durable (et non un pic isolé)
+            if rx.iloc[i:i + 10].median() >= 0.95 * mx:
+                return raw.iloc[: i + 1].reset_index(drop=True)
+    return raw.reset_index(drop=True)
+
+
 def charger_run_traite(run_id: str) -> pd.DataFrame:
     """Run complet passé dans le pipeline (nettoyage, compensation, CR, RUL)."""
     raw = fetch_run(run_id)
+    raw = couper_plateau_saturation(raw)
     tmp = tempfile.NamedTemporaryFile(suffix=".csv", delete=False, mode="w")
     raw.to_csv(tmp, sep=";", index=False)
     tmp.close()
