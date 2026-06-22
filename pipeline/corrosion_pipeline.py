@@ -397,6 +397,33 @@ def visualiser_run(df: pd.DataFrame, titre: str = "Run"):
 # MAIN
 # ─────────────────────────────────────────────────────────────────────────────
 
+def masquer_derivees_trous(df: pd.DataFrame, gap_h: float = 5/60.0,
+                           marge: int = 20) -> pd.DataFrame:
+    """Marque NaN les features DÉRIVÉES (CR, dR/dt, moyennes glissantes) autour des
+    trous temporels (>5 min). Une dérivée calculée À TRAVERS un trou est fausse —
+    on ne veut pas l'apprendre.
+
+    NE SUPPRIME AUCUNE donnée : marque juste les points invalides pour l'entraînement
+    (le dropna en aval les écarte). Le brut Supabase reste 100 % intact, et les features
+    CUMULATIVES (rx_corr, delta_R_absolu, section_perdue, temps_immersion) sont conservées.
+    """
+    if "timestamp_h" not in df.columns or len(df) < 3:
+        return df
+    th = pd.to_numeric(df["timestamp_h"], errors="coerce").values
+    gaps = np.where(np.diff(th) > gap_h)[0]
+    if len(gaps) == 0:
+        return df
+    bad = np.zeros(len(df), dtype=bool)
+    for gi in gaps:
+        bad[max(0, gi - marge):min(len(df), gi + 1 + marge)] = True
+    for col in ["CR_lisse", "temp_moy_6h", "temp_lisse",
+                "delta_R_1h", "delta_R_6h", "vitesse_CR_1h", "tendance_6h"]:
+        if col in df.columns:
+            df.loc[bad, col] = np.nan
+    print(f"  [trous] {len(gaps)} trou(s) -> {int(bad.sum())} pts ecartes de l'entrainement (brut intact)")
+    return df
+
+
 def traiter_run(path_csv: str, ph_run: float = 1.0,
                 dose_inhibiteur: float = 0.0) -> pd.DataFrame:
     """Pipeline complet sur un fichier CSV de run."""
@@ -411,6 +438,7 @@ def traiter_run(path_csv: str, ph_run: float = 1.0,
     df = compenser_thermique(df)
     df = calculer_CR(df)
     df = feature_engineering(df)
+    df = masquer_derivees_trous(df)   # trous temporels -> CR corrompu ecarte de l'entrainement (brut intact)
     df = calculer_RUL(df)
 
     # Métadonnées run

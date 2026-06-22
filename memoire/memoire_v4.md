@@ -25,7 +25,7 @@ title: "Système intégré de maintenance prédictive de la corrosion par appren
 
 **Mémoire rédigé en vue de l'obtention d'un Master Professionnel**
 
-**OPTION : MAINTENANCE INDUSTRIELLE**
+**OPTION : MAINTENANCE INDUSTRIELLE ET PRODUCTIQUE**
 
 ---
 
@@ -38,10 +38,10 @@ title: "Système intégré de maintenance prédictive de la corrosion par appren
 | | |
 |---|---|
 | **Rédigé par :** | BATOUMBI IKOND Ricky Parfait |
-| **Matricule :** | À compléter |
+| **Matricule :** | 0111 II17 |
 | **Sous encadrement académique de :** | À compléter |
-| **Sous l'encadrement professionnel de :** | À compléter (COTCO) |
-| **Sous la supervision de :** | À compléter |
+| **Sous l'encadrement professionnel de :** | M. FEZEU (COTCO) |
+| **Sous la supervision de :** | Dr. TCHAWE |
 | **Année académique :** | 2025 — 2026 |
 
 \newpage
@@ -69,13 +69,25 @@ Que tous ceux qui, de près ou de loin, ont contribué à la réussite de ce mé
 
 \newpage
 
+# AVANT-PROPOS
+
+L'**École Supérieure Technique La Salle (ESTL)** de Douala est un établissement d'enseignement supérieur privé catholique de la Fondation La Salle, dont la vocation est de former des ingénieurs et techniciens supérieurs ancrés dans les réalités industrielles de l'Afrique centrale. Le département de **Génie Industriel et Maintenance** propose, au niveau Master II, l'option **Maintenance Industrielle et Productique**, qui forme des ingénieurs capables d'assurer la fiabilité des systèmes de production, d'implémenter des stratégies de maintenance conditionnelle et prédictive, et d'intégrer les outils numériques au service de la performance industrielle.
+
+Dans le cadre de notre cursus, la formation en Master II s'achève par un stage de fin d'études sanctionné par la rédaction d'un mémoire. Ce stage nous a conduit au sein de la **Cameroon Oil Transportation Company (COTCO)**, opérateur du pipeline Tchad-Cameroun, infrastructure pétrolière stratégique de 1 070 km qui représente l'un des défis de maintenance les plus exigeants du pays. La problématique de la corrosion — première cause de dégradation des pipelines au niveau mondial — constituait le cœur de notre mission, dans un contexte industriel où les outils de maintenance prédictive restaient largement sous-exploités.
+
+C'est de cette expérience terrain, conjuguée aux enseignements reçus à l'ESTL, qu'est né le projet présenté dans ce mémoire : la conception et le développement d'un **système intégré de prédiction du taux de corrosion par apprentissage automatique**, couvrant l'ensemble de la chaîne depuis la mesure physique par sonde à résistance électrique (ER) jusqu'à la création automatique d'ordres de travail dans un CMMS open-source. Ce travail s'inscrit dans une démarche de transition **Industrie 3.0 → 4.0** adaptée aux contraintes des entreprises industrielles africaines : budget limité, dépendance aux solutions propriétaires, et besoin de maîtrise locale de la chaîne de données.
+
+Ce mémoire est le fruit d'un apprentissage pluridisciplinaire mêlant électronique embarquée, traitement du signal, apprentissage automatique et intégration système. Nous espérons qu'il contribuera, modestement, à montrer que les outils de l'Industrie 4.0 sont accessibles aux acteurs industriels africains, à condition de les adapter à leur contexte.
+
+\newpage
+
 # RÉSUMÉ
 
 La corrosion représente un coût annuel mondial de 2,5 billions de dollars US, soit environ 3,4 % du PIB mondial (Koch et al., 2016). Dans le secteur Oil & Gas, elle constitue la première cause de dégradation des pipelines et des installations de surface. Au Cameroun, la **Cameroon Oil Transportation Company (COTCO)** exploite depuis 2003 le pipeline Tchad-Cameroun (1 070 km au total, dont 903 km en territoire camerounais), infrastructure stratégique dont l'intégrité conditionne la sécurité environnementale et économique du pays. COTCO dispose déjà d'une **surveillance corrosion par sondes ER commerciales** (Cosasco, Emerson Roxar) câblées vers le DCS, mais l'exploitation des données reste à un niveau **Industrie 3.0** : analyse silotée par l'ingénieur corrosion, alertes par seuils fixes, ajustement manuel des doses d'inhibiteur, maintenance des sondes selon calendrier — sans pronostic ni corrélation multi-variables.
 
-Ce mémoire fait l'hypothèse qu'**à partir des données historiques qu'une entreprise possède déjà** (cas COTCO), il est possible d'évoluer vers une **couche prédictive supérieure (Industrie 4.0)**. À cette fin, nous proposons un **prototype maison fonctionnel doublement transposable** : (a) en industrie, en branchant la chaîne ML sur les sondes ER commerciales existantes (saut I3.0 → I4.0 purement logiciel, sans remplacement matériel) ; (b) en autonomie, comme système clé-en-main pour les PME industrielles africaines à budget réduit. Le prototype couvre la chaîne complète **détection → diagnostic → pronostic → décision → action** définie par la norme ISO 13381-1, articulée autour de quatre composants : (1) une **sonde ER (Electrical Resistance)** basée sur un fil de fer monté en pont de Wheatstone, instrumentée par un amplificateur HX711 24 bits ; (2) un **système d'acquisition IoT** à microcontrôleur ESP32 en deep sleep pulsé (10 minutes) mesurant simultanément la résistance et la température (DS18B20) ; (3) un **modèle XGBoost** entraîné en protocole *run-to-failure* (RTF) prédisant simultanément le taux de corrosion (CR, en mm/an) et la durée de vie résiduelle (RUL, en heures), avec module de diagnostic des régimes de corrosion et interprétabilité par analyse SHAP ; (4) une **application web Streamlit** intégrée par **API REST à un CMMS open-source** (GLPI ou équivalent) pour la création automatique des demandes de travaux à partir des alertes prédictives, démontrant qu'une PME africaine peut bénéficier d'une gestion structurée de la maintenance sans recourir aux solutions propriétaires (SAP PM, IBM Maximo).
+Ce mémoire fait l'hypothèse qu'**à partir des données historiques qu'une entreprise possède déjà** (cas COTCO), il est possible d'évoluer vers une **couche prédictive supérieure (Industrie 4.0)**. À cette fin, nous proposons un **prototype maison fonctionnel doublement transposable** : (a) en industrie, en branchant la chaîne ML sur les sondes ER commerciales existantes (saut I3.0 → I4.0 purement logiciel, sans remplacement matériel) ; (b) en autonomie, comme système clé-en-main pour les PME industrielles africaines à budget réduit. Le prototype couvre la chaîne complète **détection → diagnostic → pronostic → décision → action** définie par la norme ISO 13381-1, articulée autour de quatre composants : (1) une **sonde ER (Electrical Resistance)** basée sur un fil de fer monté en pont de Wheatstone, instrumentée par un amplificateur HX711 24 bits ; (2) un **système d'acquisition IoT** à microcontrôleur ESP32 en acquisition continue (période de 30 secondes) mesurant simultanément la résistance et la température (DS18B20) ; (3) un **modèle XGBoost** entraîné en protocole *run-to-failure* (RTF) prédisant simultanément le taux de corrosion (CR, en mm/an) et la durée de vie résiduelle (RUL, en heures), avec module de diagnostic des régimes de corrosion et interprétabilité par analyse SHAP ; (4) une **application web Streamlit** intégrée par **API REST à un CMMS open-source** (GLPI ou équivalent) pour la création automatique des demandes de travaux à partir des alertes prédictives, démontrant qu'une PME africaine peut bénéficier d'une gestion structurée de la maintenance sans recourir aux solutions propriétaires (SAP PM, IBM Maximo).
 
-L'environnement corrosif de référence est un **détartrant industriel commercial multi-acide** à base d'acide chlorhydrique (5–15 %) et d'acide phosphorique (10–30 %), générant un milieu acide mixte (pH ≈ 1) reproduisant des conditions agressives comparables aux effluents acides industriels. Le protocole comporte quatre runs RTF : deux runs de référence sans inhibiteur et deux runs avec injection d'un **inhibiteur de corrosion à base d'imidazoline** (référence commerciale à sélectionner) à concentrations croissantes (0,1 % et 0,5 % v/v).
+L'environnement corrosif de référence est une **solution d'acide chlorhydrique concentré** (HCl, pH ≈ 1), reproduisant des conditions agressives comparables à celles des effluents acides industriels. Le protocole repose sur une **série d'essais *run-to-failure* répétés** dans des conditions nominales identiques : une phase exploratoire à température ambiante subie, puis une phase à **température contrôlée** (bain-marie thermostaté) destinée à isoler l'effet de ce facteur. La campagne expérimentale, **toujours en cours**, a mis en évidence la **température comme variable dominante** de la variabilité observée entre essais et la **répétabilité des conditions** comme condition de fiabilité du modèle prédictif.
 
 Ce travail démontre la faisabilité d'une transition Industrie 3.0 → 4.0 appliquée à la corrosion, intégralement réalisable à partir de composants et services accessibles localement au Cameroun, et propose une chaîne de valeur reproductible aussi bien pour les opérateurs industriels disposant déjà d'une instrumentation commerciale que pour les PME industrielles cherchant à initier leur transition numérique sans investissement initial prohibitif.
 
@@ -97,9 +109,9 @@ Intégration CMMS
 
 Corrosion accounts for a global annual cost of USD 2.5 trillion, approximately 3.4 % of global GDP (Koch et al., 2016). In the Oil & Gas sector, it remains the leading cause of pipeline and surface-equipment degradation. In Cameroon, the **Cameroon Oil Transportation Company (COTCO)** has operated since 2003 the 1,070 km Chad-Cameroon pipeline (903 km within Cameroonian territory), a strategic infrastructure whose integrity conditions both environmental and economic security. COTCO already operates **commercial ER corrosion probes** (Cosasco, Emerson Roxar) hard-wired to the DCS; however, data exploitation remains at an **Industry 3.0** level: siloed analysis by the corrosion engineer, fixed-threshold alerts, manual inhibitor dosing, calendar-based probe maintenance — without prognosis or multi-variable correlation.
 
-This thesis hypothesises that **from the historical data a company already owns** (COTCO case), it is possible to leap to a **predictive layer (Industry 4.0)**. We propose a **functional in-house prototype with twofold transposability**: (a) industrial, by plugging the ML pipeline onto existing commercial ER probes (purely software-level I3.0 → I4.0 leap, no hardware replacement); (b) standalone, as a turnkey system for African industrial SMEs with limited budget. The prototype covers the complete **detection → diagnostic → prognosis → decision → action** chain defined by ISO 13381-1, built on four components: (1) an **ER (Electrical Resistance) probe** based on an iron wire mounted in a Wheatstone bridge instrumented by a 24-bit HX711 amplifier; (2) an **IoT acquisition system** using an ESP32 microcontroller in pulsed deep-sleep mode (10 minutes) measuring resistance and temperature (DS18B20) simultaneously; (3) an **XGBoost model** trained under a *run-to-failure* (RTF) protocol predicting both corrosion rate (CR, in mm/year) and remaining useful life (RUL, in hours), with corrosion regime diagnostic and SHAP-based interpretability; (4) a **Streamlit web application** integrated via **REST API to an open-source CMMS** (GLPI or equivalent) for automatic work-order generation from predictive alerts, demonstrating that an African SME can manage assets and maintenance KPIs without resorting to proprietary solutions (SAP PM, IBM Maximo).
+This thesis hypothesises that **from the historical data a company already owns** (COTCO case), it is possible to leap to a **predictive layer (Industry 4.0)**. We propose a **functional in-house prototype with twofold transposability**: (a) industrial, by plugging the ML pipeline onto existing commercial ER probes (purely software-level I3.0 → I4.0 leap, no hardware replacement); (b) standalone, as a turnkey system for African industrial SMEs with limited budget. The prototype covers the complete **detection → diagnostic → prognosis → decision → action** chain defined by ISO 13381-1, built on four components: (1) an **ER (Electrical Resistance) probe** based on an iron wire mounted in a Wheatstone bridge instrumented by a 24-bit HX711 amplifier; (2) an **IoT acquisition system** using an ESP32 microcontroller in continuous acquisition (30-second period) measuring resistance and temperature (DS18B20) simultaneously; (3) an **XGBoost model** trained under a *run-to-failure* (RTF) protocol predicting both corrosion rate (CR, in mm/year) and remaining useful life (RUL, in hours), with corrosion regime diagnostic and SHAP-based interpretability; (4) a **Streamlit web application** integrated via **REST API to an open-source CMMS** (GLPI or equivalent) for automatic work-order generation from predictive alerts, demonstrating that an African SME can manage assets and maintenance KPIs without resorting to proprietary solutions (SAP PM, IBM Maximo).
 
-The reference corrosive medium is a **commercial multi-acid industrial descaler** containing hydrochloric acid (5–15 %) and phosphoric acid (10–30 %), producing a mixed-acid medium (pH ≈ 1) reproducing aggressive conditions similar to those of industrial acidic effluents. The protocol comprises four RTF runs: two baseline runs without inhibitor and two runs with injection of an **imidazoline-based corrosion inhibitor** (commercial reference to be selected) at increasing concentrations (0.1 % and 0.5 % v/v).
+The reference corrosive medium is a **concentrated hydrochloric acid solution** (HCl, pH ≈ 1), reproducing aggressive conditions similar to those of industrial acidic effluents. The protocol relies on a **series of repeated *run-to-failure* tests** under identical nominal conditions: an exploratory phase at ambient (uncontrolled) temperature, then a **temperature-controlled phase** (thermostated water bath) designed to isolate the effect of this factor. The experimental campaign, **still ongoing**, has identified **temperature as the dominant variable** of the variability observed between tests, and **condition repeatability** as a prerequisite for the predictive model's reliability.
 
 This work demonstrates the feasibility of a corrosion-focused Industry 3.0 → 4.0 transition fully buildable from components and services available locally in Cameroon, and proposes a reproducible value chain serving both industrial operators with existing commercial instrumentation and SMEs initiating their digital transition without prohibitive upfront investment.
 
@@ -121,14 +133,13 @@ CMMS integration
 
 | Abréviation | Signification |
 |---|---|
-| API REST | Application Programming Interface — REpresentational State Transfer |
 | ADC | Analog-to-Digital Converter (Convertisseur Analogique-Numérique) |
 | AI | Artificial Intelligence (Intelligence Artificielle) |
 | AMPP | Association for Materials Protection and Performance (ex-NACE) |
+| API | American Petroleum Institute / Application Programming Interface |
 | ASTM | American Society for Testing and Materials |
 | CMMS | Computerized Maintenance Management System (équivalent anglais de GMAO) |
-| API | American Petroleum Institute |
-| ASTM | American Society for Testing and Materials |
+| REST | REpresentational State Transfer |
 | CMRR | Common-Mode Rejection Ratio |
 | COTCO | Cameroon Oil Transportation Company |
 | CR | Corrosion Rate (Taux de corrosion, mm/an) |
@@ -140,12 +151,10 @@ CMMS integration
 | ESTL | École Supérieure Technique La Salle |
 | ESP32 | Microcontrôleur bi-cœur Wi-Fi + Bluetooth (Espressif) |
 | FBE | Fusion-Bonded Epoxy (revêtement pipeline) |
-| FePO₄ | Phosphate de fer (III) |
 | FSO | Floating Storage and Offloading unit |
 | GMAO | Gestion de Maintenance Assistée par Ordinateur |
 | GPIO | General-Purpose Input/Output |
 | HCl | Acide chlorhydrique |
-| H₃PO₄ | Acide phosphorique |
 | HX711 | Amplificateur d'instrumentation et ADC 24 bits |
 | IMPACT | International Measures of Prevention, Application and Economics of Corrosion Technology |
 | IoT | Internet of Things (Internet des Objets) |
@@ -196,6 +205,7 @@ CMMS integration
 
 DÉDICACE
 REMERCIEMENTS
+AVANT-PROPOS
 RÉSUMÉ
 ABSTRACT
 LISTE DES ABRÉVIATIONS
@@ -223,9 +233,9 @@ Parmi tous les modes de dégradation, la corrosion occupe une place prépondéra
 
 Face à ces limites, deux dynamiques convergent dans la littérature récente. D'une part, la disponibilité croissante de microcontrôleurs et de capteurs IoT à très faible coût (ESP32, HX711, capteurs numériques 1-Wire) ouvre la voie à des chaînes d'instrumentation académiques et industrielles à un coût inférieur à 50 USD (Mayer et al., 2023). D'autre part, les méthodes d'apprentissage automatique — en particulier les algorithmes par gradient boosting comme XGBoost — démontrent une capacité supérieure à celle des modèles physiques classiques (de Waard et Milliams, 1975 ; NORSOK M-506) pour capturer les non-linéarités complexes entre variables de procédé et taux de corrosion, avec des erreurs de prédiction inférieures à 5 % (Hu et al., 2024 ; Wei et al., 2024 ; Yan et Yan, 2024).
 
-Le présent mémoire s'inscrit à la jonction de ces deux dynamiques avec une **thèse centrale** : à partir des données historiques qu'une entreprise possède déjà (typiquement les sondes ER déjà déployées chez COTCO, qui produisent des séries temporelles de résistance et de température sans être actuellement exploitées par un modèle prédictif), il est possible d'évoluer d'une architecture **Industrie 3.0** (acquisition câblée + alarmes par seuils + analyse silotée + maintenance préventive calendaire) vers une architecture **Industrie 4.0** (corrélation multi-variables, pronostic ML, alertes graduées, traçabilité GMAO). Le mémoire propose un **prototype maison fonctionnel doublement transposable** : (a) en industrie, en branchant la chaîne ML développée sur les sondes ER commerciales existantes (saut I3.0 → I4.0 purement logiciel, sans remplacement matériel) ; (b) en autonomie, comme système clé-en-main pour les PME industrielles africaines à budget réduit. Ce prototype couvre la chaîne complète **détection → diagnostic → pronostic → décision → action** définie par la norme ISO 13381-1 (ISO, 2015) et est articulé autour de quatre composants intégrés : (i) une **sonde ER** basée sur un microcontrôleur ESP32 et un amplificateur HX711 (couche détection — OS1) ; (ii) un **modèle XGBoost** prédisant simultanément le taux de corrosion (CR, en mm/an) et la durée de vie résiduelle (RUL, en heures) avec interprétabilité SHAP (couche pronostic — OS2) ; (iii) un module de **diagnostic des régimes de corrosion** et un système d'alertes graduées avec recommandations de dosage d'inhibiteur (couches diagnostic et décision — OS3) ; et (iv) une **application web Streamlit intégrée par API REST à un CMMS open-source** (GLPI ou équivalent) pour la création automatique des ordres de travail à partir des alertes prédictives, démontrant qu'une PME africaine peut bénéficier d'une gestion structurée de la maintenance sans recourir aux solutions propriétaires (SAP PM, IBM Maximo) — couche action — OS4. Le contexte applicatif est celui des infrastructures pétrolières camerounaises, et plus particulièrement celui de l'opérateur **Cameroon Oil Transportation Company (COTCO)**, exploitant le pipeline Tchad-Cameroun depuis 2003 (COTCO, 2024 ; Chad-Cameroon Pipeline Project, 2024).
+Le présent mémoire s'inscrit à la jonction de ces deux dynamiques avec une **thèse centrale** : à partir des données historiques qu'une entreprise possède déjà (typiquement les sondes ER déjà déployées chez COTCO, qui produisent des séries temporelles de résistance et de température sans être actuellement exploitées par un modèle prédictif), il est possible d'évoluer d'une architecture **Industrie 3.0** (acquisition câblée + alarmes par seuils + analyse silotée + maintenance préventive calendaire) vers une architecture **Industrie 4.0** (corrélation multi-variables, pronostic ML, alertes graduées, traçabilité GMAO). Le mémoire propose un **prototype maison fonctionnel doublement transposable** : (a) en industrie, en branchant la chaîne ML développée sur les sondes ER commerciales existantes (saut I3.0 → I4.0 purement logiciel, sans remplacement matériel) ; (b) en autonomie, comme système clé-en-main pour les PME industrielles africaines à budget réduit. Ce prototype couvre la chaîne complète **détection → diagnostic → pronostic → décision → action** définie par la norme ISO 13381-1 (ISO, 2015) et est articulé autour de quatre composants intégrés : (i) une **sonde ER** basée sur un microcontrôleur ESP32 et un amplificateur HX711 (couche détection — OS1) ; (ii) un **modèle XGBoost** prédisant simultanément le taux de corrosion (CR, en mm/an) et la durée de vie résiduelle (RUL, en heures) avec interprétabilité SHAP (couche pronostic — OS2) ; (iii) un module de **diagnostic des régimes de corrosion** et un système d'alertes graduées, avec identification des facteurs de variabilité conditionnant la fiabilité de la prédiction (couches diagnostic et décision — OS3) ; et (iv) une **application web Streamlit intégrée par API REST à un CMMS open-source** (GLPI ou équivalent) pour la création automatique des ordres de travail à partir des alertes prédictives, démontrant qu'une PME africaine peut bénéficier d'une gestion structurée de la maintenance sans recourir aux solutions propriétaires (SAP PM, IBM Maximo) — couche action — OS4. Le contexte applicatif est celui des infrastructures pétrolières camerounaises, et plus particulièrement celui de l'opérateur **Cameroon Oil Transportation Company (COTCO)**, exploitant le pipeline Tchad-Cameroun depuis 2003 (COTCO, 2024 ; Chad-Cameroon Pipeline Project, 2024).
 
-Après une revue de la littérature sur la corrosion, ses mécanismes, les méthodes de surveillance, les modèles prédictifs, le diagnostic en maintenance, les systèmes de GMAO et le cadre conceptuel **Industrie 3.0 / 4.0**, ainsi qu'une présentation du contexte industriel et de la problématique (**Chapitre I**), nous aborderons les fondements techniques du prototype développé, **la justification des choix technologiques retenus** (matrice de décision pour chaque brique : ESP32, HX711, DS18B20, XGBoost, TimeSeriesSplit, Streamlit, CMMS open-source), les matériels mobilisés, et la méthodologie retenue pour l'acquisition, le traitement des données, l'entraînement du modèle d'apprentissage automatique et l'**intégration au CMMS open-source via API REST** (**Chapitre II**). Enfin, les résultats expérimentaux issus du prototype, les performances métrologiques de la sonde, les métriques du modèle XGBoost, l'efficacité de l'inhibiteur de corrosion testé et la fonctionnalité de l'intégration CMMS seront présentés, discutés au regard de la littérature, et confrontés aux objectifs initiaux (**Chapitre III**).
+Après une revue de la littérature sur la corrosion, ses mécanismes, les méthodes de surveillance, les modèles prédictifs, le diagnostic en maintenance, les systèmes de GMAO et le cadre conceptuel **Industrie 3.0 / 4.0**, ainsi qu'une présentation du contexte industriel et de la problématique (**Chapitre I**), nous aborderons les fondements techniques du prototype développé, **la justification des choix technologiques retenus** (matrice de décision pour chaque brique : ESP32, HX711, DS18B20, XGBoost, stratégie de validation, Streamlit, CMMS open-source), les matériels mobilisés, et la méthodologie retenue pour l'acquisition, le traitement des données, l'entraînement du modèle d'apprentissage automatique et l'**intégration au CMMS open-source via API REST** (**Chapitre II**). Enfin, les résultats expérimentaux issus du prototype, les performances métrologiques de la sonde, les métriques du modèle XGBoost, l'effet de la température et des facteurs de variabilité sur la fiabilité de la prédiction, et la fonctionnalité de l'intégration CMMS seront présentés, discutés au regard de la littérature, et confrontés aux objectifs initiaux (**Chapitre III**).
 
 \newpage
 
@@ -349,7 +359,7 @@ Cette approche I3.0 présente plusieurs **limites structurelles** que la transit
 
 - **Absence de corrélation algorithmique multi-variables** : la dérive du taux de corrosion peut résulter d'une élévation thermique, d'un changement de composition du fluide ou d'une défaillance de l'injection inhibiteur — ces causes ne sont pas distinguées en temps réel ;
 - **Absence d'estimation explicite du RUL** (durée de vie résiduelle) : les seuils fixes informent que le système est en alerte, mais pas dans combien d'heures la défaillance est probable ;
-- **Absence de boucle décision → action structurée** : les interventions correctives ne sont pas systématiquement tracées dans une GMAO, ce qui prive l'opérateur d'historiques exploitables pour le calcul de KPIs maintenance (MTBF, MTTR, efficacité d'inhibition) ;
+- **Absence de boucle décision → action structurée** : les interventions correctives ne sont pas systématiquement tracées dans une GMAO, ce qui prive l'opérateur d'historiques exploitables pour le calcul de KPIs maintenance (MTBF, MTTR, disponibilité) ;
 - **Sous-exploitation du flux de données** : les historiques des sondes ER constituent un actif informationnel non valorisé.
 
 **Le verrou n'est donc plus l'instrumentation** (déjà en place et performante), **mais l'intelligence applicative** : ajouter au-dessus du flux ER existant une couche d'apprentissage automatique capable de corréler résistance / température / temps, de prédire CR + RUL, et d'orchestrer les ordres de travail via une GMAO interconnectée. C'est précisément la transition **Industrie 3.0 → Industrie 4.0** que ce mémoire propose d'opérer.
@@ -376,13 +386,13 @@ Sur le plan **scientifique**, les modèles physiques classiques de prédiction d
 
 Sur le plan **algorithmique**, la grande majorité des travaux ML sur la corrosion se limitent à la prédiction instantanée du taux de corrosion, sans extrapolation explicite vers la durée de vie résiduelle (RUL), pourtant définie de manière claire par la norme ISO 13381-1 (ISO, 2015 ; Akash, 2024). Cette absence de double prédiction CR + RUL prive les opérateurs d'une information essentielle à la planification optimisée des interventions.
 
-Sur le plan **applicatif**, l'opérateur COTCO et la plupart des PME industrielles africaines partagent un même besoin : se doter d'une **boucle décision → action structurée** qui exploite les sorties prédictives pour générer automatiquement les ordres de travail, tracer les interventions et calculer les KPIs maintenance (MTBF, MTTR, efficacité d'inhibition). Le marché GMAO est dominé par des solutions propriétaires (SAP PM, IBM Maximo, Mainpac) dont les coûts de licence (souvent supérieurs à 10 000 USD par site et par an) sont incompatibles avec les budgets de la plupart des opérateurs subsahariens et de l'ensemble des PME industrielles. Une **alternative open-source intégrée** est donc à construire.
+Sur le plan **applicatif**, l'opérateur COTCO et la plupart des PME industrielles africaines partagent un même besoin : se doter d'une **boucle décision → action structurée** qui exploite les sorties prédictives pour générer automatiquement les ordres de travail, tracer les interventions et calculer les KPIs maintenance (MTBF, MTTR, disponibilité). Le marché GMAO est dominé par des solutions propriétaires (SAP PM, IBM Maximo, Mainpac) dont les coûts de licence (souvent supérieurs à 10 000 USD par site et par an) sont incompatibles avec les budgets de la plupart des opérateurs subsahariens et de l'ensemble des PME industrielles. Une **alternative open-source intégrée** est donc à construire.
 
 Enfin, sur le plan **expérimental**, peu d'études disposent d'un protocole *run-to-failure* (RTF) complet permettant de couvrir l'intégralité du cycle de dégradation depuis l'état initial jusqu'à la rupture mécanique. Or seul un protocole RTF permet de constituer un jeu d'apprentissage statistiquement représentatif pour une prédiction RUL fiable.
 
 La **question centrale** de ce travail est donc :
 
-> **Dans quelle mesure un système intégré associant (i) une sonde ER instrumentée IoT à autonomie d'acquisition (ESP32 + HX711 + DS18B20), (ii) un modèle XGBoost à double sortie CR + RUL entraîné en protocole *run-to-failure* sur des données expérimentales de corrosion en milieu acide multi-composant, et (iii) une chaîne d'intégration via API REST vers un CMMS open-source pour la génération automatique d'ordres de travail, permet-il d'opérer une transition Industrie 3.0 → Industrie 4.0 transposable à la fois (a) aux opérateurs industriels disposant déjà d'une instrumentation ER commerciale (cas COTCO, saut I3.0 → I4.0 essentiellement logiciel) et (b) aux PME industrielles africaines en autonomie complète à budget réduit ?**
+> **Dans quelle mesure un système intégré associant (i) une sonde ER instrumentée IoT à autonomie d'acquisition (ESP32 + HX711 + DS18B20), (ii) un modèle XGBoost à double sortie CR + RUL entraîné en protocole *run-to-failure* sur des données expérimentales de corrosion en milieu acide (HCl), et (iii) une chaîne d'intégration via API REST vers un CMMS open-source pour la génération automatique d'ordres de travail, permet-il d'opérer une transition Industrie 3.0 → Industrie 4.0 transposable à la fois (a) aux opérateurs industriels disposant déjà d'une instrumentation ER commerciale (cas COTCO, saut I3.0 → I4.0 essentiellement logiciel) et (b) aux PME industrielles africaines en autonomie complète à budget réduit ?**
 
 ---
 
@@ -390,19 +400,19 @@ La **question centrale** de ce travail est donc :
 
 ### I.3.1. Objectif général
 
-Concevoir, développer et valider expérimentalement un **système intégré de maintenance prédictive de la corrosion** matérialisant une transition **Industrie 3.0 → Industrie 4.0**, couvrant la chaîne complète **détection → diagnostic → pronostic → décision → action** définie par la norme ISO 13381-1, et combinant une sonde ER instrumentée IoT (ESP32 + HX711 + DS18B20), un modèle d'apprentissage automatique XGBoost à double sortie (CR + RUL) avec module de diagnostic des régimes de corrosion, un système d'alertes calibrées sur l'efficacité d'un inhibiteur industriel à base d'imidazoline, et une **application web Streamlit intégrée par API REST à un CMMS open-source** pour la génération automatique des ordres de travail, le tout doublement transposable (a) aux opérateurs disposant déjà d'une instrumentation ER commerciale (cas COTCO) et (b) aux PME industrielles africaines en déploiement autonome.
+Concevoir, développer et valider expérimentalement un **système intégré de maintenance prédictive de la corrosion** matérialisant une transition **Industrie 3.0 → Industrie 4.0**, couvrant la chaîne complète **détection → diagnostic → pronostic → décision → action** définie par la norme ISO 13381-1, et combinant une sonde ER instrumentée IoT (ESP32 + HX711 + DS18B20), un modèle d'apprentissage automatique XGBoost à double sortie (CR + RUL) avec module de diagnostic des régimes de corrosion, un système d'alertes calibrées sur les régimes de corrosion et les facteurs de variabilité identifiés, et une **application web Streamlit intégrée par API REST à un CMMS open-source** pour la génération automatique des ordres de travail, le tout doublement transposable (a) aux opérateurs disposant déjà d'une instrumentation ER commerciale (cas COTCO) et (b) aux PME industrielles africaines en déploiement autonome.
 
 ### I.3.2. Objectifs spécifiques
 
 Quatre objectifs spécifiques (OS), chronologiquement ordonnés et logiquement articulés, structurent ce travail. Ils correspondent respectivement aux étapes **détection**, **pronostic**, **diagnostic + décision** et **action** de la chaîne ISO 13381-1.
 
-- **OS1 — Concevoir et valider métrologiquement la chaîne d'acquisition ER instrumentée IoT (étape *Détection*).** Il s'agit de réaliser un capteur de résistance électrique (ER) basé sur un pont de Wheatstone, un amplificateur HX711 24 bits et un microcontrôleur ESP32 en deep sleep pulsé, capable de mesurer des variations de résistance d'un fil de fer à ±0,01 mΩ près dans un milieu acide concentré (pH ≈ 1), avec une période de mesure de 10 minutes et une autonomie compatible avec un déploiement de plusieurs jours. Cette chaîne illustre la **brique d'acquisition I4.0** (interconnexion IoT, déploiement sans contrainte de câblage DCS) et fournit le format standardisé de données exploitable indifféremment par le pipeline ML maison ou par le flux des sondes ER commerciales déjà en place chez COTCO.
+- **OS1 — Concevoir et valider métrologiquement la chaîne d'acquisition ER instrumentée IoT (étape *Détection*).** Il s'agit de réaliser un capteur de résistance électrique (ER) basé sur un montage de mesure de résistance, un amplificateur HX711 24 bits et un microcontrôleur ESP32 en acquisition continue, capable de suivre finement les variations de résistance d'un fil de fer dans un milieu acide concentré (pH ≈ 1), avec une période de mesure de 30 secondes adaptée à la cinétique rapide des essais accélérés. Cette chaîne illustre la **brique d'acquisition I4.0** (interconnexion IoT, déploiement sans contrainte de câblage DCS) et fournit le format standardisé de données exploitable indifféremment par le pipeline ML maison ou par le flux des sondes ER commerciales déjà en place chez COTCO.
 
-- **OS2 — Entraîner et valider un modèle XGBoost à double sortie CR + RUL (étape *Pronostic*).** Il s'agit, à partir des séries temporelles collectées en protocole *run-to-failure* sur quatre cycles expérimentaux de corrosion, de construire un modèle d'apprentissage automatique XGBoost prédisant à la fois le taux de corrosion instantané (en mm/an) et la durée de vie résiduelle (en heures), avec une erreur relative inférieure à 15 % (RMSE), validé par une procédure de validation croisée temporelle (TimeSeriesSplit) respectant la causalité, et interprété par analyse SHAP. Le modèle est conçu pour être **agnostique à la source des mesures** : il consomme des séries temporelles (résistance, température, temps) qu'elles proviennent du prototype maison ou d'un export DCS de sondes commerciales.
+- **OS2 — Entraîner et valider un modèle XGBoost à double sortie CR + RUL (étape *Pronostic*).** Il s'agit, à partir des séries temporelles collectées en protocole *run-to-failure* sur une série d'essais répétés de corrosion, de construire un modèle d'apprentissage automatique XGBoost prédisant à la fois le taux de corrosion instantané (en mm/an) et la durée de vie résiduelle (en heures), validé par une procédure de validation inter-essais *leave-one-run-out* (LORO) mesurant la généralisation à un essai nouveau, et interprété par analyse SHAP. Le modèle est conçu pour être **agnostique à la source des mesures** : il consomme des séries temporelles (résistance, température, temps) qu'elles proviennent du prototype maison ou d'un export DCS de sondes commerciales.
 
-- **OS3 — Diagnostiquer les régimes de corrosion, évaluer l'efficacité d'un inhibiteur à base d'imidazoline et définir un système d'alertes graduées (étapes *Diagnostic* et *Décision*).** Il s'agit (i) de classifier en temps réel le régime de corrosion observé (corrosion stable, accélérée, passivation, adsorption inhibiteur, pré-rupture) à partir des sorties du modèle XGBoost ; (ii) de quantifier expérimentalement l'effet d'un inhibiteur de la famille des imidazolines (référence commerciale à sélectionner) sur le taux de corrosion mesuré, à deux concentrations différentes (0,1 % et 0,5 % v/v) ; (iii) de détecter par algorithme *changepoint* le temps d'adsorption de l'inhibiteur ; et (iv) de définir un système d'alertes à trois niveaux (vert / orange / rouge) avec recommandations de dosage exploitables industriellement.
+- **OS3 — Diagnostiquer les régimes de corrosion, identifier les facteurs de variabilité conditionnant la fiabilité de la prédiction et définir un système d'alertes graduées (étapes *Diagnostic* et *Décision*).** Il s'agit (i) de classifier le régime de corrosion observé (induction, croissance, emballement, pré-rupture) à partir des sorties du modèle ; (ii) d'identifier et de quantifier les **facteurs expérimentaux qui conditionnent la reproductibilité des essais et donc la fiabilité de la prédiction** — au premier rang desquels la **température**, identifiée comme variable dominante, ainsi que la concentration du milieu ; (iii) de démontrer, par une stratégie de validation inter-essais, que la **répétabilité des conditions** est la condition d'une prédiction fiable ; et (iv) de définir un système d'alertes à trois niveaux (vert / orange / rouge) fondé sur les seuils de taux de corrosion (CR) et de durée de vie résiduelle (RUL).
 
-- **OS4 — Intégrer le système prédictif à un CMMS open-source via API REST (étape *Action*).** Il s'agit (i) de réaliser une application web Streamlit servant de frontend ML et de dashboard temps réel des sondes, hébergée sur Streamlit Community Cloud ; (ii) d'établir une connexion API REST vers un **CMMS open-source existant** (GLPI ou équivalent à préciser après matrice comparative) pour la création automatique d'ordres de travail à partir des alertes prédictives ; (iii) de définir le mapping prédiction ML → ticket CMMS (asset, sévérité, description, dose recommandée) ; (iv) de calculer les KPIs maintenance (MTBF, MTTR, efficacité d'inhibition, taux de fausses alertes) à partir des historiques CMMS. Cette approche démontre qu'un opérateur ou une PME peut structurer sa boucle décision → action **sans développer de GMAO ex nihilo et sans payer de licence propriétaire** (SAP PM, IBM Maximo).
+- **OS4 — Intégrer le système prédictif à un CMMS open-source via API REST (étape *Action*).** Il s'agit (i) de réaliser une application web Streamlit servant de frontend ML et de dashboard temps réel des sondes, hébergée sur Streamlit Community Cloud ; (ii) d'établir une connexion API REST vers un **CMMS open-source existant** (GLPI ou équivalent à préciser après matrice comparative) pour la création automatique d'ordres de travail à partir des alertes prédictives ; (iii) de définir le mapping prédiction ML → ticket CMMS (asset, sévérité, description, régime diagnostiqué) ; (iv) de calculer les KPIs maintenance (MTBF, MTTR, disponibilité, taux de fausses alertes) à partir des historiques CMMS. Cette approche démontre qu'un opérateur ou une PME peut structurer sa boucle décision → action **sans développer de GMAO ex nihilo et sans payer de licence propriétaire** (SAP PM, IBM Maximo).
 
 ---
 
@@ -414,9 +424,9 @@ Quatre objectifs spécifiques (OS), chronologiquement ordonnés et logiquement a
 
 - **QR2 :** Dans quelle mesure un modèle XGBoost entraîné sur des séries temporelles de résistance et de température collectées en protocole *run-to-failure* permet-il de prédire simultanément le taux de corrosion (CR) et la durée de vie résiduelle (RUL) avec une erreur relative inférieure à 15 % (RMSE), tout en restant interprétable par analyse SHAP ?
 
-- **QR3 :** Dans quelle mesure les sorties du modèle XGBoost permettent-elles de diagnostiquer en temps réel le régime de corrosion en cours (stable, accélérée, passivation, adsorption d'inhibiteur, pré-rupture), de calibrer un système d'alertes graduées (vert / orange / rouge), et de fournir des recommandations de dosage d'un inhibiteur de la famille des imidazolines exploitables industriellement ?
+- **QR3 :** Dans quelle mesure les sorties du modèle XGBoost permettent-elles de diagnostiquer le régime de corrosion en cours (induction, croissance, emballement, pré-rupture), et dans quelle mesure l'identification des facteurs de variabilité expérimentale — en particulier la température — et la répétabilité des conditions conditionnent-elles la fiabilité de la prédiction et la calibration d'un système d'alertes graduées (vert / orange / rouge) ?
 
-- **QR4 :** Dans quelle mesure une **application Streamlit intégrée par API REST à un CMMS open-source existant** (GLPI ou équivalent) peut-elle exploiter les alertes et les recommandations issues du système prédictif pour générer automatiquement les ordres de travail, tracer les interventions et calculer les KPIs de maintenance (MTBF, MTTR, efficacité d'inhibition), avec une couverture fonctionnelle équivalente aux GMAO propriétaires (SAP PM, IBM Maximo) sans coût de licence ?
+- **QR4 :** Dans quelle mesure une **application Streamlit intégrée par API REST à un CMMS open-source existant** (GLPI ou équivalent) peut-elle exploiter les alertes et les recommandations issues du système prédictif pour générer automatiquement les ordres de travail, tracer les interventions et calculer les KPIs de maintenance (MTBF, MTTR, disponibilité), avec une couverture fonctionnelle équivalente aux GMAO propriétaires (SAP PM, IBM Maximo) sans coût de licence ?
 
 ---
 
@@ -430,7 +440,7 @@ Ce travail revêt un intérêt à plusieurs niveaux et pour plusieurs catégorie
 
 **Pour l'École Supérieure Technique La Salle (ESTL) :** le mémoire contribue au rayonnement scientifique de l'institution en démontrant la capacité de ses étudiants à produire des prototypes intégrés et fonctionnels mobilisant des outils numériques avancés à partir de composants accessibles localement. Il s'inscrit pleinement dans la mission de formation d'ingénieurs adaptés aux contextes africains.
 
-**Pour la recherche :** ce travail constitue l'une des premières études publiées (à notre connaissance) intégrant explicitement la prédiction CR + RUL par XGBoost avec interprétabilité SHAP, sur des données expérimentales originales collectées en protocole *run-to-failure*, et dans un contexte multi-acide non-monotone. Il complète la littérature dominée par les approches mono-cible (CR seul) et les jeux de données nord-américains.
+**Pour la recherche :** ce travail constitue l'une des premières études publiées (à notre connaissance) intégrant explicitement la prédiction CR + RUL par XGBoost avec interprétabilité SHAP, sur des données expérimentales originales collectées en protocole *run-to-failure*, avec une validation inter-essais (LORO) mettant en évidence le rôle de la couverture des conditions. Il complète la littérature dominée par les approches mono-cible (CR seul) et les jeux de données nord-américains.
 
 **Pour COTCO et les opérateurs pétroliers camerounais :** le mémoire fournit une **preuve de concept industriellement transposable** dont la valeur principale n'est pas le coût matériel mais la **chaîne de valeur logicielle I3.0 → I4.0**. Le pipeline ML développé est applicable directement aux flux des sondes ER commerciales déjà en place (Cosasco, Roxar) via export DCS, sans remplacement matériel. La chaîne d'acquisition autonome ESP32 développée constitue par ailleurs une option d'extension pour les sections où le câblage DCS est absent ou indisponible.
 
@@ -446,9 +456,9 @@ Ce mémoire est organisé en trois chapitres principaux, encadrés par une intro
 
 Le **Chapitre I (Contexte et problématique)** établit le cadre théorique, normatif et industriel de la recherche selon les six approches du protocole de recherche, formule la problématique, les objectifs et les questions de recherche, expose l'importance de l'étude, et présente une revue détaillée de la littérature sur la corrosion, ses mécanismes, ses méthodes de surveillance, ses modèles prédictifs, le diagnostic en maintenance industrielle et les systèmes de Gestion de Maintenance Assistée par Ordinateur (GMAO).
 
-Le **Chapitre II (Outils et méthodes)** présente le prototype développé (sonde ER + acquisition IoT ESP32 + pipeline ML + intégration CMMS), s'ouvre sur une **§II.0 dédiée à la justification des choix technologiques** (matrice de décision pour chaque brique : ESP32, HX711, DS18B20, XGBoost, TimeSeriesSplit, Streamlit, CMMS open-source retenu), puis détaille l'ensemble des matériels mobilisés, les méthodes d'acquisition et de traitement des données, la méthodologie d'entraînement du modèle XGBoost (validation croisée temporelle, hyperparamètres, interprétabilité SHAP), le module de diagnostic des régimes de corrosion, le protocole expérimental *run-to-failure* en quatre runs, l'**architecture d'intégration Streamlit ↔ CMMS open-source par API REST** (mapping prédiction ML → ticket CMMS, KPIs maintenance), et le tableau synoptique de la démarche méthodologique.
+Le **Chapitre II (Outils et méthodes)** présente le prototype développé (sonde ER + acquisition IoT ESP32 + pipeline ML + intégration CMMS), s'ouvre sur une **§II.0 dédiée à la justification des choix technologiques** (matrice de décision pour chaque brique : ESP32, HX711, DS18B20, XGBoost, stratégie de validation, Streamlit, CMMS open-source retenu), puis détaille l'ensemble des matériels mobilisés, les méthodes d'acquisition et de traitement des données, la méthodologie d'entraînement du modèle XGBoost (validation *leave-one-run-out*, hyperparamètres, interprétabilité SHAP), le module de diagnostic des régimes de corrosion, le protocole expérimental *run-to-failure* en série répétée, l'**architecture d'intégration Streamlit ↔ CMMS open-source par API REST** (mapping prédiction ML → ticket CMMS, KPIs maintenance), et le tableau synoptique de la démarche méthodologique.
 
-Le **Chapitre III (Résultats et discussions)** présente les résultats expérimentaux issus du prototype, les performances métrologi ques de la sonde ER, les résultats des quatre runs RTF, les métriques de validation du modèle XGBoost, l'analyse SHAP des variables d'influence, le diagnostic des régimes observés, l'évaluation de l'efficacité de l'inhibiteur de corrosion testé, la fonctionnalité du prototype GMAO et ses KPIs, et la discussion comparative des résultats au regard de la littérature.
+Le **Chapitre III (Résultats et discussions)** présente les résultats expérimentaux issus du prototype, les performances métrologiques de la sonde ER, les résultats de la série d'essais RTF, les métriques de validation inter-essais du modèle XGBoost, l'analyse des variables d'influence, le diagnostic des régimes observés, l'effet de la température et des facteurs de variabilité sur la fiabilité de la prédiction, la fonctionnalité du prototype GMAO et ses KPIs, et la discussion comparative des résultats au regard de la littérature.
 
 La **Conclusion générale** synthétise les résultats des quatre objectifs spécifiques, dresse le bilan des contributions, identifie les limites du travail et formule des recommandations pour COTCO, pour les PME industrielles africaines, et pour les travaux futurs.
 
@@ -539,7 +549,7 @@ Ce modèle a été progressivement étendu pour inclure le pH, le débit, la com
 - Erreurs systématiques de 40 à 60 % en conditions réelles ;
 - Domaine de validité limité à *P*(CO₂) ∈ [0 ; 2 MPa] ;
 - Recalibration complète nécessaire pour intégrer toute nouvelle donnée ;
-- Ignorance des interactions entre composants (HCl + H₃PO₄, SRB, etc.).
+- Ignorance des interactions complexes entre constituants du milieu (multiples espèces agressives, bactéries SRB, etc.).
 
 La **norme NORSOK M-506** (Standards Norway, 2017) propose une formulation alternative également limitée par les mêmes contraintes.
 
@@ -560,7 +570,7 @@ Les performances rapportées dans la littérature récente sur la corrosion sont
 - **Yan et Yan (2024)** : XGBoost et AdaBoost obtiennent *RMSE* = 0,052 sur la corrosion atmosphérique d'aciers faiblement alliés ;
 - **Hu et al. (2024)** : modèle d'ensemble interprétable atteignant *RMSE* = 0,005876 et *R²* = 0,9648 sur la corrosion interne O&G.
 
-**SHAP (SHapley Additive exPlanations)**, introduit par **Lundberg et Lee (2017)**, permet d'interpréter chaque prédiction individuelle en quantifiant la contribution de chaque variable d'entrée. Les analyses SHAP appliquées à la corrosion identifient typiquement la **température**, la **pression partielle de CO₂** et la **pression totale** comme les trois variables dominantes (Hu et al., 2024). Le présent travail mobilise SHAP pour identifier les variables dominantes dans le contexte multi-acide Detar Plus.
+**SHAP (SHapley Additive exPlanations)**, introduit par **Lundberg et Lee (2017)**, permet d'interpréter chaque prédiction individuelle en quantifiant la contribution de chaque variable d'entrée. Les analyses SHAP appliquées à la corrosion identifient typiquement la **température**, la **pression partielle de CO₂** et la **pression totale** comme les trois variables dominantes (Hu et al., 2024). Le présent travail mobilise SHAP pour identifier les variables dominantes dans le contexte de la corrosion du fer en milieu HCl, où la température joue un rôle de premier plan.
 
 ### I.7.6. Pronostic et durée de vie résiduelle (RUL)
 
@@ -575,26 +585,17 @@ Quatre familles d'approches existent (Liu et al., 2022) :
 
 Pour la corrosion spécifiquement, les approches ML *run-to-failure* sont les mieux adaptées car elles exploitent l'intégralité du cycle de dégradation (état initial → rupture). C'est la voie retenue dans ce travail.
 
-### I.7.7. Inhibiteurs de corrosion à base d'imidazoline
+### I.7.7. Facteurs influençant la cinétique de corrosion — rôle de la température
 
-Les **imidazolines** sont une famille d'inhibiteurs de corrosion largement utilisés dans le secteur Oil & Gas, particulièrement efficaces en milieu acide (Heydari et Talebpour, 2024). Leur structure moléculaire présente :
+La vitesse de corrosion d'un métal en milieu acide dépend de nombreux facteurs : concentration et nature de l'acide, pH, **température**, hydrodynamique, état de surface et présence éventuelle d'inhibiteurs (Schweitzer, 2010 ; Roberge, 2000). Parmi ces facteurs, la température occupe une place déterminante.
 
-- Un **cycle imidazoline à 5 atomes** contenant deux atomes d'azote (N), dont l'un porte un doublet libre ;
-- Une **chaîne hydrocarbonée hydrophobe** assurant l'orientation de la molécule sur la surface métallique.
+La dépendance de la vitesse de corrosion à la température suit typiquement une loi de type **Arrhenius** :
 
-Le mécanisme d'inhibition combine **physisorption et chimisorption** sur la surface du fer, formant une couche monomoléculaire qui isole le métal du milieu corrosif (Lu et Luo, 2016 ; Heydari et Talebpour, 2024). L'isotherme d'adsorption suit typiquement le modèle de **Langmuir** :
+$$v_{corr}(T) = A \cdot \exp\!\left(-\frac{E_a}{R\,T}\right)$$
 
-$$\frac{C}{\theta} = \frac{1}{K_{ads}} + C$$
+où *A* est un facteur pré-exponentiel, *E_a* l'énergie d'activation de la réaction et *R* la constante des gaz parfaits. Cette relation traduit une **croissance exponentielle** de la vitesse de corrosion avec la température ; une règle empirique fréquemment citée indique qu'une élévation de 10 °C peut approximativement doubler la vitesse de réaction (Schweitzer, 2010).
 
-où *C* est la concentration de l'inhibiteur, θ le taux de couverture surfacique, et *K*_ads la constante d'adsorption.
-
-Les **efficacités d'inhibition** rapportées dans la littérature pour les imidazolines en milieu HCl sont remarquables :
-
-- 94,4 % à 500 ppm en HCl 1 N (Heydari et Talebpour, 2024) ;
-- 95,7 % à 80 mg/L sur acier A572 Gr.65 en NaCl 3,5 % (Wang et al., 2023) ;
-- 96,8 % à 500 ppm en HCl 1 N (PMC, 2023).
-
-L'**inhibiteur retenu dans ce travail** appartient à la famille des imidazolines, commercialisé pour l'industrie pétrolière. La référence commerciale précise sera fixée selon la disponibilité sur le marché camerounais ; à titre indicatif, des produits tels qu'AC PROTECT 106, Nalco Champion EC1605A ou équivalents respectent ce profil. L'efficacité fabricant typique déclarée est > 90 % en milieu HCl 1 N pour cette famille de produits.
+Cette sensibilité a une conséquence directe pour la **modélisation prédictive** : dans une campagne d'essais, toute variation non maîtrisée de la température introduit une variabilité importante entre essais, susceptible de masquer ou de fausser les relations apprises par un modèle. Dans le cadre de ce travail, ce constat justifie deux leviers complémentaires : (i) intégrer la température comme **variable explicative** du modèle, et (ii) **contrôler la température** par bain-marie thermostaté afin d'isoler les autres facteurs et garantir la répétabilité des essais — démarche dont le Chapitre III démontre la nécessité.
 
 ### I.7.8. Diagnostic en maintenance industrielle
 
@@ -608,7 +609,7 @@ Pour la corrosion spécifiquement, plusieurs approches de diagnostic coexistent 
 - **Approches par classification ML** : forêts aléatoires, XGBoost classifieur, SVM — performantes mais nécessitent des données labélisées ;
 - **Approches non-supervisées** : Isolation Forest, One-Class SVM — adaptées à la détection d'anomalies sans labélisation préalable.
 
-Dans le contexte de la corrosion en milieu acide multi-composant, plusieurs régimes coexistent et peuvent être diagnostiqués à partir des signatures temporelles du signal ER : (i) corrosion stable nominale (dR/dt constant et faible), (ii) corrosion accélérée (dR/dt croissant — typiquement HCl dominant), (iii) passivation (dR/dt qui décélère sans inhibiteur — typiquement formation de FePO₄ par H₃PO₄), (iv) adsorption d'inhibiteur (changepoint avec chute brutale du dR/dt), et (v) pré-rupture (divergence de dR/dt, RUL faible). Le présent travail mobilise une approche hybride règles métier + sortie XGBoost, simple et explicable pour un déploiement industriel léger.
+Dans le contexte de la corrosion d'un fil de fer en milieu acide, plusieurs régimes se succèdent au cours d'un essai et peuvent être diagnostiqués à partir des signatures temporelles du signal ER : (i) induction (dR/dt quasi nul en début d'immersion), (ii) croissance (dR/dt positif et régulier), (iii) emballement (accélération marquée du dR/dt), et (iv) pré-rupture (divergence du dR/dt, RUL faible). Le présent travail mobilise une approche hybride règles métier + sortie XGBoost, simple et explicable pour un déploiement industriel léger.
 
 ### I.7.9. Systèmes de gestion de la maintenance — GMAO et CMMS
 
@@ -669,7 +670,7 @@ Ce premier chapitre a permis de poser les bases théoriques, normatives et conte
 
 ## II.0. Introduction
 
-Dans ce chapitre, il sera question de présenter (i) la **justification des choix technologiques** mobilisés à chaque étage du prototype (matrice de décision pour chaque brique : microcontrôleur, amplificateur, capteur de température, méthode de mesure de la corrosion, algorithme ML, méthode de validation, frontend, CMMS), (ii) le cadre institutionnel et physique de l'étude, (iii) l'architecture du prototype de sonde ER développé (description et principe de fonctionnement), (iv) l'ensemble des matériels mobilisés, (v) les méthodes d'acquisition et de traitement des données, (vi) la méthodologie d'entraînement du modèle XGBoost (validation croisée temporelle, hyperparamètres, interprétabilité SHAP), (vii) le protocole expérimental *run-to-failure* en quatre runs, l'**architecture d'intégration au CMMS open-source par API REST**, et (viii) le tableau synoptique de la démarche méthodologique.
+Dans ce chapitre, il sera question de présenter (i) la **justification des choix technologiques** mobilisés à chaque étage du prototype (matrice de décision pour chaque brique : microcontrôleur, amplificateur, capteur de température, méthode de mesure de la corrosion, algorithme ML, méthode de validation, frontend, CMMS), (ii) le cadre institutionnel et physique de l'étude, (iii) l'architecture du prototype de sonde ER développé (description et principe de fonctionnement), (iv) l'ensemble des matériels mobilisés, (v) les méthodes d'acquisition et de traitement des données, (vi) la méthodologie d'entraînement du modèle XGBoost (validation *leave-one-run-out*, hyperparamètres, interprétabilité SHAP), (vii) le protocole expérimental *run-to-failure* en série répétée, l'**architecture d'intégration au CMMS open-source par API REST**, et (viii) le tableau synoptique de la démarche méthodologique.
 
 ---
 
@@ -700,7 +701,7 @@ Cette section consolide en un seul endroit les arbitrages techniques qui sous-te
 | AD7793 | 24 bits, faible bruit | Très faible (import) | Moyennes | 25 000 FCFA | Excellent mais coût + dispo |
 | **HX711** | **24 bits, gain 128** | **Élevée (modules ready-made)** | **Très matures (Arduino, ESP32)** | **2 500 FCFA** | **Retenu** |
 
-**Choix retenu : HX711.** Critère décisif : 24 bits de résolution effective sur sortie pont à très faible amplitude (Vdiff ~ mV), couplés à une excellente disponibilité locale (modules pré-câblés vendus en kit) et une intégration logicielle triviale. Limite acceptée : taux d'échantillonnage maximum 80 Hz (largement suffisant pour la corrosion lente, à période 10 min).
+**Choix retenu : HX711.** Critère décisif : 24 bits de résolution effective sur sortie pont à très faible amplitude (Vdiff ~ mV), couplés à une excellente disponibilité locale (modules pré-câblés vendus en kit) et une intégration logicielle triviale. Limite acceptée : taux d'échantillonnage maximum 80 Hz (largement suffisant pour la corrosion lente, à période de 30 s).
 
 ### II.0.5.3. Capteur de température — DS18B20
 
@@ -741,17 +742,18 @@ Cette section consolide en un seul endroit les arbitrages techniques qui sous-te
 
 **Choix retenu : XGBoost.** Critère décisif : performance reconnue en time-series sur faibles volumes (Chen et Guestrin, 2016 ; Ma et al., 2021 ; Wei et al., 2024), interprétabilité native par SHAP (Lundberg et Lee, 2017), régularisation L1/L2 limitant le sur-apprentissage. Limite acceptée : architecture point-par-point (pas de mémoire séquentielle native comme LSTM) — compensée par feature engineering temporel explicite (EMA, pente locale, lag).
 
-### II.0.5.6. Méthode de validation croisée — TimeSeriesSplit
+### II.0.5.6. Stratégie de validation — leave-one-run-out
 
-**Tableau II.0.6 — Comparaison des méthodes de validation croisée**
+**Tableau II.0.6 — Comparaison des stratégies de validation**
 
-| Méthode | Causalité respectée | Risque de fuite future→passé | Verdict |
-|---|---|---|---|
-| Hold-out simple (80/20) | ✅ si chronologique | Faible | Acceptable mais une seule estimation |
-| k-fold standard | ❌ | **Élevé (fuite garantie)** | À proscrire en time-series |
-| **TimeSeriesSplit** (n=4) | **✅** | **Aucune** | **Retenu** |
+| Méthode | Question évaluée | Limite |
+|---|---|---|
+| Hold-out simple (80/20) | prédiction intra-jeu | une seule estimation |
+| k-fold standard | prédiction intra-jeu | fuite temporelle en time-series |
+| TimeSeriesSplit | prédiction intra-run (causalité) | ne teste pas la généralisation à un essai nouveau |
+| **Leave-one-run-out (LORO)** | **généralisation à un essai jamais vu** | **plus exigeante (retenue)** |
 
-**Choix retenu : TimeSeriesSplit (Scikit-learn) avec n=4 folds.** Critère décisif : seule méthode garantissant que le modèle n'apprend jamais sur un échantillon temporellement postérieur à un échantillon de test — exigence stricte en pronostic (ISO 13381-1).
+**Choix retenu : leave-one-run-out (LORO).** Critère décisif : l'objectif industriel étant de prédire un *essai nouveau*, seule la validation LORO (un run complet retiré et testé à chaque itération) mesure cette capacité. TimeSeriesSplit reste utilisé pour vérifier la causalité au sein d'un run. Détail en §II.5.1.
 
 ### II.0.5.7. Frontend ML / dashboard — Streamlit
 
@@ -772,7 +774,7 @@ Justification déjà détaillée en §II.7.2 (matrice comparative GLPI / OpenMai
 
 ### II.0.5.9. Synthèse des choix technologiques
 
-L'ensemble des choix forme une **chaîne cohérente** orientée par trois principes : (i) **simplicité d'intégration locale** (composants disponibles au Cameroun, langages Python pour la majeure partie de la chaîne ML+frontend), (ii) **rigueur méthodologique** (TimeSeriesSplit, SHAP, conformité ASTM/ISO), (iii) **transposabilité industrielle** (ER conformes ASTM G96 ; CMMS open-source on-premise compatible OT/réseau industriel).
+L'ensemble des choix forme une **chaîne cohérente** orientée par trois principes : (i) **simplicité d'intégration locale** (composants disponibles au Cameroun, langages Python pour la majeure partie de la chaîne ML+frontend), (ii) **rigueur méthodologique** (validation *leave-one-run-out*, SHAP, conformité ASTM/ISO), (iii) **transposabilité industrielle** (ER conformes ASTM G96 ; CMMS open-source on-premise compatible OT/réseau industriel).
 
 ---
 
@@ -784,17 +786,11 @@ Le présent travail est réalisé dans le cadre du **Master 2 Professionnel en M
 
 ### II.1.2. Cadre physique du prototype
 
-Le prototype reproduit en laboratoire des conditions de **corrosion généralisée accélérée en milieu acide multi-composant**. Il est constitué d'une cellule de corrosion ouverte (récipient en HDPE de 2 litres) contenant le milieu corrosif, dans laquelle est immergé le fil de fer ER. La sonde est connectée à un pont de Wheatstone instrumenté par un amplificateur HX711 24 bits, lui-même piloté par un microcontrôleur ESP32 en mode deep sleep pulsé (cycle réveil → mesure → sommeil de 10 minutes). La température du milieu est mesurée par un capteur DS18B20 numérique 1-Wire.
+Le prototype reproduit en laboratoire des conditions de **corrosion généralisée accélérée en milieu acide**. Il est constitué d'une cellule de corrosion ouverte (récipient en HDPE) contenant le milieu corrosif, dans laquelle est immergé le fil de fer ER. La sonde est connectée à un montage de mesure de résistance instrumenté par un amplificateur HX711 24 bits, lui-même piloté par un microcontrôleur ESP32 en acquisition continue (cycle de mesure de 30 secondes). La température du milieu est mesurée par un capteur DS18B20 numérique 1-Wire.
 
-Le **milieu corrosif de référence** est le **Detar Plus**, détartrant industriel commercial dont la composition déclarée par le fabricant est :
+Plusieurs milieux corrosifs sont employés dans les essais de corrosion accélérée du fer (acides minéraux — HCl, H₂SO₄ —, solutions salines NaCl, détartrants industriels multi-acides). Dans le cadre de ce travail, le **milieu de référence retenu est une solution d'acide chlorhydrique concentré (HCl)**. Ce choix se justifie par trois critères : (i) la **simplicité et la reproductibilité** d'un milieu mono-acide, indispensable pour isoler proprement l'effet d'un facteur unique (la température) ; (ii) la **représentativité** du mécanisme d'attaque acide pure (H⁺ + Fe → Fe²⁺ + H₂), dominant dans de nombreux effluents industriels ; (iii) la **disponibilité locale** au Cameroun.
 
-- Acide chlorhydrique (HCl) : 5–15 % en masse ;
-- Acide phosphorique (H₃PO₄) : 10–30 % en masse ;
-- Agents tensioactifs et additifs.
-
-Ce milieu génère un **pH ≈ 1**, mesuré par pH-mètre papier avant chaque run, et constant durant la durée d'un run (vérifié par mesures répétées). La température ambiante du laboratoire varie entre 25 et 30 °C.
-
-Le **choix de ce milieu** est scientifiquement motivé : la coexistence de HCl (mécanisme d'attaque acide pure : H⁺ + Fe → Fe²⁺ + H₂) et de H₃PO₄ (mécanisme partiellement passivant via la formation de FePO₄ — voir Persian Utab, 2023 ; Schweitzer, 2010) crée une cinétique multi-mécanismes non-monotone, impossible à prédire par les modèles physiques classiques. C'est précisément le type de complexité que l'approche XGBoost vise à capturer (justification ML).
+Ce milieu génère un **pH ≈ 1**. La température ambiante du laboratoire varie entre 25 et 32 °C selon les conditions météorologiques — variabilité qui s'est révélée déterminante (voir Chapitre III) et a motivé l'introduction d'une phase à température contrôlée par bain-marie thermostaté.
 
 ---
 
@@ -855,22 +851,18 @@ $$\text{ratio}_{Rx} = \frac{V_{diff,raw}}{V_{exc,eff}} + \frac{R_{REF}}{R_1 + R_
 
 $$R_x = R_2 \cdot \frac{\text{ratio}_{Rx}}{1 - \text{ratio}_{Rx}}$$
 
-### II.2.4. Système d'acquisition IoT — ESP32 en deep sleep pulsé
+### II.2.4. Système d'acquisition IoT — ESP32 en acquisition continue
 
-L'**ESP32 DevKit V1** est un microcontrôleur bi-cœur Wi-Fi + Bluetooth (Espressif Systems) intégrant un mode **deep sleep** à très faible consommation (~10 µA) (Espressif, 2024). Le firmware développé suit le cycle suivant à chaque réveil :
+L'**ESP32 DevKit V1** est un microcontrôleur bi-cœur Wi-Fi + Bluetooth (Espressif Systems) qui supporte deux modes d'acquisition : un mode **deep sleep pulsé** (~10 µA, adapté à un déploiement terrain longue durée sur batterie) et un mode **acquisition continue** sur alimentation secteur (Espressif, 2024). Dans le cadre de ces essais de corrosion **accélérée** — où la rupture survient en quelques heures à un jour et où la phase d'emballement final est très rapide —, nous retenons le **mode acquisition continue à période de 30 secondes**, qui fournit la résolution temporelle nécessaire pour capturer fidèlement la cinétique de dégradation. Le mode deep sleep demeure l'option privilégiée pour un futur déploiement terrain de longue durée. Le firmware suit le cycle suivant :
 
-1. **Réveil** depuis le deep sleep (timer RTC) ;
-2. **Initialisation** des bibliothèques HX711 et DallasTemperature ;
-3. **Lecture HX711** : moyenne sur 10 échantillons → *R*ₓ ;
-4. **Lecture DS18B20** : conversion 12 bits (0,0625 °C) → *T* ;
-5. **Connexion Wi-Fi** et **envoi HTTPS POST** vers la base de données **Supabase** (PostgreSQL managé) via son API REST PostgREST, payload JSON ;
-6. **Power-down HX711** (SCK HIGH > 60 µs) ;
-7. **Programmation du deep sleep** suivant (600 secondes = 10 minutes) ;
-8. **Mise en deep sleep**.
+1. **Lecture HX711** : moyenne sur 10 échantillons → *R*ₓ ;
+2. **Lecture DS18B20** : conversion 12 bits (0,0625 °C) → *T* ;
+3. **Connexion Wi-Fi** et **envoi HTTPS POST** vers la base de données **Supabase** (PostgreSQL managé) via son API REST PostgREST, payload JSON ;
+4. **Temporisation** de 30 secondes avant le cycle suivant.
 
-![Figure II.3 — Cycle de fonctionnement ESP32 en deep sleep pulsé](figures/fig_ii3_cycle_esp32.png){ width=95% }
+![Figure II.3 — Cycle de fonctionnement de l'acquisition ESP32](figures/fig_ii3_cycle_esp32.png){ width=95% }
 
-La **persistance locale** entre cycles de deep sleep est assurée par la mémoire RTC (variables `RTC_DATA_ATTR`) qui conserve le compteur de mesures, la dernière valeur de *R*ₓ et l'horodatage de la dernière transmission. La **persistance distante** des mesures est assurée côté Supabase dans la table `measurements` (voir Annexe F). En cas d'échec Wi-Fi, la mesure est mise en file d'attente en mémoire RTC et retransmise au cycle suivant. Le **payload JSON** émis est :
+La **persistance distante** des mesures est assurée côté Supabase dans la table `cr_measurements` (voir Annexe F). En cas d'échec Wi-Fi, la transmission est ré-essayée au cycle suivant. Le **payload JSON** émis est :
 
 ```json
 {
@@ -903,9 +895,9 @@ Le tableau ci-dessous consolide la totalité des matériels mobilisés dans le c
 | Résistances pont | Bras de référence | *R*₁ = *R*₂ = 10 Ω, *R*_REF = 0,5 Ω (1 %) |
 | Résistance série | Limitation courant | *R*_SERIE = 100 Ω (1 %) |
 | Pull-up DS18B20 | Bus 1-Wire | 4,7 kΩ |
-| Cellule de corrosion | Contenant milieu | Récipient HDPE 2 L |
-| Milieu corrosif | Environnement test | Detar Plus (HCl 5–15 % + H₃PO₄ 10–30 %), pH ≈ 1 |
-| Inhibiteur | Protection fil | Inhibiteur de la famille des imidazolines (référence commerciale à sélectionner) |
+| Cellule de corrosion | Contenant milieu | Récipient HDPE |
+| Milieu corrosif | Environnement test | Acide chlorhydrique concentré (HCl), pH ≈ 1 |
+| Bain-marie thermostaté | Contrôle de la température | Chauffe-eau d'aquarium 25 W, plage 16–35 °C (phase contrôlée) |
 | pH-mètre papier | Vérification pH | Plages 0–14, résolution ±0,5 |
 | Câble USB-UART | Liaison ESP32-PC | CP2102 ou CH340 |
 | Multimètre numérique | Mesure *R*₀ initiale | Précision 0,1 % |
@@ -918,7 +910,7 @@ Le tableau ci-dessous consolide la totalité des matériels mobilisés dans le c
 |---|---|---|
 | HX711 DOUT | GPIO 21 | Données série HX711 |
 | HX711 SCK | GPIO 22 | Horloge HX711 |
-| DS18B20 DQ | GPIO 4 | Bus 1-Wire température |
+| DS18B20 DQ | GPIO 19 | Bus 1-Wire température (pull-up 4,7 kΩ) |
 | Alimentation | 3,3 V | Pont + HX711 + DS18B20 |
 | Masse | GND | Commun |
 
@@ -972,9 +964,9 @@ La méthodologie de traitement des données suit une chaîne en cinq étapes suc
 
 ### II.4.1. Acquisition
 
-Les mesures émises par l'ESP32 sont écrites en temps réel dans la table `measurements` de la base **Supabase** (PostgreSQL managé) via son API REST PostgREST. Le pipeline Python charge ensuite ces données par requête SQL paramétrée (`SELECT … WHERE asset_id = … ORDER BY timestamp_s`) et les convertit en `DataFrame` Pandas pour traitement. Les colonnes consommées sont : `timestamp_s`, `vdiff_v`, `rx_ohm`, `temp_c`, `delta_r_per_h`.
+Les mesures émises par l'ESP32 sont écrites en temps réel dans la table `cr_measurements` de la base **Supabase** (PostgreSQL managé) via son API REST PostgREST. Chaque mesure est rattachée à un identifiant de run (`run_id`) de la table `cr_runs`. Le pipeline Python charge ensuite ces données par requête paramétrée et les convertit en `DataFrame` Pandas pour traitement. Les colonnes consommées sont : `timestamp_s`, `vdiff_v`, `rx_ohm`, `temp_c`, `delta_r_per_h`.
 
-Une mesure est émise toutes les 600 secondes (10 minutes). Pour un run de 48 heures, cela représente 288 points de mesure ; pour un run de 72 heures, 432 points. L'historique complet est ainsi centralisé sur Supabase et accessible aussi bien à l'application Streamlit qu'aux notebooks d'analyse, sans manipulation manuelle de fichiers.
+Une mesure est émise toutes les **30 secondes**, soit environ 120 points par heure. Pour un run de 12 heures, cela représente de l'ordre de 1 400 points de mesure ; pour un run de 20 heures, environ 2 300 points. Cette résolution temporelle fine est nécessaire pour capturer la phase d'emballement final, très rapide. L'historique complet est centralisé sur Supabase et accessible aussi bien à l'application Streamlit qu'aux notebooks d'analyse, sans manipulation manuelle de fichiers.
 
 ### II.4.2. Nettoyage du signal
 
@@ -1034,9 +1026,13 @@ $$RUL(t) = \frac{r(t) - r_{critique}}{|dr/dt|}$$
 
 ## II.5. Méthodologie d'entraînement du modèle XGBoost
 
-### II.5.1. Validation croisée temporelle (TimeSeriesSplit)
+### II.5.1. Stratégie de validation : du *walk-forward* au *leave-one-run-out*
 
-La validation croisée walk-forward, implémentée par `TimeSeriesSplit` (n_splits = 4), est utilisée pour respecter la **causalité temporelle** : chaque fold entraîne sur les données passées et teste sur les données futures, jamais l'inverse (Bergmeir et Benítez, 2012). Ce protocole évite toute fuite temporelle et fournit une estimation honnête de la performance en conditions de déploiement.
+Plusieurs stratégies de validation existent pour un modèle prédictif : la séparation simple *train/test*, la validation croisée *k-fold* classique, la validation croisée temporelle *walk-forward* (`TimeSeriesSplit`), et la validation *leave-one-group-out*. Le choix dépend de la question posée.
+
+La validation **walk-forward** (`TimeSeriesSplit`) respecte la **causalité temporelle** à l'intérieur d'un même essai : chaque fold entraîne sur le passé et teste sur le futur, jamais l'inverse (Bergmeir et Benítez, 2012). Elle évite toute fuite temporelle mais ne renseigne que sur la prédiction *au sein* d'un run déjà observé.
+
+Or l'objectif industriel est la **généralisation à un essai nouveau, jamais vu**. Dans le cadre de ce travail, nous retenons donc comme stratégie principale la **validation *leave-one-run-out* (LORO)** : à chaque itération, un run complet est retiré de l'entraînement et sert exclusivement de test. Cette stratégie, plus exigeante, mesure la capacité réelle du modèle à prédire un essai indépendant — et constitue le cœur de la démonstration du Chapitre III (la fiabilité de cette généralisation dépend de la couverture des conditions, notamment thermiques, par les runs d'entraînement).
 
 ### II.5.2. Hyperparamètres XGBoost
 
@@ -1077,21 +1073,22 @@ L'objectif est d'identifier les **3 variables les plus influentes** et de vérif
 
 ### II.5.5. Module de diagnostic des régimes de corrosion
 
-Au-delà de la prédiction quantitative (CR, RUL), le pipeline implémente un **module de diagnostic** classifiant en temps réel le régime de corrosion observé, conformément à l'étape *Diagnostic* de la norme ISO 13381-1. L'approche retenue est une **approche par règles métier explicables**, simple à valider, transparente pour le jury et les utilisateurs industriels finaux. Cinq régimes sont reconnus :
+Au-delà de la prédiction quantitative (CR, RUL), le pipeline implémente un **module de diagnostic** classifiant le régime de corrosion observé, conformément à l'étape *Diagnostic* de la norme ISO 13381-1. Le diagnostic d'un régime peut s'appuyer sur diverses approches : règles métier explicites, classification supervisée (XGBoost classifieur) ou détection non-supervisée d'anomalies (Isolation Forest). Dans le cadre de ce travail, nous retenons une **approche par règles métier explicables**, simple à valider, transparente pour le jury et les utilisateurs industriels — les approches ML de classification étant envisagées en perspective d'évolution.
+
+Les régimes correspondent aux phases physiques observées sur un essai RTF du fil de fer en milieu HCl :
 
 **Tableau II.7 — Régimes de corrosion diagnostiqués et signatures**
 
-| Régime | Signature dans le signal | Action déclenchée |
+| Régime | Signature dans le signal | Niveau d'alerte |
 |---|---|---|
-| **Stable** | dR/dt ≈ 0 sur 6h, tendance plate | Surveillance normale (alerte verte) |
-| **Accélération** (HCl dominant) | tendance_6h > seuil_acc, T stable | Alerte orange + injection 0,1 % v/v |
-| **Passivation** (FePO₄ dominant) | dR/dt qui décélère sans inhibiteur | Surveillance — film stable |
-| **Adsorption inhibiteur** | Changepoint avec chute brutale de CR ≥ 30 % | Confirmer dose efficace |
-| **Pré-rupture** | dR/dt diverge ET RUL < 12 h | Alerte rouge + arrêt + remplacement |
+| **Induction** | dR/dt ≈ 0, résistance quasi stable (début d'immersion) | Vert |
+| **Croissance** | dR/dt > 0 régulier, tendance_6h positive et stable | Vert |
+| **Emballement** | accélération marquée de dR/dt, tendance_6h croissante | Orange |
+| **Pré-rupture** | dR/dt diverge ET RUL < 12 h | Rouge |
 
-Les seuils sont calibrés empiriquement à partir des distributions observées dans les runs de référence (runs 1 et 2), ce qui constitue une démarche scientifiquement honnête et reproductible. Une extension future à un classificateur ML supervisé (XGBoost classifieur) ou non-supervisé (Isolation Forest pour la détection d'anomalies) est envisagée comme perspective d'évolution mais hors périmètre du présent mémoire.
+Les seuils sont calibrés empiriquement à partir des distributions observées dans les runs de référence, ce qui constitue une démarche reproductible.
 
-La fonction `diagnostiquer(features)` du pipeline Python prend en entrée le vecteur de features de l'instant courant et retourne un dictionnaire `{régime: str, confiance: float, signal: dict}` exploité ensuite par le module GMAO (OS4) pour générer alertes et recommandations.
+La fonction `diagnostiquer(features)` du pipeline Python prend en entrée le vecteur de features de l'instant courant et retourne un dictionnaire `{régime: str, confiance: float, signal: dict}` exploité ensuite par le module GMAO (OS4) pour générer les alertes.
 
 ---
 
@@ -1099,39 +1096,51 @@ La fonction `diagnostiquer(features)` du pipeline Python prend en entrée le vec
 
 ### II.6.1. Justification du protocole RTF
 
-Le choix d'un protocole **run-to-failure (RTF)** est fondé sur la nécessité de constituer un jeu d'apprentissage couvrant l'intégralité du cycle de dégradation, de l'état initial jusqu'à la rupture, conformément à l'esprit de la norme **ISO 13381-1 :2015** sur la maintenance prévisionnelle (ISO, 2015 ; Akash, 2024). Seul un protocole RTF permet de constituer une base de données *vraie* (avec événement de défaillance observé) pour l'apprentissage de la prédiction RUL.
+Plusieurs protocoles permettent d'étudier la corrosion d'un métal : les **essais électrochimiques** (polarisation, spectroscopie d'impédance EIS), la **perte de masse** par immersion sur durée fixe, et les essais **run-to-failure (RTF)** où l'échantillon est suivi en continu jusqu'à sa rupture. Les essais électrochimiques fournissent des grandeurs instantanées mais nécessitent un instrument coûteux ; la perte de masse est simple mais ne donne qu'une vitesse moyenne, sans dynamique temporelle ni événement de défaillance.
+
+Dans le cadre de ce travail, nous retenons le protocole **run-to-failure (RTF)**, car il est le seul à constituer un jeu d'apprentissage couvrant l'intégralité du cycle de dégradation — de l'état initial jusqu'à la rupture — et à fournir un **événement de défaillance réellement observé**, indispensable à l'apprentissage de la prédiction de durée de vie résiduelle (RUL). Ce choix est conforme à l'esprit de la norme **ISO 13381-1 :2015** sur la maintenance prévisionnelle (ISO, 2015 ; Akash, 2024).
 
 ### II.6.2. Plan expérimental
 
-**Tableau II.8 — Plan des quatre runs expérimentaux**
+Le plan expérimental ne repose pas sur un nombre figé de runs, mais sur une **série d'essais RTF répétés** dans des conditions nominales identiques (même milieu HCl, même montage), conçue de manière **itérative**. Deux phases structurent la campagne :
 
-| Run | Durée estimée | Conditions | Utilisation ML |
+- une **phase exploratoire**, à température ambiante *subie* (non régulée), destinée à constituer les premières séries et à identifier les facteurs de variabilité ;
+- une **phase contrôlée**, à température *régulée* par bain-marie thermostaté, destinée à isoler l'effet de la température et à démontrer la répétabilité.
+
+**Tableau II.8 — Plan de la série d'essais run-to-failure (campagne en cours)**
+
+| Phase | Essais réalisés à ce stade | Conditions | Rôle |
 |---|---|---|---|
-| Run 1 | 24–72 h jusqu'à rupture | Detar Plus pur, sans inhibiteur, T ambiante | Entraînement |
-| Run 2 | 24–72 h jusqu'à rupture | Detar Plus pur (réplique) | Entraînement |
-| Run 3 | 24–72 h jusqu'à rupture | Milieu corrosif + inhibiteur imidazoline à 0,1 % v/v | Entraînement + évaluation inhibiteur |
-| Run 4 | 24–72 h jusqu'à rupture | Milieu corrosif + inhibiteur imidazoline à 0,5 % v/v | Validation |
+| Exploratoire | Run #1, #11, #12, #14 | HCl, température ambiante subie (≈ 29–33 °C) | Entraînement + mise en évidence de l'effet température |
+| Contrôlée | Run #16, #17 (+ runs en cours) | HCl, température régulée (consignes 30 °C puis 32 °C) | Démonstration de répétabilité + validation |
+
+La campagne se poursuit : des essais complémentaires aux consignes 30 °C et 32 °C sont en cours afin de consolider la couverture thermique (voir Chapitre III, perspectives). Le détail des essais retenus, écartés et utilisés comme contre-exemples est présenté au Chapitre III.
 
 ### II.6.3. Procédure standard par run
 
 Pour chaque run, la procédure suivante est appliquée :
 
-1. **Préparation de la cellule** : nettoyage du récipient HDPE, découpe d'un fil de fer neuf (longueur 1,1 m, diamètre 0,3 mm), nettoyage à l'acétone, séchage, mesure de *R*₀ au multimètre de précision, vérification du pH par pH-mètre papier ;
-2. **Câblage de la sonde** : montage du fil dans le pont, connexion HX711 → ESP32, vérification de la bonne réception des premiers points dans la table Supabase `measurements` via l'application Streamlit ;
-3. **Démarrage de l'acquisition** : immersion du fil dans le Detar Plus, déclenchement du run dans Supabase (`runs.started_at`) et début de l'envoi périodique des mesures par l'ESP32 ;
-4. **Surveillance périodique** toutes les 2 à 4 heures : vérification que l'acquisition se poursuit (LED ESP32, points apparaissant en continu dans le dashboard Streamlit) ;
-5. **Détection de la fin de run** : la rupture du fil est identifiée par divergence de *R*ₓ vers +∞. Clôture du run dans Supabase (`runs.ended_at`) et export ponctuel des mesures pour analyse hors-ligne ;
-6. **Post-run** : photographie de la cellule et du fil corrodé, nettoyage et préparation du run suivant.
+1. **Préparation de la cellule** : nettoyage du récipient, découpe d'un fil de fer neuf, nettoyage, séchage, mesure de *R*₀ au multimètre, vérification du pH ;
+2. **Câblage de la sonde** : montage du fil, connexion HX711 → ESP32, vérification de la réception des premiers points dans la table Supabase `cr_measurements` via l'application Streamlit ;
+3. **Mise en condition thermique** (phase contrôlée) : mise en route du bain-marie thermostaté et stabilisation à la consigne **avant** immersion ;
+4. **Démarrage de l'acquisition** : préparation d'**acide frais** et **immersion immédiate** du fil (sans délai d'exposition de l'acide à l'air, le HCl étant volatil), récipient **couvert** pour limiter l'évaporation ; création du run dans Supabase (`cr_runs.started_at`) et début de l'envoi des mesures ;
+5. **Surveillance périodique** : vérification de la continuité de l'acquisition via le dashboard Streamlit ;
+6. **Détection de la fin de run** : la rupture du fil est identifiée par un **critère objectif** — saturation de *R*ₓ (circuit ouvert), la valeur se figeant à sa borne haute. Le run est clôturé au premier point de saturation (`cr_runs.ended_at`) ;
+7. **Post-run** : photographie du fil corrodé, nettoyage et préparation du run suivant.
 
-### II.6.4. Seuils d'alerte et recommandations d'inhibiteur
+> **Note de protocole.** Deux exigences se sont révélées critiques pour la répétabilité (Chapitre III) : (i) la **stabilité thermique** du bain avant immersion ; (ii) l'**emploi d'acide frais immergé sans délai**, l'exposition prolongée de l'acide à l'air abaissant sa concentration par volatilisation du HCl.
 
-**Tableau II.9 — Seuils d'alerte et recommandations de dosage**
+### II.6.4. Seuils d'alerte gradués
+
+Les seuils d'alerte sont définis à partir des deux sorties du modèle (taux de corrosion CR et durée de vie résiduelle RUL), sans recourir à une action chimique corrective (hors périmètre de ce travail).
+
+**Tableau II.9 — Seuils d'alerte gradués**
 
 | Niveau | Condition | Recommandation |
 |---|---|---|
 | Vert (nominal) | *CR* < 1 mm/an ET *RUL* > 48 h | Surveillance normale |
-| Orange (vigilance) | 1 ≤ *CR* < 5 mm/an OU 12 ≤ *RUL* < 48 h | Injection inhibiteur imidazoline à 0,1 % v/v |
-| Rouge (critique) | *CR* ≥ 5 mm/an OU *RUL* < 12 h | Injection inhibiteur imidazoline à 0,5–1,0 % v/v + inspection immédiate |
+| Orange (vigilance) | 1 ≤ *CR* < 5 mm/an OU 12 ≤ *RUL* < 48 h | Planifier une inspection / intervention |
+| Rouge (critique) | *CR* ≥ 5 mm/an OU *RUL* < 12 h | Inspection immédiate + arrêt préventif |
 
 ---
 
@@ -1200,7 +1209,7 @@ Le tableau ci-dessous décrit le mapping entre les sorties du pipeline ML et les
 | `urgency` | Niveau d'alerte (vert=1, orange=3, rouge=5) | 5 |
 | `impact` | Criticité de l'asset (configuration) | 5 |
 | `priority` | Calcul GLPI = f(urgency, impact) | "Très haute" |
-| `content` (description) | Template enrichi : CR_pred, RUL_pred, top-3 SHAP, recommandation | "CR=4,2 mm/an ; RUL=18 h ; top-3 SHAP : ΔR/Δt, T_avg, Rx_ema. Recommandation : injection inhibiteur 0,5 % v/v." |
+| `content` (description) | Template enrichi : CR_pred, RUL_pred, top-3 SHAP, régime diagnostiqué | "CR=4,2 mm/an ; RUL=18 h ; régime : emballement ; top-3 SHAP : ΔR/Δt, T_avg, Rx_corr. Recommandation : inspection immédiate." |
 | `entities_id` | Asset surveillé (entité GLPI) | ID de la section pipeline |
 | `itilcategories_id` | Catégorie « Corrosion » | ID GLPI catégorie |
 | `_users_id_assign` | Technicien d'astreinte (configuration) | ID utilisateur |
@@ -1244,18 +1253,18 @@ GLPI fournit nativement ou par requête SQL/plugin les KPIs maintenance suivants
 
 | Objectif Spécifique | Activités à réaliser | Méthodes / Outils | Justifications / Résultats attendus |
 |---|---|---|---|
-| **OS1** — Concevoir et valider la sonde ER instrumentée IoT | (i) Câblage du pont de Wheatstone ; (ii) Programmation du firmware ESP32 (deep sleep, HX711, DS18B20) ; (iii) Tests de résolution sur résistances étalons ; (iv) Validation de la stabilité en milieu corrosif | Pont de Wheatstone (*R*₁ = *R*₂ = 10 Ω, *R*_REF = 0,5 Ω, *R*_SERIE = 100 Ω) ; HX711 gain 128 ; ESP32 deep sleep 600 s ; CSV série 115 200 baud ; Multimètre de précision | Sonde fonctionnelle avec résolution ≤ 0,01 mΩ, stabilité ±0,5 mV/24 h — démonstration de la brique d'acquisition I4.0 |
-| **OS2** — Entraîner et valider le modèle XGBoost (CR + RUL) | (i) Collecte de 4 runs RTF ; (ii) Nettoyage IQR + Savitzky-Golay ; (iii) Compensation thermique ; (iv) Feature engineering (10 variables) ; (v) TimeSeriesSplit n=4 ; (vi) Entraînement XGBoost ; (vii) MAE/RMSE/R² ; (viii) SHAP | Python : Pandas, SciPy, XGBoost, Scikit-learn, SHAP ; *n*=500, depth=4, lr=0,05, L1=0,1, L2=1,0 | *R²* > 0,70 et *RMSE* < 15 % pour CR et RUL ; SHAP : top 3 variables physiquement plausibles |
-| **OS3** — Diagnostic + évaluation inhibiteur + alertes | (i) Diagnostic régimes (5 classes) par règles métier ; (ii) Runs 3 et 4 avec inhibiteur imidazoline (0,1 % et 0,5 % v/v) ; (iii) Détection changepoint adsorption ; (iv) Calcul η ; (v) Calibration seuils vert/orange/rouge ; (vi) Recommandations dosage | Pipeline Python : `diagnostiquer(features)` ; algorithme changepoint sur fenêtre glissante ; comparaison runs inhibés vs non-inhibés ; calibration empirique | Diagnostic temps réel exploitable ; η mesuré comparé fabricant ; seuils calibrés (CR=1, 5 mm/an ; RUL=12, 48 h) |
+| **OS1** — Concevoir et valider la sonde ER instrumentée IoT | (i) Montage de la sonde ER ; (ii) Programmation du firmware ESP32 (acquisition 30 s, HX711, DS18B20) ; (iii) Tests de résolution sur résistances étalons ; (iv) Validation de la stabilité en milieu corrosif | Montage de mesure de résistance ; HX711 ; ESP32 acquisition continue 30 s ; Multimètre de précision | Sonde fonctionnelle, résolution suffisante pour quantifier le CR — démonstration de la brique d'acquisition I4.0 |
+| **OS2** — Entraîner et valider le modèle XGBoost (CR + RUL) | (i) Collecte d'une série de runs RTF ; (ii) Nettoyage IQR + Savitzky-Golay ; (iii) Compensation thermique ; (iv) Feature engineering ; (v) Validation LORO ; (vi) Entraînement XGBoost ; (vii) MAE/RMSE/R² ; (viii) SHAP | Python : Pandas, SciPy, XGBoost, Scikit-learn, SHAP ; *n*=500, depth=4, lr=0,05, L1=0,1, L2=1,0 | Prédiction CR + RUL ; comparaison aux baselines ; SHAP : variables physiquement plausibles |
+| **OS3** — Diagnostic des régimes + facteurs de variabilité + alertes | (i) Diagnostic des régimes (induction, croissance, emballement, pré-rupture) par règles métier ; (ii) Identification et quantification des facteurs de variabilité (température, concentration) par LORO ; (iii) Démonstration du rôle de la répétabilité ; (iv) Calibration des seuils vert/orange/rouge sur CR et RUL | Pipeline Python : `diagnostiquer(features)` ; validation LORO par plage thermique ; analyse des contre-exemples ; calibration empirique | Diagnostic exploitable ; effet température quantifié ; seuils calibrés (CR=1, 5 mm/an ; RUL=12, 48 h) |
 | **OS4** — Intégration au CMMS open-source par API REST | (i) Application Streamlit (frontend ML + dashboard) ; (ii) Matrice comparative GLPI/OpenMaint/Snipe-IT ; (iii) Mapping prédiction ML → ticket CMMS ; (iv) API REST `/Ticket` (POST automatique) ; (v) Calcul KPIs (MTBF, MTTR, η inhibition) | Streamlit + Streamlit Community Cloud ; **GLPI** (PHP/MariaDB, auto-hébergé) ; API REST GLPI ; Python `requests` ; ISO 14224 codes anomalie | Boucle Sonde→ML→Ticket CMMS démontrée end-to-end ; KPIs calculés ; coût de licence = 0 FCFA |
 
-L'usage des outils suit une chronologie stricte : conception matérielle (OS1) → acquisition expérimentale et modélisation (OS2) → diagnostic et évaluation inhibiteur (OS3) → intégration applicative GMAO (OS4).
+L'usage des outils suit une chronologie stricte : conception matérielle (OS1) → acquisition expérimentale et modélisation (OS2) → diagnostic des régimes et analyse des facteurs de variabilité (OS3) → intégration applicative GMAO (OS4).
 
 ---
 
 ## II.9. Conclusion du Chapitre II
 
-Ce chapitre a présenté l'ensemble des outils et de la méthodologie retenus pour répondre aux **quatre objectifs spécifiques** du mémoire. Une **§II.0.5 dédiée à la justification des choix technologiques** a consolidé les arbitrages techniques (microcontrôleur ESP32, amplificateur HX711, capteur DS18B20, méthode ER, algorithme XGBoost, validation TimeSeriesSplit, frontend Streamlit, CMMS GLPI) sous forme de matrices de décision. Le prototype de sonde ER (pont de Wheatstone + HX711 + ESP32 en deep sleep pulsé) a ensuite été décrit dans son principe physique et son implémentation matérielle. Les matériels électroniques, chimiques et logiciels mobilisés ont été consolidés en tableaux récapitulatifs. Les méthodes d'acquisition, de nettoyage, de compensation thermique, de feature engineering, d'entraînement XGBoost et d'interprétabilité SHAP ont été détaillées, ainsi que le module de diagnostic des régimes de corrosion. L'**architecture d'intégration Streamlit ↔ CMMS open-source par API REST** (matrice comparative GLPI / OpenMaint / Snipe-IT, mapping prédiction ML → ticket, KPIs maintenance côté CMMS) a été spécifiée. Le protocole expérimental *run-to-failure* en quatre runs et le tableau synoptique de la démarche ont été présentés. Le **Chapitre III** présente à présent les résultats issus de la mise en œuvre de cette méthodologie, leur analyse et leur discussion.
+Ce chapitre a présenté l'ensemble des outils et de la méthodologie retenus pour répondre aux **quatre objectifs spécifiques** du mémoire. Une **§II.0.5 dédiée à la justification des choix technologiques** a consolidé les arbitrages techniques (microcontrôleur ESP32, amplificateur HX711, capteur DS18B20, méthode ER, algorithme XGBoost, stratégie de validation, frontend Streamlit, CMMS GLPI) sous forme de matrices de décision. Le prototype de sonde ER (montage de mesure de résistance + HX711 + ESP32 en acquisition continue 30 s) a ensuite été décrit dans son principe physique et son implémentation matérielle. Les matériels électroniques, chimiques et logiciels mobilisés ont été consolidés en tableaux récapitulatifs. Les méthodes d'acquisition, de nettoyage, de compensation thermique, de feature engineering, d'entraînement XGBoost et d'interprétabilité SHAP ont été détaillées, ainsi que le module de diagnostic des régimes de corrosion et la stratégie de validation *leave-one-run-out*. L'**architecture d'intégration Streamlit ↔ CMMS open-source par API REST** (matrice comparative GLPI / OpenMaint / Snipe-IT, mapping prédiction ML → ticket, KPIs maintenance côté CMMS) a été spécifiée. Le protocole expérimental *run-to-failure* en série répétée et le tableau synoptique de la démarche ont été présentés. Le **Chapitre III** présente à présent les résultats issus de la mise en œuvre de cette méthodologie, leur analyse et leur discussion.
 
 \newpage
 
@@ -1267,238 +1276,191 @@ Ce chapitre a présenté l'ensemble des outils et de la méthodologie retenus po
 
 - III.0. Introduction
 - III.1. Validation métrologique de la sonde ER (OS1)
-- III.2. Résultats des quatre runs run-to-failure
-- III.3. Performance du modèle XGBoost CR + RUL (OS2)
-- III.4. Diagnostic des régimes de corrosion (OS3)
-- III.5. Évaluation de l'inhibiteur de corrosion et calibration des alertes (OS3)
-- III.6. Intégration au CMMS open-source — démonstration end-to-end et KPIs (OS4)
-- III.7. Discussions
-- III.8. Conclusion
+- III.2. Résultats de la série run-to-failure (OS2)
+- III.3. Effet de la température et performance du modèle XGBoost (OS2/OS3)
+- III.4. Diagnostic des régimes et facteurs de variabilité (OS3)
+- III.5. Intégration au CMMS open-source — démonstration end-to-end et KPIs (OS4)
+- III.6. Discussions
+- III.7. Conclusion
 
 ---
 
 ## III.0. Introduction
 
-> **Ce chapitre sera complété au fur et à mesure de la collecte des données expérimentales sur le prototype et du déploiement de la GMAO.** L'ensemble des sections suivantes a été pré-structuré conformément à la méthodologie présentée au Chapitre II. Chaque section est accompagnée d'une indication précise de la nature des données, des graphes, des captures d'écran et des analyses à insérer.
+> **Note d'état.** La campagne expérimentale est **toujours en cours** : les résultats présentés ici correspondent aux essais exploités à la date de rédaction. Ils sont **provisoires et défendables en l'état**, et seront consolidés par les runs complémentaires en cours d'acquisition (voir perspectives, §III.6).
 
-Dans ce chapitre, il sera question de présenter (i) les résultats de la validation métrologique de la sonde ER (OS1), (ii) les données expérimentales issues des quatre runs RTF, (iii) les performances du modèle XGBoost prédisant CR et RUL ainsi que l'analyse SHAP des variables d'influence (OS2), (iv) le diagnostic des régimes de corrosion observés (OS3), (v) l'évaluation de l'efficacité de l'inhibiteur de corrosion testé et la calibration du système d'alertes (OS3), (vi) la **démonstration end-to-end de l'intégration Streamlit ↔ CMMS open-source** et les KPIs maintenance calculés (OS4), puis de discuter l'ensemble de ces résultats au regard des objectifs initiaux et de la littérature internationale (Chapitre I).
-
----
-
-## III.1. Validation métrologi que de la sonde ER (OS1)
-
-### III.1.1. Stabilité du signal en milieu neutre (test à vide)
-
-*[À compléter — Protocole : immersion du fil dans de l'eau distillée pendant 24 h, mesure de Rx(t). Insérer : graphe Rx(t) sur 24 h, calcul de l'écart-type σ_Rx (mΩ), vérification que σ_Rx < 0,01 mΩ.]*
-
-### III.1.2. Étalonnage sur résistances de référence
-
-*[À compléter — Protocole : substitution du fil par 5 résistances de précision (0,1 Ω, 0,2 Ω, 0,5 Ω, 1,0 Ω, 2,0 Ω). Insérer : tableau comparatif HX711 vs valeur étalon, graphe linéarité, calcul de l'erreur relative moyenne (%).]*
-
-### III.1.3. Efficacité de la compensation thermique
-
-*[À compléter — Protocole : variation contrôlée de la température de 22 °C à 32 °C, mesure simultanée Rx_brut et Rx_corr. Insérer : courbe Rx_brut(T) et Rx_corr(T) — démontrer que la pente Rx_corr(T) est < 1 % de la pente Rx_brut(T).]*
-
-### III.1.4. Bilan de la validation métrologi que
-
-*[À compléter — Tableau synthèse : résolution effective (mΩ), bruit RMS (mΩ), dérive thermique résiduelle (%), conformité au cahier des charges.]*
+Dans ce chapitre, il sera question de présenter (i) la validation métrologique de la sonde ER (OS1), (ii) les résultats de la série d'essais run-to-failure (OS2), (iii) l'effet de la température et la performance du modèle XGBoost en validation inter-essais (OS2/OS3), (iv) le diagnostic des régimes de corrosion et l'analyse des facteurs de variabilité conditionnant la fiabilité de la prédiction (OS3), (v) la démonstration de l'intégration Streamlit ↔ CMMS open-source (OS4), puis de discuter ces résultats au regard des objectifs initiaux et de la littérature (Chapitre I).
 
 ---
 
-## III.2. Résultats des quatre runs run-to-failure (OS2)
+## III.1. Validation métrologique de la sonde ER (OS1)
 
-### III.2.1. Run 1 — Detar Plus pur, sans inhibiteur
+Avant d'exploiter la sonde pour le suivi de corrosion, sa chaîne de mesure doit être validée. Une validation métrologique peut s'appuyer sur plusieurs vérifications : stabilité du signal au repos, étalonnage sur références connues, et maîtrise des grandeurs d'influence (température). Dans le cadre de ce travail, nous retenons ces trois vérifications, présentées ci-dessous.
 
-*[À compléter — Insérer : (i) graphe Rx(t) sur la durée du run, (ii) graphe CR_lisse(t), (iii) graphe T(t). Indicateurs : durée totale du run (h), Rx initial (Ω), Rx à la rupture (Ω), CR moyen (mm/an), CR maximum (mm/an), photographie du fil après rupture.]*
+### III.1.1. Étalonnage sur résistances de référence
 
-### III.2.2. Run 2 — Detar Plus pur, sans inhibiteur (réplique)
+La justesse de la mesure de résistance a été vérifiée par substitution du fil par des résistances de précision connues. L'étalonnage a conduit à retenir un **facteur de correction du module HX711** (constant), appliqué à toutes les mesures du pipeline. *[Tableau comparatif HX711 vs étalon et courbe de linéarité à insérer après consolidation des points d'étalonnage.]*
 
-*[À compléter — Idem Run 1. Tableau comparatif Run 1 vs Run 2 : durée, CR moyen, CR max, Rx_rupture. Discussion de la reproductibilité.]*
+### III.1.2. Compensation thermique
 
-### III.2.3. Run 3 — Milieu corrosif + inhibiteur imidazoline à 0,1 % v/v
+La résistivité du fer dépendant de la température (§II.4.3), une compensation thermique est appliquée à chaque mesure à partir de la température lue par le DS18B20. L'effet de cette compensation est illustré indirectement dans les essais à température variable : la résistance compensée *R*_corr suit la dégradation réelle du fil sans être polluée par les fluctuations thermiques de courte durée.
 
-*[À compléter — Insérer : graphe Rx(t) avec annotation du temps d'injection de l'inhibiteur (t_injection) et du temps d'adsorption détecté (t_adsorption). Calcul de Δt_adsorption = t_adsorption - t_injection. Calcul de l'efficacité d'inhibition η₁ = (CR_avant - CR_après) / CR_avant × 100.]*
+### III.1.3. Bilan provisoire
 
-### III.2.4. Run 4 — Milieu corrosif + inhibiteur imidazoline à 0,5 % v/v
-
-*[À compléter — Idem Run 3. Calcul η₂. Comparaison η₁ vs η₂. Vérification de la relation dose-efficacité (loi de Langmuir attendue).]*
-
-### III.2.5. Synthèse des quatre runs
-
-*[À compléter — Tableau récapitulatif : pour chaque run, durée, CR moyen, CR max, η, observations particulières. Graphe consolidé Rx(t) des 4 runs sur le même axe pour comparaison visuelle.]*
+À ce stade, la chaîne d'acquisition est **fonctionnelle et stable** : elle a permis de suivre sans interruption plusieurs essais de 10 à 20 heures (acquisition continue à 30 s), de capturer la phase d'emballement rapide et de détecter la rupture du fil. Le bilan métrologique chiffré (résolution effective, bruit RMS, dérive thermique résiduelle) sera complété par les tests dédiés en cours.
 
 ---
 
-## III.3. Performance du modèle XGBoost (OS2)
+## III.2. Résultats de la série run-to-failure (OS2)
 
-### III.3.1. Métriques de validation croisée walk-forward
+Un essai de corrosion peut être suivi par plusieurs grandeurs (perte de masse, courant de corrosion, résistance électrique). Dans ce travail, le suivi repose sur la **résistance électrique compensée** *R*_corr(t) du fil de fer, dont la croissance traduit la perte de section, jusqu'à la rupture. Chaque essai fournit ainsi une courbe complète de dégradation.
 
-*[À compléter — Tableau MAE, RMSE, R² pour chacun des 4 folds TimeSeriesSplit, séparément pour CR et RUL. Comparaison avec baseline naïve (prédiction par la moyenne du training set).]*
+### III.2.1. Allure typique d'un essai et phases observées
 
-**Tableau III.1 (à compléter) — Métriques walk-forward XGBoost CR**
+La figure III.2 présente l'évolution de *R*_corr(t) et de la température T(t) pour les essais retenus. Toutes les courbes partagent la même allure en trois phases : une **induction** (résistance quasi stable en début d'immersion), une **croissance** progressive, puis un **emballement** final rapide aboutissant à la rupture (saturation de la résistance, circuit ouvert). Ce profil, conforme à la dégradation attendue d'un fil corrodé, valide le principe de la mesure.
 
-| Fold | n_train | n_test | MAE | RMSE | R² | RMSE_baseline | Gain (%) |
-|---|---|---|---|---|---|---|---|
-| 1 | … | … | … | … | … | … | … |
-| 2 | … | … | … | … | … | … | … |
-| 3 | … | … | … | … | … | … | … |
-| 4 | … | … | … | … | … | … | … |
-| Moyenne | — | — | … | … | … | … | … |
+![Figure III.2 — Évolution de R(t) compensée et T(t) par essai](figures/fig_iii2_runs.png){ width=98% }
 
-**Tableau III.2 (à compléter) — Métriques walk-forward XGBoost RUL**
+### III.2.2. Synthèse des essais exploités
 
-*[Même structure pour RUL.]*
+À ce stade de la campagne, **cinq essais** sont retenus comme essais propres (milieu HCl, montage identique) : un essai de référence initial (Run #1) et quatre essais de la série répétée (Run #11, #12, #14, #16). Le tableau III.1 en résume les caractéristiques.
 
-### III.3.2. Courbes prédites vs observées
+**Tableau III.1 — Caractéristiques des essais retenus (campagne en cours)**
 
-*[À compléter — Graphes scatter plot CR_prédit vs CR_observé et RUL_prédit vs RUL_observé, avec diagonale idéale et bandes ±15 %.]*
+| Essai | Phase | T° moyenne | Durée de vie | Points | Observation |
+|---|---|---|---|---|---|
+| Run #1 | Exploratoire | 29,5 °C | 22,1 h | 2 531 | Essai de référence initial |
+| Run #11 | Exploratoire | 32,7 °C | 10,0 h | 1 183 | Température élevée (canicule) |
+| Run #12 | Exploratoire | 29,6 °C | 14,1 h | 1 684 | Essai propre |
+| Run #14 | Exploratoire | 31,7 °C | 13,6 h | 1 519 | Essai propre |
+| Run #16 | Contrôlée | 30,1 °C | 12,0 h | 1 442 | Régulation thermique (σ = 0,52 °C) |
 
-### III.3.3. Analyse SHAP — variables d'influence
+La figure III.3 confronte la durée de vie et la température moyenne de chaque essai. Une **tendance nette** se dégage : les essais les plus chauds rompent le plus vite (Run #11 à 32,7 °C : 10 h), conformément à la dépendance d'Arrhenius (§I.7.7). Une variabilité résiduelle subsiste néanmoins à température comparable (Run #1 et Run #12, tous deux à ≈ 29,5 °C, durent respectivement 22 h et 14 h), ce qui annonce le rôle des facteurs non thermiques analysés en §III.4.
 
-*[À compléter — Insérer : (i) SHAP summary plot (beeswarm) des 10 features, (ii) SHAP bar chart des importances moyennes, (iii) SHAP dependence plot pour la feature top-1. Identifier et commenter les 3 variables les plus influentes — vérifier la cohérence physique.]*
-
----
-
-## III.4. Diagnostic des régimes de corrosion (OS3)
-
-### III.4.1. Détection du régime stable
-
-*[À compléter — Identification des plages temporelles classifiées « stable » dans les runs 1 et 2. Vérification de la cohérence des seuils empiriques (dR/dt < seuil_stable, tendance_6h ≈ 0).]*
-
-### III.4.2. Détection du régime d'accélération (HCl dominant)
-
-*[À compléter — Identification des phases d'accélération de la corrosion sans inhibiteur. Graphe CR(t) avec annotation des fenêtres classifiées « accélération ».]*
-
-### III.4.3. Détection du régime de passivation (FePO₄ dominant)
-
-*[À compléter — Identification d'éventuelles phases de passivation observées (CR qui décélère sans inhibiteur). Hypothèse : formation d'un film de phosphate de fer par H₃PO₄. À confirmer par observation visuelle du fil après run.]*
-
-### III.4.4. Détection du régime d'adsorption inhibiteur
-
-*[À compléter — Pour les runs 3 et 4 : détection du changepoint et classification automatique du régime « adsorption inhibiteur ». Comparaison avec le moment d'injection réel.]*
-
-### III.4.5. Détection du régime pré-rupture
-
-*[À compléter — Identification des dernières heures avant rupture sur chaque run. Vérification que l'algorithme classifie bien ces fenêtres en « pré-rupture » (RUL < 12 h, dR/dt diverge).]*
-
-### III.4.6. Synthèse — matrice de confusion du diagnostic
-
-*[À compléter — Matrice de confusion 5 × 5 (régime prédit vs régime réel labélisé manuellement). Calcul de la précision globale.]*
+![Figure III.3 — Durée de vie et température moyenne par essai](figures/fig_iii2_synthese.png){ width=85% }
 
 ---
 
-## III.5. Évaluation de l'inhibiteur de corrosion et calibration des alertes (OS3)
+## III.3. Effet de la température et performance du modèle (OS2/OS3)
 
-### III.5.1. Détection du temps d'adsorption (changepoint)
+La température agit sur la cinétique de corrosion selon une loi de type Arrhenius (§I.7.7) : sa variation entre essais est donc une source majeure de variabilité. La question centrale de cette section est la capacité du modèle à **généraliser à un essai jamais vu**, évaluée par la validation *leave-one-run-out* (LORO, §II.5.1).
 
-*[À compléter — Pour les runs 3 et 4 : graphe CR_lisse(t) avec marqueur du changepoint détecté par l'algorithme (chute ≥ 30 % par rapport à la baseline). Comparaison avec t_injection réel. Calcul de Δt_adsorption et discussion (cohérence avec la cinétique de Langmuir).]*
+### III.3.1. Performance en validation inter-essais (LORO)
 
-### III.5.2. Efficacité d'inhibition mesurée vs déclarée fabricant
+Le tableau III.2 et la figure III.4 présentent le R² obtenu sur chaque essai testé (le run testé n'étant jamais vu à l'entraînement), pour le modèle XGBoost comparé à deux références : une régression linéaire et une prédiction par la moyenne.
 
-*[À compléter — Tableau comparatif :*
+**Tableau III.2 — Performance LORO par essai (taux de corrosion CR)**
 
-| Concentration | η mesurée (%) | η fabricant typique (%) | Écart (%) |
-|---|---|---|---|
-| 0,1 % v/v | … | > 90 (à vérifier) | … |
-| 0,5 % v/v | … | > 90 | … |
+| Essai testé | T° | R² XGBoost | R² Régression lin. | R² Moyenne |
+|---|---|---|---|---|
+| Run #12 | 29,6 °C | **+0,44** | +0,06 | < 0 |
+| Run #16 | 30,1 °C | +0,03 | +0,07 | < 0 |
+| Run #14 | 31,7 °C | −1,02 | −5,37 | < 0 |
+| **Moyenne** | — | **−0,18** | — | — |
 
-*Discussion des écarts au regard de la composition multi-acide (HCl + H₃PO₄) vs HCl pur des essais fabricant — l'efficacité réelle peut être réduite par l'environnement multi-mécanismes.]*
+![Figure III.4 — Performance LORO par essai (XGBoost vs références)](figures/fig_iii3_r2_runs.png){ width=85% }
 
-### III.5.3. Calibration finale des seuils vert / orange / rouge
+XGBoost domine systématiquement les deux références. Mais la moyenne globale négative (−0,18) appelle une lecture **par plage de température** plutôt que globale.
 
-*[À compléter — Justification empirique des seuils (CR = 1 et 5 mm/an, RUL = 12 et 48 h) basée sur les distributions observées dans les runs 1 et 2. Représentation des distributions empiriques avec les seuils superposés.]*
+### III.3.2. La couverture thermique conditionne la fiabilité
 
----
+La figure III.5 regroupe les essais par plage de température. Le résultat est net :
 
-## III.6. Intégration au CMMS open-source — démonstration end-to-end et KPIs (OS4)
+- **plage ~30 °C, couverte par plusieurs essais : R² moyen = +0,24** (positif — le modèle prédit correctement) ;
+- **plage ~32 °C, représentée par un seul essai (Run #14) : R² = −1,02** (le modèle échoue).
 
-### III.6.1. Schéma de base de données déployé
+![Figure III.5 — Performance moyenne par plage de température](figures/fig_iii3_r2_plage.png){ width=70% }
 
-*[À compléter — Capture d'écran ou schéma graphique des huit tables Supabase déployées (assets, measurements, predictions, alerts, work_orders, interventions, inhibitor_doses, kpi_maintenance). Vérification de l'intégrité référentielle.]*
+L'interprétation est directe : **la prédiction est fiable là où la plage de température du run testé est couverte par les essais d'entraînement, et échoue là où elle ne l'est pas.** Run #14 est négatif non pas par faiblesse du modèle, mais parce qu'aucun autre essai propre ne couvre encore sa plage (32 °C). C'est la **répétabilité des conditions** — et non le volume brut de données — qui conditionne la fiabilité. Ce constat fonde directement le plan d'essais complémentaires (§III.6).
 
-### III.6.2. Dashboard temps réel — page d'accueil
+### III.3.3. Variables d'influence
 
-*[À compléter — Capture d'écran de la page `/` du dashboard Next.js déployé sur Vercel. Affichage des courbes Rx(t), T(t), CR(t), RUL(t) en temps réel. Liste des alertes actives.]*
+La figure III.6 présente l'importance relative des variables dans le modèle. Les variables liées à l'**état de dégradation** (résistance compensée, section perdue) et à la **température** ressortent en tête, ce qui est cohérent avec la physique du phénomène et conforte la validité du modèle.
 
-### III.6.3. Génération automatique d'alertes et d'ordres de travail
-
-*[À compléter — Captures d'écran : (i) page `/alerts` avec filtrage vert/orange/rouge ; (ii) page `/work-orders` en mode Kanban (Ouvert / En cours / Fermé) ; (iii) détail d'un OT avec formulaire d'intervention. Démontrer la création automatique d'OT depuis une alerte rouge.]*
-
-### III.6.4. Traçabilité des interventions et des doses d'inhibiteur
-
-*[À compléter — Capture d'écran de l'historique d'un asset : timeline des alertes, OT, interventions, doses d'inhibiteur injectées. Vérification de la traçabilité ISO 14224.]*
-
-### III.6.5. KPIs maintenance calculés
-
-*[À compléter — Capture d'écran du dashboard `/kpi`. Tableau des KPIs réalisés sur la période expérimentale :*
-
-| KPI | Valeur mesurée | Cible | Conformité |
-|---|---|---|---|
-| MTBF (h) | … | maximiser | … |
-| MTTR (h) | … | minimiser | … |
-| Disponibilité (%) | … | > 95 | … |
-| Efficacité d'inhibition (%) | … | > 90 | … |
-| Coût évité (FCFA) | … | maximiser | … |
-| Précision du modèle (%) | … | > 85 | … |
-
-*Discussion : ces KPIs n'ont de valeur que sur des volumes significatifs ; les valeurs présentées sont à considérer comme une démonstration de la chaîne de calcul, à confirmer en exploitation industrielle réelle.]*
-
-### III.6.6. Comparaison fonctionnelle vs GMAO industrielles
-
-*[À compléter — Tableau comparatif fonctionnel : intégration Streamlit + GLPI vs SAP PM vs IBM Maximo vs MaintainX (free) sur les fonctions essentielles (gestion actifs, OT, KPIs, intégration IoT, ML embarqué, coût annuel par site). Discussion de la viabilité du prototype pour les PME industrielles africaines et pour le contexte COTCO.]*
+![Figure III.6 — Importance des variables explicatives (XGBoost)](figures/fig_iii3_features.png){ width=80% }
 
 ---
 
-## III.7. Discussions
+## III.4. Diagnostic des régimes et facteurs de variabilité (OS3)
 
-### III.7.1. Comparaison de maturité numérique : chaîne prototype I4.0 vs sondes commerciales déployées en I3.0
+### III.4.1. Diagnostic des régimes de corrosion
 
-*[À compléter — Comparer la résolution effective obtenue (mΩ) aux spécifications industrielles : Cosasco CW-20, Emerson Roxar, Permasense WT. Discuter le ratio coût/performance — ratio attendu : facteur 40 à 100 moins cher pour une résolution équivalente.]*
+Le module de diagnostic (§II.5.5) classe chaque instant dans l'un des régimes physiques observés : induction, croissance, emballement, pré-rupture. Appliqué aux essais, il identifie correctement la succession de ces phases sur les courbes *R*_corr(t) (figure III.2) : une induction initiale, une croissance régulière sur la majeure partie du run, puis un emballement dans les dernières heures précédant la rupture. Cette classification par règles explicables est directement exploitée pour graduer les alertes (§II.6.4).
 
-### III.7.2. Performance du modèle XGBoost — confrontation à la littérature
+### III.4.2. Facteurs de variabilité : deux contre-exemples instructifs
 
-*[À compléter — Comparer le RMSE obtenu avec les valeurs rapportées par :*
+Au-delà de la température, deux essais se sont révélés **imprédictibles** par le modèle malgré une plage thermique a priori couverte. Leur analyse, loin d'être un échec, **isole expérimentalement deux facteurs de variabilité** qu'il faut contrôler.
 
-- *Wei et al. (2024) : RMSE = 0,031 mm/an, R² = 0,99 ;*
-- *Yan et Yan (2024) : RMSE = 0,052 ;*
-- *Hu et al. (2024) : RMSE = 0,005876, R² = 0,9648.*
+La figure III.7 confronte la courbe d'un essai propre (Run #16) à celles de ces deux contre-exemples.
 
-*Discuter les raisons d'éventuels écarts (taille du jeu de données, type de milieu multi-acide vs corrosion CO₂, protocole RTF).]*
+![Figure III.7 — Vitrine 30 °C vs contre-exemples](figures/fig_iii4_contrexemples.png){ width=85% }
 
-### III.7.3. Effet de l'inhibiteur testé — interprétation physico-chimique
+**Tableau III.3 — Les deux facteurs de variabilité identifiés**
 
-*[À compléter — Interpréter le temps d'adsorption détecté au regard de la cinétique d'adsorption des imidazolines (Heydari et Talebpour, 2024 ; Wang et al., 2023). Vérifier que η mesuré suit l'isotherme de Langmuir : η(C) = K_ads × C / (1 + K_ads × C).]*
+| Essai | Facteur dégradé | Température | Effet observé | R² en test |
+|---|---|---|---|---|
+| Run #15 | **Régulation thermique** (dérive 31 → 28 °C) | instable (σ = 0,96 °C) | cinétique incohérente | ≈ −2,4 |
+| Run #17 | **Concentration d'acide** (HCl évaporé, acide exposé > 1 h à l'air avant immersion) | parfaite (σ = 0,55 °C) | corrosion ~2× plus lente | ≈ −2,3 |
 
-### III.7.4. Apport de l'intégration au CMMS open-source
+Le cas de Run #17 est particulièrement parlant : sa **température était parfaitement régulée**, mais l'acide, laissé exposé à l'air avant immersion, avait perdu une partie de sa concentration par volatilisation du HCl — ralentissant la corrosion et rendant l'essai non comparable aux autres. La vérification que le filtrage des points froids ne « répare » pas Run #15 confirme qu'un essai dont une condition a dérivé est **irrécupérable par post-traitement**.
 
-*[À compléter après déploiement — Discussion de la viabilité du prototype GMAO en termes de :*
+**Conclusion de l'OS3 :** la fiabilité de la prédiction exige la maîtrise simultanée de **tous** les facteurs expérimentaux — non seulement la couverture thermique (§III.3), mais aussi la **qualité de régulation** (Run #15) et la **constance de la concentration** (Run #17). Ce constat justifie le protocole acide corrigé (§II.6.3).
 
-- *Couverture fonctionnelle (vs ISO 14224) ;*
-- *Coût total de possession (TCO) sur 5 ans : < 200 USD vs 50–250 K USD pour SAP PM/Maximo ;*
-- *Adéquation aux PME africaines ;*
-- *Limites identifiées (mono-tenant, pas de mode hors-ligne, etc.).*
+### III.4.3. Calibration des seuils d'alerte
 
-*Argumenter que le ratio coût/fonctionnalité ouvre un marché jusqu'ici inaccessible aux PME industrielles subsahariennes.]*
-
-### III.7.5. Limites du travail
-
-Plusieurs limites sont identifiées et doivent être prises en compte dans l'interprétation des résultats :
-
-**Limites matérielles :** le fil de fer recuit utilisé dans le prototype n'est pas le matériau standard des pipelines COTCO (acier API 5L Grade B). Les valeurs absolues de *CR* mesurées ne sont pas directement transposables aux conditions industrielles sans facteur de correction de composition. Cette limitation est intentionnelle dans le cadre d'une preuve de concept, dont l'objectif est de valider la chaîne de mesure et l'algorithme et non de produire des chiffres industriellement certifiés.
-
-**Limites du jeu de données :** quatre runs RTF, soit environ 1 200 à 1 800 points de mesure, constituent un jeu d'apprentissage minimal. Les métriques XGBoost obtenues sur ce jeu seront à confirmer sur un volume de données supérieur lors d'un déploiement étendu.
-
-**Limites du milieu corrosif :** le Detar Plus est un produit commercial dont la composition exacte (concentrations HCl et H₃PO₄) varie selon les lots. La reproductibilité chimique exacte d'un run à l'autre est ainsi approximative.
-
-**Limites de la validation :** l'absence de coupon gravimétrique parallèle prive ce travail d'une validation indépendante du *CR* mesuré par la sonde ER. Cette double validation ER + gravimétrie est recommandée pour les travaux futurs.
-
-**Limites de transposition à l'industrie :** la transposition aux conditions COTCO réelles (acier API 5L, hydrocarbures, températures et pressions de procédé) nécessitera un recalibrage du modèle sur un jeu de données collecté en conditions industrielles — ce qui constitue précisément l'objet du stage en entreprise prévu à la suite de ce mémoire.
+Les seuils d'alerte (tableau II.9) sont fixés à partir des distributions de CR et de RUL observées sur les essais de référence. La calibration définitive sera affinée lorsque la couverture thermique sera complétée.
 
 ---
 
-## III.8. Conclusion du Chapitre III
+## III.5. Intégration au CMMS open-source — démonstration (OS4)
 
-*[À compléter après acquisition des données — Synthétiser les résultats des **quatre objectifs spécifiques** : (i) validation métrologi que de la sonde ER (résolution mΩ obtenue, stabilité), (ii) performance XGBoost (R², RMSE pour CR et RUL ; top-3 SHAP), (iii) diagnostic des régimes (matrice de confusion ; efficacité η mesurée de l'inhibiteur ; seuils calibrés), (iv) prototype GMAO (URL Vercel déployée ; KPIs maintenance calculés ; comparaison fonctionnelle avec GMAO industrielles). Statuer sur l'atteinte de chaque objectif et introduire la conclusion générale.]*
+La boucle décision → action peut être structurée de deux manières : développer une GMAO *ex nihilo*, ou intégrer un CMMS open-source existant (§II.7.1). Conformément au choix retenu, cette section présente l'état de l'intégration à ce stade.
+
+### III.5.1. Écran de supervision temps réel
+
+Une application web de supervision a été développée (Streamlit). Elle se connecte en temps réel à la base Supabase et affiche, par essai, la résistance compensée, la température, le taux de corrosion et l'état de l'acquisition, dans une interface de type salle de contrôle. Elle détecte automatiquement un run actif et s'actualise en continu. *[Captures d'écran de l'écran de supervision à insérer.]*
+
+### III.5.2. Mapping alerte → ticket et KPIs
+
+Le mapping entre une prédiction et un ticket CMMS (GLPI) a été spécifié (§II.7.5) : une alerte rouge génère un ordre de travail enrichi (CR, RUL, régime diagnostiqué, top-3 SHAP). Les KPIs de maintenance (MTBF, MTTR, disponibilité, taux de fausses alertes) sont calculables côté CMMS à partir de l'historique des interventions.
+
+> **État d'avancement.** L'écran de supervision est opérationnel ; la connexion automatisée au CMMS GLPI et le calcul des KPIs sur un historique significatif sont en cours de finalisation. Les KPIs n'auront de valeur statistique que sur un volume d'essais et d'interventions plus important — ils constituent à ce stade une démonstration de la chaîne de calcul.
+
+---
+
+## III.6. Discussions
+
+### III.6.1. Le prototype low-cost face aux sondes commerciales (I3.0 → I4.0)
+
+Les sondes ER commerciales (Cosasco, Emerson Roxar, Permasense) offrent une résolution et un durcissement industriels supérieurs, mais restent coûteuses et exploitées à un niveau Industrie 3.0 (seuils fixes, analyse silotée). Le prototype développé ici, à partir de composants accessibles localement, démontre qu'une **couche prédictive (I4.0) peut être ajoutée pour un coût marginal** : il ne s'agit pas de remplacer les sondes commerciales mais de brancher en aval une chaîne ML — saut essentiellement logiciel.
+
+### III.6.2. Performance du modèle — confrontation à la littérature
+
+La littérature rapporte d'excellentes performances pour les modèles ML de prédiction du taux de corrosion sur de **grands jeux de données homogènes** (Wei et al., 2024 ; Yan et Yan, 2024 ; Hu et al., 2024, avec des R² > 0,96). Nos résultats, plus modestes en valeur absolue, s'expliquent par un nombre d'essais réduit et, surtout, par le caractère **inter-essais** de notre validation (LORO), bien plus exigeante qu'une validation intra-jeu. Le résultat marquant n'est pas tant la valeur du R² que sa **structure** : positif là où les conditions sont couvertes et répétées, négatif sinon. Cette lecture, rarement explicitée dans la littérature, constitue l'apport méthodologique de ce travail.
+
+### III.6.3. Apport de l'intégration au CMMS open-source
+
+L'intégration à un CMMS open-source (GLPI) plutôt qu'un développement *ex nihilo* offre un coût total de possession très faible (de l'ordre de quelques dizaines de dollars, contre 50–250 k USD pour SAP PM ou IBM Maximo), ouvrant la maintenance structurée aux PME industrielles africaines. Cette approche reste compatible avec un déploiement on-premise, exigé par les contraintes de sécurité industrielle (cas COTCO).
+
+### III.6.4. Limites du travail
+
+**Limites matérielles :** le fil de fer utilisé n'est pas le matériau des pipelines COTCO (acier API 5L). Les valeurs absolues de *CR* ne sont pas directement transposables — limitation assumée dans une preuve de concept visant à valider la chaîne et la méthode.
+
+**Limites du jeu de données :** le nombre d'essais exploités à ce stade reste réduit, ce qui rend les métriques **bruitées** (un même essai peut voir son R² varier sensiblement selon la composition du jeu d'entraînement). La campagne en cours vise précisément à augmenter ce volume.
+
+**Limites de la couverture thermique :** une seule plage (~30 °C) est aujourd'hui couverte par plusieurs essais ; la plage ~32 °C ne l'est pas encore, d'où sa mauvaise prédiction.
+
+**Limites de la validation :** l'absence de coupon gravimétrique parallèle prive ce travail d'une validation indépendante du *CR*. Cette double validation ER + gravimétrie est recommandée pour la suite.
+
+### III.6.5. Perspectives
+
+La campagne se poursuit selon trois axes : (i) **compléter la couverture thermique** par des essais répétés aux consignes 30 °C et 32 °C, afin de transformer la plage 32 °C de « non couverte » à « couverte » ; (ii) **consolider les métriques** sur un volume d'essais accru ; (iii) **finaliser l'automatisation** de la boucle alerte → ticket CMMS et le calcul des KPIs sur historique. La transposition aux conditions industrielles réelles (acier API 5L, conditions de procédé) constitue l'objet du stage en entreprise prévu à la suite de ce mémoire.
+
+---
+
+## III.7. Conclusion du Chapitre III
+
+Ce chapitre a présenté les résultats provisoires de la campagne. **OS1** : la chaîne d'acquisition ER est fonctionnelle et a permis de suivre sans interruption une série d'essais run-to-failure complets jusqu'à la rupture. **OS2** : le modèle XGBoost prédit le taux de corrosion et surpasse les méthodes de référence, mais sa performance dépend de la couverture des conditions. **OS3** : l'analyse a établi que la **température est la variable dominante** et que la **répétabilité des conditions** — couverture thermique, qualité de régulation, constance de la concentration — conditionne la fiabilité de la prédiction ; deux contre-exemples (Run #15, Run #17) l'ont démontré expérimentalement. **OS4** : l'écran de supervision est opérationnel et le mapping vers le CMMS spécifié, la finalisation de l'automatisation étant en cours. Au regard de l'état d'avancement, les objectifs sont **partiellement atteints et en voie de consolidation** par les essais en cours. La conclusion générale dresse le bilan d'ensemble et les perspectives.
 
 \newpage
 
@@ -1512,15 +1474,15 @@ Au terme de ce travail, qui s'inscrit dans un contexte de besoin industriel pres
 
 **Synthèse par objectif spécifique :**
 
-- **OS1 — Chaîne d'acquisition ER instrumentée IoT :** la sonde a été conçue et assemblée à partir de composants accessibles localement (ESP32, HX711, DS18B20, fil de fer, résistances). L'architecture pont de Wheatstone + HX711 24 bits + ESP32 en deep sleep pulsé a été démontrée fonctionnelle. La justification des choix technologiques a été consolidée en matrice de décision (§II.0.5). *[Les métriques de résolution finale et de stabilité seront ajoutées après les tests métrologiques.]*
+- **OS1 — Chaîne d'acquisition ER instrumentée IoT :** la sonde a été conçue et assemblée à partir de composants accessibles localement (ESP32, HX711, DS18B20, fil de fer). L'architecture de mesure de résistance + HX711 24 bits + ESP32 en acquisition continue (30 s) a été démontrée fonctionnelle, suivant sans interruption des essais complets jusqu'à la rupture. La justification des choix technologiques a été consolidée en matrice de décision (§II.0.5).
 
-- **OS2 — Modèle XGBoost à double sortie :** le pipeline complet (nettoyage IQR + Savitzky-Golay, compensation thermique, feature engineering à 10 variables, validation croisée walk-forward TimeSeriesSplit, hyperparamètres XGBoost optimisés, interprétabilité SHAP) a été implémenté en Python. Le modèle est conçu pour être agnostique à la source des mesures (prototype maison ou sondes ER commerciales). *[Les métriques R² et RMSE pour CR et RUL seront ajoutées après les runs.]*
+- **OS2 — Modèle XGBoost à double sortie :** le pipeline complet (nettoyage IQR + Savitzky-Golay, compensation thermique, feature engineering, validation *leave-one-run-out*, hyperparamètres XGBoost, interprétabilité SHAP) a été implémenté en Python. Le modèle prédit le taux de corrosion et surpasse les méthodes de référence sur les plages de température couvertes. Il est conçu pour être agnostique à la source des mesures (prototype maison ou sondes ER commerciales).
 
-- **OS3 — Diagnostic + évaluation inhibiteur + alertes :** un module de diagnostic des régimes de corrosion (5 classes : stable, accélération, passivation, adsorption inhibiteur, pré-rupture) a été spécifié par règles métier explicables. Le protocole d'évaluation de l'inhibiteur de la famille des imidazolines à deux concentrations (0,1 % et 0,5 % v/v), l'algorithme de détection du temps d'adsorption (changepoint) et le système d'alertes graduées vert/orange/rouge ont été définis. *[Valeurs numériques η, matrice de confusion et calibration finale à compléter après runs.]*
+- **OS3 — Diagnostic des régimes et facteurs de variabilité :** un module de diagnostic des régimes de corrosion (induction, croissance, emballement, pré-rupture) a été spécifié par règles métier explicables, et un système d'alertes graduées vert/orange/rouge fondé sur CR et RUL a été défini. L'analyse a établi que la **température est la variable dominante** et que la **répétabilité des conditions** conditionne la fiabilité de la prédiction, deux contre-exemples (régulation thermique dégradée, concentration d'acide altérée) le démontrant expérimentalement.
 
-- **OS4 — Intégration au CMMS open-source par API REST :** une matrice comparative des CMMS open-source candidats a conduit au choix de **GLPI**. L'architecture d'intégration (Streamlit ↔ API REST GLPI), le mapping prédiction ML → ticket et les KPIs maintenance (MTBF, MTTR, η inhibition, précision modèle) côté CMMS ont été spécifiés. *[Démo end-to-end et KPIs réels à compléter après déploiement.]*
+- **OS4 — Intégration au CMMS open-source par API REST :** une matrice comparative des CMMS open-source candidats a conduit au choix de **GLPI**. L'architecture d'intégration (Streamlit ↔ API REST GLPI), le mapping prédiction ML → ticket et les KPIs maintenance (MTBF, MTTR, disponibilité, taux de fausses alertes) côté CMMS ont été spécifiés. L'écran de supervision est opérationnel ; l'automatisation complète de la boucle est en cours de finalisation.
 
-**Contribution centrale de ce travail :** la démonstration qu'une **transition Industrie 3.0 → 4.0** appliquée à la corrosion peut être opérée à partir de composants et services accessibles localement, et qu'elle est **doublement transposable** (opérateurs industriels disposant déjà d'instrumentation commerciale d'une part ; PME industrielles cherchant un déploiement autonome d'autre part). En conformité avec les définitions opérationnelles de l'Industrie 4.0 (Lasi et al., 2014 ; Lu, 2017 ; Xu et al., 2018), ce travail adresse explicitement **trois des cinq piliers** : (i) **interconnexion** (chaîne IoT ESP32) ; (ii) **transparence informationnelle** (dashboard Streamlit + CMMS centralisant mesures, prédictions et tickets) ; (iii) **décision décentralisée** (pronostic ML embarqué + recommandations d'inhibiteur). Les deux piliers restants — **boucle de rétroaction autonome** (commande automatique des pompes à inhibiteur) et **jumeau numérique complet** — sont identifiés comme perspectives. Cette contribution comble plusieurs gaps de la littérature : (i) l'absence d'études ML sur la corrosion en contexte africain ; (ii) l'absence de prédiction simultanée CR + RUL en protocole *run-to-failure* ; (iii) l'absence d'études adressant explicitement la chaîne décision-action via une intégration CMMS open-source.
+**Contribution centrale de ce travail :** la démonstration qu'une **transition Industrie 3.0 → 4.0** appliquée à la corrosion peut être opérée à partir de composants et services accessibles localement, et qu'elle est **doublement transposable** (opérateurs industriels disposant déjà d'instrumentation commerciale d'une part ; PME industrielles cherchant un déploiement autonome d'autre part). En conformité avec les définitions opérationnelles de l'Industrie 4.0 (Lasi et al., 2014 ; Lu, 2017 ; Xu et al., 2018), ce travail adresse explicitement **trois des cinq piliers** : (i) **interconnexion** (chaîne IoT ESP32) ; (ii) **transparence informationnelle** (dashboard Streamlit + CMMS centralisant mesures, prédictions et tickets) ; (iii) **décision décentralisée** (pronostic ML embarqué + alertes graduées). Les deux piliers restants — **boucle de rétroaction autonome** (commande automatique des pompes à inhibiteur) et **jumeau numérique complet** — sont identifiés comme perspectives. Cette contribution comble plusieurs gaps de la littérature : (i) l'absence d'études ML sur la corrosion en contexte africain ; (ii) l'absence de prédiction simultanée CR + RUL en protocole *run-to-failure* ; (iii) l'absence d'études adressant explicitement la chaîne décision-action via une intégration CMMS open-source.
 
 **Recommandations à l'attention de COTCO et des opérateurs pétroliers camerounais :**
 
@@ -1727,7 +1689,7 @@ Ce mémoire ouvre ainsi la voie à une **transition Industrie 4.0 maîtrisée** 
 // ─────────────────────────────────────────────────────────
 // Corrosion Monitor — ESP32 + HX711 + DS18B20
 // M2 Maintenance Industrielle — ESTL Douala
-// Cycle : wake → mesure → POST Supabase → deep sleep 10 min
+// Cycle : mesure → POST Supabase → temporisation 30 s (acquisition continue)
 // ─────────────────────────────────────────────────────────
 
 #include "HX711.h"
@@ -1736,23 +1698,13 @@ Ce mémoire ouvre ainsi la voie à une **transition Industrie 4.0 maîtrisée** 
 
 #define HX711_DOUT_PIN   21
 #define HX711_SCK_PIN    22
-#define ONE_WIRE_BUS      4
+#define ONE_WIRE_BUS     19
 
-const float R_SERIE      = 100.0;
-const float R1           = 10.0;
-const float R2           = 10.0;
-const float R_REF        = 0.5;
-const float V_ALIM       = 3.3;
-const float R_PONT_EQUIV = (R1 + R_REF);
-const float V_EXC_EFF    = V_ALIM * R_PONT_EQUIV
-                           / (R_SERIE + R_PONT_EQUIV);
+#define MEASURE_INTERVAL_MS  30000UL   // 30 secondes
+#define MESURES_PAR_CYCLE    10
 
-#define SLEEP_INTERVAL_US  600000000ULL  // 10 minutes
-#define MESURES_PAR_CYCLE  10
-
-RTC_DATA_ATTR static unsigned long mesure_index  = 0;
-RTC_DATA_ATTR static double        last_Rx        = 0.0;
-RTC_DATA_ATTR static bool          header_envoye  = false;
+static double last_Rx       = 0.0;
+static bool   first_measure = true;
 ```
 
 *Code complet disponible dans le dépôt GitHub : `firmware/corrosion_monitor.ino`.*
@@ -1761,8 +1713,8 @@ RTC_DATA_ATTR static bool          header_envoye  = false;
 
 ```python
 def feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
-    df["delta_R_1h"]  = df["rx_corr"].diff(6)    # 6 × 10 min
-    df["delta_R_6h"]  = df["rx_corr"].diff(36)   # 36 × 10 min
+    df["delta_R_1h"]  = df["rx_corr"].diff(N_1H)   # variation sur ~1 h
+    df["delta_R_6h"]  = df["rx_corr"].diff(N_6H)   # variation sur ~6 h
     dt_1h = df["timestamp_h"].diff(6).replace(0, np.nan)
     df["vitesse_CR_1h"] = (np.abs(df["rx_corr"].diff(6) / dt_1h)
                            * HEURES_PAR_AN * 1000.0)
@@ -1779,9 +1731,9 @@ def feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
 
 ![Figure C.1 — Schéma de câblage complet : ESP32 + HX711 + Pont de Wheatstone + DS18B20 + cellule HDPE](figures/fig_c1_cablage.png){ width=95% }
 
-## Annexe D — Fiche de sécurité Detar Plus (résumé)
+## Annexe D — Fiche de sécurité du milieu corrosif (acide chlorhydrique)
 
-Le **Detar Plus** est classé comme produit corrosif (catégorie 1A pour les acides minéraux). Lors des manipulations, les **équipements de protection individuelle (EPI)** suivants sont obligatoires :
+L'**acide chlorhydrique concentré (HCl)** est classé comme produit corrosif (catégorie 1A pour les acides minéraux) et volatil. Lors des manipulations, les **équipements de protection individuelle (EPI)** suivants sont obligatoires :
 
 - Lunettes de protection étanches aux projections liquides ;
 - Gants résistants aux acides (nitrile, épaisseur ≥ 0,5 mm) ;
@@ -1791,15 +1743,14 @@ Le **Detar Plus** est classé comme produit corrosif (catégorie 1A pour les aci
 
 En cas de contact cutané : rincer abondamment à l'eau claire pendant au moins 15 minutes et consulter un médecin.
 
-## Annexe E — Fiche technique de l'inhibiteur de corrosion (famille imidazoline)
+## Annexe E — Dispositif de contrôle de la température (phase contrôlée)
 
-L'**inhibiteur de corrosion** retenu pour ce travail appartient à la famille des **imidazolines**. La référence commerciale précise sera fixée selon la disponibilité sur le marché camerounais (candidats potentiels : AC PROTECT 106, Nalco Champion EC1605A, Baker Hughes Petromeen 1000 ou équivalents). Caractéristiques génériques de cette famille :
+La phase contrôlée de la campagne s'appuie sur un **bain-marie thermostaté** isolant la cellule de corrosion des fluctuations de la température ambiante :
 
-- **Mécanisme** : adsorption monomoléculaire (Langmuir) via l'atome d'azote du cycle imidazoline ;
-- **Efficacité fabricant déclarée** : η > 90 % en milieu HCl 1 N ;
-- **Concentrations d'utilisation** : 0,05 à 1,0 % v/v selon sévérité du milieu ;
-- **Compatibilité** : aciers au carbone, alliages ferritiques (déconseillé alliages cuivre) ;
-- **Stockage** : récipient hermétique, à l'abri de la chaleur.
+- **Chauffe-eau d'aquarium** à thermostat intégré, puissance 25 W, plage de consigne 16–35 °C ;
+- **Bain d'eau** (4–5 L) jouant le rôle d'inertie thermique stabilisatrice ; la cellule de corrosion (HCl) y est immergée, sans contact direct entre la résistance chauffante et l'acide ;
+- **Contrôle** : stabilisation à la consigne **avant** immersion du fil ; suivi de la température réelle du milieu par le capteur DS18B20 du dispositif de mesure ;
+- **Limite** : à consigne élevée (≥ 32 °C), la puissance de 25 W impose de couvrir le bain pour limiter les pertes et atteindre la consigne au-dessus de la température ambiante de Douala (≈ 28–29 °C).
 
 ## Annexe F — Schéma de base de données du prototype GMAO
 
@@ -1808,7 +1759,7 @@ L'**inhibiteur de corrosion** retenu pour ce travail appartient à la famille de
 **Définitions SQL des tables :**
 
 ```sql
--- 8 tables relationnelles (Supabase / PostgreSQL)
+-- Tables relationnelles du prototype GMAO (Supabase / PostgreSQL)
 
 CREATE TABLE assets (
   id uuid PRIMARY KEY,
@@ -1865,15 +1816,6 @@ CREATE TABLE interventions (
   duree_min int, cout_fcfa int,
   notes text, photo_url text,
   realise_le timestamptz
-);
-
-CREATE TABLE inhibitor_doses (
-  id uuid PRIMARY KEY,
-  asset_id uuid REFERENCES assets(id),
-  intervention_id uuid REFERENCES interventions(id),
-  produit text DEFAULT 'imidazoline',
-  concentration_pct float, volume_ml float,
-  injecte_le timestamptz
 );
 
 CREATE VIEW kpi_maintenance AS

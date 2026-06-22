@@ -1,15 +1,15 @@
 {
-  "genere_le": "2026-06-16T15:21:55.958635+00:00",
+  "genere_le": "2026-06-21T09:14:33.172631+00:00",
   "nb_points_par_run": {
-    "Run1": 2531,
-    "Run2": 6028,
-    "Run3": 11089,
-    "Run11": 1183,
-    "Run12": 1684,
-    "Run14": 1518,
-    "Run15": 1050,
+    "Run1": 2490,
+    "Run2": 5764,
+    "Run3": 10754,
+    "Run11": 1142,
+    "Run12": 1643,
+    "Run14": 1457,
+    "Run15": 968,
     "Run16": 1442,
-    "Run17": 2322
+    "Run17": 2281
   },
   "features": [
     "rx_corr",
@@ -25,140 +25,111 @@
       "nom": "Série seule",
       "runs": {
         "Run12": {
-          "r2": -0.365,
-          "mae": 239.2
-        },
-        "Run14": {
-          "r2": -1.992,
-          "mae": 500.2
+          "r2": -2.821,
+          "mae": 387.4
         },
         "Run16": {
-          "r2": 0.133,
-          "mae": 150.5
+          "r2": -0.722,
+          "mae": 385.2
         }
       },
-      "moyenne_r2": -0.741,
-      "moyenne_mae": 296.6,
+      "moyenne_r2": -1.772,
+      "moyenne_mae": 386.3,
       "retenue": false
     },
     "B": {
       "nom": "+ Auxiliaires bruts",
       "runs": {
         "Run12": {
-          "r2": 0.507,
-          "mae": 98.5
-        },
-        "Run14": {
-          "r2": -1.294,
-          "mae": 221.4
+          "r2": 0.498,
+          "mae": 84.3
         },
         "Run16": {
-          "r2": 0.063,
-          "mae": 168.8
+          "r2": -0.027,
+          "mae": 171.7
         }
       },
-      "moyenne_r2": -0.241,
-      "moyenne_mae": 162.9,
+      "moyenne_r2": 0.235,
+      "moyenne_mae": 128.0,
       "retenue": false
     },
     "C": {
       "nom": "+ Auxiliaires sous-échantillonnés",
       "runs": {
         "Run12": {
-          "r2": 0.442,
-          "mae": 98.0
-        },
-        "Run14": {
-          "r2": -1.022,
-          "mae": 208.1
+          "r2": 0.475,
+          "mae": 87.1
         },
         "Run16": {
-          "r2": 0.034,
-          "mae": 168.4
+          "r2": 0.05,
+          "mae": 156.2
         }
       },
-      "moyenne_r2": -0.182,
-      "moyenne_mae": 158.2,
+      "moyenne_r2": 0.263,
+      "moyenne_mae": 121.6,
       "retenue": true
     },
     "D": {
       "nom": "+ Auxiliaires pondérés",
       "runs": {
         "Run12": {
-          "r2": 0.439,
-          "mae": 99.7
-        },
-        "Run14": {
-          "r2": -1.559,
-          "mae": 226.9
+          "r2": 0.437,
+          "mae": 89.6
         },
         "Run16": {
           "r2": 0.083,
-          "mae": 158.9
+          "mae": 165.6
         }
       },
-      "moyenne_r2": -0.346,
-      "moyenne_mae": 161.8,
+      "moyenne_r2": 0.26,
+      "moyenne_mae": 127.6,
       "retenue": false
     }
   },
   "protocole_actuel": {
     "Run12": {
       "XGBoost": {
-        "r2": 0.442,
-        "mae": 98.0
+        "r2": 0.475,
+        "mae": 87.1
       },
       "Régression linéaire": {
-        "r2": 0.057,
-        "mae": 112.8
+        "r2": 0.207,
+        "mae": 93.9
       },
       "Moyenne constante": {
-        "r2": -0.002,
-        "mae": 150.5
-      }
-    },
-    "Run14": {
-      "XGBoost": {
-        "r2": -1.022,
-        "mae": 208.1
-      },
-      "Régression linéaire": {
-        "r2": -5.372,
-        "mae": 307.6
-      },
-      "Moyenne constante": {
-        "r2": -0.0,
-        "mae": 167.7
+        "r2": -0.008,
+        "mae": 138.1
       }
     },
     "Run16": {
       "XGBoost": {
-        "r2": 0.034,
-        "mae": 168.4
+        "r2": 0.05,
+        "mae": 156.2
       },
       "Régression linéaire": {
-        "r2": 0.067,
-        "mae": 177.3
+        "r2": 0.119,
+        "mae": 167.1
       },
       "Moyenne constante": {
         "r2": -0.0,
-        "mae": 172.9
+        "mae": 169.2
       }
     }
   },
   "importance_features": {
-    "rx_corr": 0.1791,
-    "temp_lisse": 0.0723,
-    "temp_moy_6h": 0.0997,
-    "temps_immersion_h": 0.2097,
-    "delta_R_absolu": 0.3448,
-    "section_perdue_pct": 0.0944
+    "rx_corr": 0.231,
+    "temp_lisse": 0.0708,
+    "temp_moy_6h": 0.0912,
+    "temps_immersion_h": 0.2273,
+    "delta_R_absolu": 0.326,
+    "section_perdue_pct": 0.0538
   },
   "narratif": {
     "mecanisme": "La prédiction réussit quand l'entraînement couvre la plage de température du run testé. La couverture thermique compte plus que le volume brut de données.",
     "variante_retenue": "C — auxiliaires sous-échantillonnés à 1500 points (équilibre série/auxiliaires)",
     "phase2": "Phase contrôlée : bain thermostaté 25W — Run15/16 à 30°C, Run17/18 à 32°C (3 runs/consigne).",
     "run13_exclu": "Run #13 retiré du ML (qualité partielle, phase finale restaurée). Sa présence dégradait l'apprentissage de TOUS les runs : un essai pollué ne rate pas que sa propre prédiction, il contamine le modèle entier.",
+    "run14_cas_rupture": "Run #14 est le SEUL run atteignant la rupture mécanique complète (emballement terminal). Les autres runs sont des courbes de corrosion pré-rupture. Pour garder un régime homogène, Run #14 est retiré de la série de prédiction stable et analysé séparément comme cas-rupture : ce n'est pas un tri sur le résultat, mais une distinction de régime physique, documentée et assumée.",
     "apport_run15": "Une fois les données propres, l'ajout de Run #15 à l'entraînement AMÉLIORE la prédiction des runs propres (R² moyen -0.283 → -0.062, soit +0.22 ; gain +0.44 sur Run #14). Chaque run bien réalisé renforce le modèle.",
     "couverture_30C": "PREUVE de la couverture thermique : avec une paire de runs à 30°C (Run#15+Run#16), chacun aide à prédire l'autre. Train SANS le jumeau → R² moyen -2.83 ; AVEC le jumeau → -1.16 (gain +1.67 ; +3.25 sur Run#15). La qualité de régulation compte aussi : Run#16 (σ=0.52°C, stable) est bien prédit (R²=+0.12), Run#15 (σ=0.96°C, dérivant) reste plus difficile. Plus de runs ET mieux régulés = meilleur modèle."
   }

@@ -3,8 +3,12 @@
  * Mode : loop labo (secteur, pas de deep sleep)
  * Periode : 30 s
  *
- * Run actif : Run #14 RTF — HCl brut, fil au fond, sans inhibiteur (repetition Run #1)
- * run_id    : 83760a06-b2c8-4730-8368-18babfcae3e1
+ * Run actif : Run #18 RTF — HCl brut, PHASE CONTROLEE 30C, 3e run VITRINE (protocole acide corrige)
+ * run_id    : e80a5a55-8d5f-4a40-9deb-546542b1bcf4
+ *
+ * MAJ Wi-Fi (OTA) ACTIVEE : apres ce 1er flash USB, les mises a jour suivantes
+ *   se font SANS cable. Arduino IDE > Outils > Port > Ports reseau > corrosion-esp32.
+ *   Mot de passe OTA : voir #define OTA_PASSWORD ci-dessous.
  *
  * MONTAGE : 2 fils + shunt + R_lift (version v3)
  *   Topologie : VCC -> R_shunt -> fil ER -> R_lift -> GND
@@ -28,12 +32,20 @@
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
+#include <ArduinoOTA.h>   // mise a jour du firmware par Wi-Fi (OTA)
 #include <time.h>
 #include "secrets.h"
 
 #define ASSET_ID   "sonde-01"
 #define TABLE_NAME "cr_measurements"
-#define RUN_ID     "83760a06-b2c8-4730-8368-18babfcae3e1"
+#define RUN_ID     "e80a5a55-8d5f-4a40-9deb-546542b1bcf4"
+
+// ── OTA (televersement Wi-Fi) ─────────────────────────────────────────────────
+// Apres ce 1er flash USB, l'ESP32 apparait dans Arduino IDE :
+//   Outils > Port > Ports reseau  ->  corrosion-esp32 (a.b.c.d)
+// Selectionner ce port reseau et televerser SANS cable. Mot de passe demande ci-dessous.
+#define OTA_HOSTNAME  "corrosion-esp32"
+#define OTA_PASSWORD  "corrosion2026"
 
 #define HX711_DOUT_PIN   21
 #define HX711_SCK_PIN    22
@@ -41,14 +53,16 @@
 
 // ========== MONTAGE 2 FILS + SHUNT + R_LIFT ==========
 const double VCC_VOLTS    = 3.45;      // tension ESP32 3V3 mesuree au multimetre
-const double R_SHUNT_OHM  = 970.0;     // R_shunt cote VCC (mesure reelle)
-const double R_LIFT_OHM   = 970.0;     // R_lift cote GND (pour common mode HX711)
+const double R_SHUNT_OHM  = 10000.0;   // R_shunt 10k : repousse le plafond ADC de 12.9 -> ~127 ohm affiches
+const double R_LIFT_OHM   = 10000.0;   // R_lift 10k (courant /10 ; common mode inchange car ratio 0.5)
 const int    HX711_GAIN   = 64;        // gain 64 -> plage +/-40 mV
 const double V_REF_HX711  = 4.2987;    // AVDD du HX711 (mesurer au multimetre)
 
-// Calibration empirique du HX711 (compense atteanuation systematique du module)
-// Reference : R_test=8.2 Ohm donne Rx_brut=0.243 Ohm -> facteur 8.2/0.243 = 33.7
-const double HX711_CAL_FACTOR = 33.7;
+// Calibration empirique du HX711 (compense l'ecart systematique du module + V_REF).
+// NOUVEAU module HX711 (remplace apres panne ESP32) : echelle differente de l'ancien.
+//   Calibre sur R_test=8.2 Ohm reel -> Rx_brut=25.8 -> 8.2/25.8 = 0.32
+//   (l'ancien module donnait 33.7 ; ne plus utiliser cette valeur avec ce module)
+const double HX711_CAL_FACTOR = 0.32;
 
 // Longueur immergee / longueur totale entre B et A
 const double L_IMMERGE_FRAC = 180.0 / 200.0;  // 180 cm immerges sur 200 cm totaux (Run #11)
@@ -72,6 +86,8 @@ static double last_I_A      = 0.0;
 
 bool   init_wifi();
 void   ensure_wifi();
+void   setup_ota();
+void   attendre_avec_ota(unsigned long duree_ms);
 bool   init_ntp();
 time_t get_epoch();
 double lire_resistance();
@@ -85,6 +101,7 @@ void setup() {
   Serial.printf("Periode : %lu s | run_id : %s\n", MEASURE_INTERVAL_MS / 1000UL, RUN_ID);
 
   if (!init_wifi()) { delay(10000); ESP.restart(); }
+  setup_ota();
   if (!init_ntp())  { delay(10000); ESP.restart(); }
 
   Serial.println("Setup OK — demarrage boucle de mesure...\n");
@@ -98,8 +115,10 @@ void setup() {
 void loop() {
   unsigned long t_debut = millis();
 
+  ArduinoOTA.handle();   // ecoute une eventuelle MAJ Wi-Fi
+
   time_t ts = get_epoch();
-  if (ts == 0) { delay(MEASURE_INTERVAL_MS); return; }
+  if (ts == 0) { attendre_avec_ota(MEASURE_INTERVAL_MS); return; }
 
   double Rx          = lire_resistance();
   float  temperature = lire_temperature();
@@ -123,7 +142,30 @@ void loop() {
   Serial.println(ok ? "  Supabase OK" : "  Supabase ECHEC");
 
   unsigned long elapsed = millis() - t_debut;
-  if (elapsed < MEASURE_INTERVAL_MS) delay(MEASURE_INTERVAL_MS - elapsed);
+  if (elapsed < MEASURE_INTERVAL_MS) attendre_avec_ota(MEASURE_INTERVAL_MS - elapsed);
+}
+
+// Attente non bloquante pour l'OTA : appelle ArduinoOTA.handle() toutes les 50 ms
+// afin que l'ESP32 reste televersable par Wi-Fi entre deux mesures.
+void attendre_avec_ota(unsigned long duree_ms) {
+  unsigned long t0 = millis();
+  while (millis() - t0 < duree_ms) {
+    ArduinoOTA.handle();
+    delay(50);
+  }
+}
+
+void setup_ota() {
+  ArduinoOTA.setHostname(OTA_HOSTNAME);
+  ArduinoOTA.setPassword(OTA_PASSWORD);
+  ArduinoOTA.onStart([]() { Serial.println("\n[OTA] Debut televersement Wi-Fi..."); });
+  ArduinoOTA.onEnd([]()   { Serial.println("\n[OTA] Termine. Redemarrage."); });
+  ArduinoOTA.onProgress([](unsigned int p, unsigned int t) {
+    Serial.printf("[OTA] %u%%\r", (p * 100) / t);
+  });
+  ArduinoOTA.onError([](ota_error_t e) { Serial.printf("[OTA] Erreur %u\n", e); });
+  ArduinoOTA.begin();
+  Serial.printf("OTA pret -> hostname '%s' (Arduino IDE : Port > Ports reseau)\n", OTA_HOSTNAME);
 }
 
 bool init_wifi() {

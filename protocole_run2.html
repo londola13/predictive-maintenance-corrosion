@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Protocole Run #2 RTF — Corrosion M2</title>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; padding: 25px; max-width: 900px; margin: 0 auto; color: #222; }
+  h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+  h2 { color: #34495e; margin-top: 28px; border-bottom: 1px solid #bdc3c7; padding-bottom: 5px; }
+  .card { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 18px 22px; margin: 14px 0; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+  .warn { background: #fdedec; border-left: 5px solid #e74c3c; padding: 14px 18px; border-radius: 4px; margin: 14px 0; }
+  .info { background: #ebf5fb; border-left: 5px solid #3498db; padding: 14px 18px; border-radius: 4px; margin: 14px 0; }
+  .ok { background: #e8f8f5; border-left: 5px solid #27ae60; padding: 14px 18px; border-radius: 4px; margin: 14px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+  th { background: #34495e; color: white; padding: 9px; text-align: left; }
+  td { border-bottom: 1px solid #ecf0f1; padding: 9px; }
+  code { background: #2c3e50; color: #ecf0f1; padding: 2px 7px; border-radius: 3px; font-family: Consolas, monospace; font-size: 13px; }
+  .big-id { font-size: 16px; font-weight: bold; color: #c0392b; }
+  ol li, ul li { margin: 6px 0; }
+</style>
+</head>
+<body>
+
+<h1>Protocole — Run #2 RTF (Corrosion M2)</h1>
+<p><strong>Objectif :</strong> produire une 2ème trajectoire de corrosion à <strong>vitesse différente</strong> du Run #1, pour donner de la variété au modèle XGBoost (apprentissage de la loi de corrosion, pas mémorisation d'une courbe).</p>
+
+<div class="card">
+<h2>Identifiants du run</h2>
+<table>
+<tr><td><strong>run_id</strong></td><td class="big-id">66e66c0a-b4c6-40fd-937b-c25fcc71a56c</td></tr>
+<tr><td>Statut Supabase</td><td>active (créé dans cr_runs)</td></tr>
+<tr><td>Firmware</td><td>déjà mis à jour avec ce run_id (header + define)</td></tr>
+<tr><td>Asset</td><td>sonde-01</td></tr>
+</table>
+</div>
+
+<h2>1. Conditions expérimentales</h2>
+<table>
+<tr><th>Paramètre</th><th>Run #1 (fait)</th><th>Run #2 (ce protocole)</th></tr>
+<tr><td>Acide</td><td>HCl brut</td><td><strong>HCl dilué 1:1 avec eau distillée</strong></td></tr>
+<tr><td>Inhibiteur</td><td>Aucun</td><td>Aucun</td></tr>
+<tr><td>Fil</td><td>Fer ~2m Ø1.15mm</td><td>Fer ~2m Ø1.15mm (identique)</td></tr>
+<tr><td>Vitesse attendue</td><td>Rapide (rupture 22h)</td><td>~2× plus lente (rupture ~40-50h estimée)</td></tr>
+</table>
+
+<div class="info">
+<strong>Pourquoi diluer 1:1 ?</strong> Réduire la concentration de H⁺ ralentit la cinétique de corrosion. On obtient une vitesse différente sans acheter d'inhibiteur. C'est la variable expérimentale la plus simple à contrôler.
+</div>
+
+<h2>2. Préparation du fil (identique au Run #1)</h2>
+<ol>
+  <li>Coupe un fil de fer doux Ø1.15mm, longueur <strong>~2 m</strong> (le plus proche possible du Run #1)</li>
+  <li>Forme-le en U (les 2 extrémités sortent du bain par le haut)</li>
+  <li>Nettoie le fil : frotte avec papier de verre fin puis dégraisse (alcool/acétone) pour enlever l'oxyde et les graisses — <strong>état de surface reproductible</strong></li>
+  <li>Connecte B et A dans les sockets femelles de jumper (comme Run #1)</li>
+  <li>Mesure et note la <strong>résistance à sec</strong> au multimètre (devrait être proche de 1.29 Ω du Run #1 si le fil est identique)</li>
+</ol>
+
+<h2>3. Préparation de la solution</h2>
+<div class="warn">
+<strong>⚠ Sécurité acide</strong> — Toujours <strong>verser l'ACIDE dans l'EAU</strong>, jamais l'inverse (réaction exothermique, projections). Gants + lunettes + ventilation.
+</div>
+<ol>
+  <li>Mesure un volume V d'eau distillée (ex : 250 mL)</li>
+  <li>Ajoute <strong>lentement</strong> le même volume V de HCl brut dans l'eau (250 mL) → dilution 1:1</li>
+  <li>Remue doucement, laisse refroidir à température ambiante avant immersion</li>
+  <li>Note le volume total et, si tu as un pH-mètre, le pH réel (estimé ~1.3)</li>
+</ol>
+
+<h2>4. Câblage électronique — INCHANGÉ vs Run #1</h2>
+<div class="ok">
+Le montage reste exactement le même (validé au Run #1) :
+<br><code>VCC 3V3 → R_shunt 970Ω → B → [fil] → A → R_lift 970Ω → GND</code>
+<br>HX711 A+ entre R_shunt et fil, HX711 A− entre fil et R_lift.
+<br>Calibration <code>HX711_CAL_FACTOR = 33.7</code> conservée.
+</div>
+
+<h2>5. Lancement</h2>
+<ol>
+  <li><strong>Flashe le firmware</strong> (déjà à jour avec le run_id Run #2) sur l'ESP32 via Arduino IDE → Upload</li>
+  <li>Ouvre le moniteur série, vérifie :
+    <ul>
+      <li>Header affiche <code>Run #2 RTF</code> et le bon run_id</li>
+      <li><code>I ≈ 1.78 mA</code>, Rx baseline cohérent (~1.3 Ω à sec)</li>
+    </ul>
+  </li>
+  <li><strong>Note Rx baseline à sec</strong> dans ton cahier</li>
+  <li><strong>Plonge le fil</strong> dans la solution diluée (même profondeur que Run #1 : ~120 cm immergés)</li>
+  <li>Note l'heure exacte de plongée</li>
+  <li>Laisse tourner — 1 mesure / 30 s, envoi automatique vers Supabase sous le run_id Run #2</li>
+</ol>
+
+<h2>6. Suivi pendant le run</h2>
+<ul>
+  <li>Surveille Rx de temps en temps (moniteur série ou dashboard)</li>
+  <li>Rx doit monter <strong>plus lentement</strong> que le Run #1 (c'est le but : vitesse différente)</li>
+  <li>Le run se termine à la <strong>rupture</strong> (Rx → plafond 98 Ω) ou si tu décides d'arrêter</li>
+</ul>
+
+<h2>7. Clôture du run</h2>
+<ol>
+  <li>Quand le fil casse (ou que tu arrêtes) : note l'heure de rupture</li>
+  <li>Coupe l'alimentation de la sonde</li>
+  <li>Marque le run comme terminé dans Supabase :
+    <br><code>UPDATE cr_runs SET status='done', ended_at=now() WHERE run_id='66e66c0a-...';</code>
+    <br>(ou demande-moi de le faire)</li>
+  <li>Nettoie les données debug/post-rupture comme pour le Run #1 (garde uniquement immersion → rupture)</li>
+  <li>Sors et photographie le fil cassé (point de rupture) pour le mémoire</li>
+</ol>
+
+<h2>8. Après le Run #2</h2>
+<div class="info">
+Tu auras alors <strong>2 trajectoires à vitesses différentes</strong>. On pourra commencer à entraîner XGBoost en <strong>leave-one-run-out</strong> (apprendre sur Run #1, tester sur Run #2) pour voir s'il généralise. Idéalement viser <strong>4 runs</strong> au total pour un modèle robuste.
+</div>
+
+<h2>Récapitulatif rapide</h2>
+<table>
+<tr><th>Étape</th><th>Action</th></tr>
+<tr><td>1</td><td>Fil ~2m nettoyé, formé en U, connecté B/A</td></tr>
+<tr><td>2</td><td>Solution HCl dilué 1:1 (acide dans l'eau)</td></tr>
+<tr><td>3</td><td>Câblage inchangé (R_shunt + R_lift + HX711)</td></tr>
+<tr><td>4</td><td>Flash firmware (run_id Run #2 déjà dedans)</td></tr>
+<tr><td>5</td><td>Noter Rx baseline à sec</td></tr>
+<tr><td>6</td><td>Plonger, noter l'heure, laisser tourner</td></tr>
+<tr><td>7</td><td>Rupture → clôturer le run, nettoyer données</td></tr>
+</table>
+
+</body>
+</html>

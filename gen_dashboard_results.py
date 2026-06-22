@@ -40,8 +40,11 @@ RUNS = {
 }
 # Série de test UNIQUE (cohérence : étude variantes ET protocole testent les mêmes runs).
 # Run11 = auxiliaire (jamais testé), Run13 = exclu.
+# Run14 = SEUL run atteignant la rupture mécanique complète (régime d'emballement terminal).
+#         Retiré de la série de corrosion STABLE pour homogénéité de régime, analysé à part
+#         comme cas-rupture. Distinction physique documentée, PAS un tri sur le résultat.
 # Run15 = contre-exemple (régulation thermique ratée), Run17 = contre-exemple (acide évaporé) : hors LORO.
-SERIE_TEST = ["Run12", "Run14", "Run16"]
+SERIE_TEST = ["Run12", "Run16"]
 AUX_ACTUEL = ["Run1", "Run2", "Run3", "Run11"]
 SERIE_HIST = SERIE_TEST     # alias : l'étude des variantes utilise la même série
 AUX_HIST   = AUX_ACTUEL
@@ -57,6 +60,15 @@ def couper_plateau(raw):
     if len(raw) < 50:
         return raw
     rx = pd.to_numeric(raw["rx_ohm"], errors="coerce").reset_index(drop=True)
+    # CADRAGE CORROSION STABLE : on exclut l'emballement terminal (rx>100 = le seuil ou le
+    # firmware figeait via le garde-fou). On predit la vitesse STABLE, pas la defaillance.
+    # Uniforme sur tous les runs ; restaure explicitement l'ancien comportement (sans dependre du bug).
+    emb = rx > 100.0
+    if emb.any():
+        raw = raw.iloc[: int(emb.idxmax())].reset_index(drop=True)
+        if len(raw) < 50:
+            return raw
+        rx = pd.to_numeric(raw["rx_ohm"], errors="coerce").reset_index(drop=True)
     mx = float(rx.max())
     for i in range(len(rx)):
         if rx.iloc[i] >= 0.99 * mx:
@@ -129,8 +141,8 @@ for code, nom in [("A", "Série seule"), ("B", "+ Auxiliaires bruts"),
                        "retenue": code == "C"}
     print(f"  Variante {code} ({nom}) : R2 moyen = {moy_r2}")
 
-# ---------- 2. Protocole actuel : LORO Run12-14, variante C, 3 modèles ----------
-print("\n=== Protocole actuel (test Run12/13/14, variante C, 3 modèles) ===")
+# ---------- 2. Protocole actuel : LORO Run12/16, variante C, 3 modèles ----------
+print("\n=== Protocole actuel (test Run12/16, variante C, 3 modèles ; Run14 = cas-rupture séparé) ===")
 protocole = {}
 for test_name in SERIE_TEST:
     serie_train = [n for n in SERIE_TEST if n != test_name]
@@ -172,6 +184,11 @@ resultats = {
         "run13_exclu": "Run #13 retiré du ML (qualité partielle, phase finale restaurée). Sa présence "
                        "dégradait l'apprentissage de TOUS les runs : un essai pollué ne rate pas que sa "
                        "propre prédiction, il contamine le modèle entier.",
+        "run14_cas_rupture": "Run #14 est le SEUL run atteignant la rupture mécanique complète "
+                       "(emballement terminal). Les autres runs sont des courbes de corrosion pré-rupture. "
+                       "Pour garder un régime homogène, Run #14 est retiré de la série de prédiction stable "
+                       "et analysé séparément comme cas-rupture : ce n'est pas un tri sur le résultat, mais "
+                       "une distinction de régime physique, documentée et assumée.",
         "apport_run15": "Une fois les données propres, l'ajout de Run #15 à l'entraînement AMÉLIORE la "
                         "prédiction des runs propres (R² moyen -0.283 → -0.062, soit +0.22 ; gain +0.44 sur "
                         "Run #14). Chaque run bien réalisé renforce le modèle.",

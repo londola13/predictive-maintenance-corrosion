@@ -55,3 +55,7 @@ firmware/secrets.h
 firmware/**/secrets.h
 firmware/**/secrets*.h
 firmware/secrets*.h
+
+# Fichiers temporaires Word/Office
+~$*
+*.tmp

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Schema Kelvin DC — Source de courant constante 50 mA</title>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; padding: 25px; max-width: 1300px; margin: 0 auto; }
+  h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+  h2 { color: #34495e; margin-top: 30px; border-bottom: 1px solid #bdc3c7; padding-bottom: 5px; }
+  .schema-box { background: white; border: 2px solid #34495e; border-radius: 8px; padding: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); margin-bottom: 25px; }
+  .warning { background: #fdedec; padding: 18px 22px; border-left: 5px solid #e74c3c; border-radius: 4px; margin: 18px 0; }
+  .info { background: #ebf5fb; padding: 18px 22px; border-left: 5px solid #3498db; border-radius: 4px; margin: 18px 0; }
+  .success { background: #e8f8f5; padding: 18px 22px; border-left: 5px solid #27ae60; border-radius: 4px; margin: 18px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 15px 0; background: white; }
+  th { background: #34495e; color: white; padding: 10px; text-align: left; }
+  td { border-bottom: 1px solid #ecf0f1; padding: 10px; vertical-align: top; }
+  tr:hover { background: #f8f9fa; }
+  code { background: #2c3e50; color: #ecf0f1; padding: 3px 8px; border-radius: 3px; font-family: 'Consolas', monospace; font-size: 13px; }
+  pre { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 6px; overflow-x: auto; }
+  pre code { background: transparent; padding: 0; }
+  .label-blue { color: #2980b9; font-weight: bold; }
+  .label-red { color: #c0392b; font-weight: bold; }
+  .label-green { color: #27ae60; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h1>Source de courant constante — Montage Kelvin 4 fils</h1>
+<p><strong>Corrosion Monitor M2</strong> — ESP32 + HX711 + LM358 + Transistor NPN (2N2222 / BC547 / S8050)</p>
+<p>Cible : <strong>I = 50 mA constant</strong> dans le fil ER. Mesure de tension Kelvin (sans erreur de contact).</p>
+
+<div class="schema-box">
+<svg width="100%" viewBox="0 0 1200 920" xmlns="http://www.w3.org/2000/svg" style="background:#fafafa">
+
+  <defs>
+    <pattern id="hatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="6" stroke="#555" stroke-width="1.5"/>
+    </pattern>
+  </defs>
+
+  <!-- ============ VCC rail (rouge) ============ -->
+  <line x1="60" y1="60" x2="1140" y2="60" stroke="#c0392b" stroke-width="3"/>
+  <text x="10" y="55" font-size="18" font-weight="bold" fill="#c0392b">+VCC</text>
+  <text x="10" y="78" font-size="13" fill="#c0392b">3.3 V</text>
+
+  <!-- ============ GND rail (noir) ============ -->
+  <line x1="60" y1="870" x2="1140" y2="870" stroke="black" stroke-width="3"/>
+  <text x="15" y="865" font-size="18" font-weight="bold">GND</text>
+  <line x1="60" y1="870" x2="60" y2="885" stroke="black" stroke-width="2"/>
+  <line x1="50" y1="885" x2="70" y2="885" stroke="black" stroke-width="2"/>
+  <line x1="54" y1="890" x2="66" y2="890" stroke="black" stroke-width="2"/>
+  <line x1="58" y1="895" x2="62" y2="895" stroke="black" stroke-width="2"/>
+
+  <!-- ============ HX711 module ============ -->
+  <rect x="480" y="115" width="400" height="35" fill="#d5dbdb" stroke="#2c3e50" stroke-width="2" rx="4"/>
+  <text x="680" y="138" font-size="14" text-anchor="middle" font-weight="bold">Module HX711 (gain 128 - DOUT GPIO21 - SCK GPIO22)</text>
+  <text x="505" y="167" font-size="11" fill="#2980b9" font-weight="bold">A+</text>
+  <text x="845" y="167" font-size="11" fill="#2980b9" font-weight="bold">A-</text>
+
+  <!-- ============ FIL ER ============ -->
+  <rect x="190" y="220" width="860" height="36" fill="url(#hatch)" stroke="#34495e" stroke-width="2"/>
+  <text x="620" y="245" font-size="13" text-anchor="middle" font-weight="bold" fill="#222">
+    FIL ER (acier doux O 1.15 mm - 110 cm total - 100 cm immerges HCl)
+  </text>
+
+  <!-- Point B -->
+  <circle cx="240" cy="220" r="7" fill="#c0392b" stroke="black" stroke-width="1.5"/>
+  <text x="226" y="208" font-size="22" font-weight="bold" fill="#c0392b">B</text>
+  <text x="180" y="195" font-size="11" fill="#c0392b" font-weight="bold">I+ (a 5 cm)</text>
+
+  <!-- Point D -->
+  <circle cx="520" cy="220" r="7" fill="#2980b9" stroke="black" stroke-width="1.5"/>
+  <text x="506" y="208" font-size="22" font-weight="bold" fill="#2980b9">D</text>
+  <text x="468" y="195" font-size="11" fill="#2980b9" font-weight="bold">Sense+ (15 cm)</text>
+
+  <!-- Point C -->
+  <circle cx="830" cy="220" r="7" fill="#2980b9" stroke="black" stroke-width="1.5"/>
+  <text x="816" y="208" font-size="22" font-weight="bold" fill="#2980b9">C</text>
+  <text x="780" y="195" font-size="11" fill="#2980b9" font-weight="bold">Sense- (95 cm)</text>
+
+  <!-- Point A -->
+  <circle cx="1000" cy="220" r="7" fill="#c0392b" stroke="black" stroke-width="1.5"/>
+  <text x="986" y="208" font-size="22" font-weight="bold" fill="#c0392b">A</text>
+  <text x="990" y="195" font-size="11" fill="#c0392b" font-weight="bold">I- (105 cm)</text>
+
+  <!-- B -> VCC -->
+  <line x1="240" y1="220" x2="240" y2="60" stroke="#c0392b" stroke-width="2.5"/>
+  <polygon points="232,90 248,90 240,75" fill="#c0392b"/>
+
+  <!-- D -> HX711 A+ -->
+  <line x1="520" y1="220" x2="520" y2="150" stroke="#2980b9" stroke-width="2"/>
+
+  <!-- C -> HX711 A- -->
+  <line x1="830" y1="220" x2="830" y2="150" stroke="#2980b9" stroke-width="2"/>
+
+  <!-- A -> droite -> bas -> collecteur NPN -->
+  <line x1="1000" y1="220" x2="1080" y2="220" stroke="#c0392b" stroke-width="2.5"/>
+  <line x1="1080" y1="220" x2="1080" y2="550" stroke="#c0392b" stroke-width="2.5"/>
+  <line x1="1080" y1="550" x2="900" y2="550" stroke="#c0392b" stroke-width="2.5"/>
+  <polygon points="1015,212 1015,228 1028,220" fill="#c0392b"/>
+  <text x="1090" y="380" font-size="13" fill="#c0392b" font-weight="bold">courant</text>
+
+  <!-- ============ TRIM POTENTIOMETRE 10 kOhm ============ -->
+  <rect x="130" y="350" width="50" height="140" fill="#fff" stroke="black" stroke-width="2"/>
+  <text x="155" y="335" font-size="13" font-weight="bold" text-anchor="middle">Trim 10k</text>
+  <text x="155" y="510" font-size="11" text-anchor="middle" fill="#555">(ajuste V_REF)</text>
+
+  <!-- Squiggle pattern inside pot -->
+  <path d="M 140 365 L 170 372 L 140 380 L 170 388 L 140 396 L 170 404 L 140 412 L 170 420 L 140 428 L 170 436 L 140 444 L 170 452 L 140 460 L 170 468 L 140 476" stroke="#999" stroke-width="1" fill="none"/>
+
+  <!-- Top terminal -> VCC -->
+  <line x1="155" y1="350" x2="155" y2="60" stroke="#c0392b" stroke-width="1.5"/>
+
+  <!-- Bottom terminal -> GND -->
+  <line x1="155" y1="490" x2="155" y2="870" stroke="black" stroke-width="1.5"/>
+
+  <!-- Wiper -->
+  <line x1="180" y1="420" x2="220" y2="420" stroke="black" stroke-width="2"/>
+  <polygon points="172,415 180,420 172,425" fill="black"/>
+
+  <!-- V_REF wire from wiper to LM358 pin 3 -->
+  <line x1="220" y1="420" x2="290" y2="420" stroke="black" stroke-width="2"/>
+  <line x1="290" y1="420" x2="290" y2="520" stroke="black" stroke-width="2"/>
+  <line x1="290" y1="520" x2="350" y2="520" stroke="black" stroke-width="2"/>
+  <text x="225" y="412" font-size="12" font-weight="bold" fill="#27ae60">V_REF = 0.5 V</text>
+
+  <!-- ============ LM358 op-amp ============ -->
+  <polygon points="350,440 350,540 460,490" fill="#fef9e7" stroke="black" stroke-width="2.5"/>
+  <text x="395" y="488" font-size="14" font-weight="bold" text-anchor="middle">LM358</text>
+  <text x="395" y="505" font-size="10" text-anchor="middle" fill="#555">(op-amp A)</text>
+
+  <!-- Pin 2 (IN-) - V_E feedback -->
+  <line x1="320" y1="460" x2="350" y2="460" stroke="black" stroke-width="2"/>
+  <text x="358" y="466" font-size="16" font-weight="bold" fill="#c0392b">-</text>
+  <text x="325" y="452" font-size="9" fill="#555">pin 2</text>
+
+  <!-- V_E node label at pin 2 -->
+  <rect x="268" y="453" width="50" height="16" fill="#fff" stroke="#27ae60" stroke-width="1.5" rx="3"/>
+  <text x="293" y="465" font-size="12" font-weight="bold" text-anchor="middle" fill="#27ae60">V_E</text>
+
+  <!-- Pin 3 (IN+) - V_REF -->
+  <text x="358" y="525" font-size="16" font-weight="bold" fill="#27ae60">+</text>
+  <text x="325" y="535" font-size="9" fill="#555">pin 3</text>
+
+  <!-- Pin 1 (OUT) -->
+  <line x1="460" y1="490" x2="490" y2="490" stroke="black" stroke-width="2"/>
+  <text x="463" y="483" font-size="9" fill="#555">pin 1</text>
+
+  <!-- Pin 8 (VCC) - dashed line up from top-left vertex -->
+  <line x1="350" y1="440" x2="350" y2="60" stroke="#c0392b" stroke-width="1.3" stroke-dasharray="5,3"/>
+  <text x="355" y="430" font-size="10" fill="#c0392b" font-weight="bold">pin 8 -> VCC</text>
+
+  <!-- Pin 4 (GND) - dashed line down from bottom-left vertex -->
+  <line x1="350" y1="540" x2="350" y2="870" stroke="black" stroke-width="1.3" stroke-dasharray="5,3"/>
+  <text x="355" y="555" font-size="10" fill="#000" font-weight="bold">pin 4 -> GND</text>
+
+  <!-- ============ R_BASE (1 kOhm) ============ -->
+  <rect x="490" y="480" width="80" height="20" fill="#fff" stroke="black" stroke-width="2"/>
+  <text x="530" y="495" font-size="13" font-weight="bold" text-anchor="middle">1 k</text>
+  <text x="530" y="472" font-size="10" text-anchor="middle" fill="#555">R_base (protection)</text>
+
+  <line x1="570" y1="490" x2="700" y2="490" stroke="black" stroke-width="2"/>
+  <line x1="700" y1="490" x2="700" y2="580" stroke="black" stroke-width="2"/>
+  <line x1="700" y1="580" x2="870" y2="580" stroke="black" stroke-width="2"/>
+
+  <!-- ============ NPN TRANSISTOR ============ -->
+  <circle cx="900" cy="580" r="30" fill="#fef9e7" stroke="black" stroke-width="2.5"/>
+  <text x="960" y="572" font-size="13" font-weight="bold">2N2222</text>
+  <text x="960" y="588" font-size="11" fill="#555">(NPN - TO-92)</text>
+  <text x="960" y="603" font-size="10" fill="#555">ou BC547, S8050,</text>
+  <text x="960" y="615" font-size="10" fill="#555">BC337, 2N3904</text>
+
+  <!-- NPN symbol -->
+  <line x1="885" y1="560" x2="885" y2="600" stroke="black" stroke-width="3"/>
+  <line x1="870" y1="580" x2="885" y2="580" stroke="black" stroke-width="2"/>
+  <line x1="885" y1="568" x2="900" y2="550" stroke="black" stroke-width="2"/>
+  <line x1="885" y1="592" x2="900" y2="610" stroke="black" stroke-width="2"/>
+  <polygon points="900,610 891,605 895,615" fill="black"/>
+
+  <text x="848" y="585" font-size="13" font-weight="bold">B</text>
+  <text x="906" y="546" font-size="13" font-weight="bold">C</text>
+  <text x="906" y="625" font-size="13" font-weight="bold">E</text>
+
+  <!-- Wire emitter -> R_cal -->
+  <line x1="900" y1="610" x2="900" y2="700" stroke="black" stroke-width="2"/>
+
+  <!-- V_E feedback node at emitter -->
+  <circle cx="900" cy="660" r="4" fill="black"/>
+  <line x1="900" y1="660" x2="945" y2="660" stroke="black" stroke-width="2"/>
+  <rect x="945" y="652" width="50" height="16" fill="#fff" stroke="#27ae60" stroke-width="1.5" rx="3"/>
+  <text x="970" y="664" font-size="12" font-weight="bold" text-anchor="middle" fill="#27ae60">V_E</text>
+
+  <!-- ============ R_CAL (10 Ohm) ============ -->
+  <rect x="890" y="700" width="20" height="80" fill="#fff" stroke="black" stroke-width="2"/>
+  <text x="925" y="730" font-size="13" font-weight="bold">R_cal = 10</text>
+  <text x="925" y="748" font-size="11" fill="#555">(1/2 W, 1%)</text>
+  <text x="925" y="763" font-size="10" fill="#555">fixe I_constant</text>
+
+  <!-- R_cal -> GND -->
+  <line x1="900" y1="780" x2="900" y2="870" stroke="black" stroke-width="2"/>
+
+  <!-- ============ BOITE FORMULES ============ -->
+  <rect x="60" y="600" width="240" height="200" fill="#fef9e7" stroke="#f39c12" stroke-width="2" rx="6"/>
+  <text x="180" y="625" font-size="14" font-weight="bold" text-anchor="middle">PRINCIPE</text>
+  <line x1="80" y1="635" x2="280" y2="635" stroke="#f39c12" stroke-width="1"/>
+  <text x="75" y="655" font-size="12">Le LM358 force :</text>
+  <text x="75" y="678" font-size="13" font-weight="bold" fill="#27ae60">V_E = V_REF</text>
+  <text x="75" y="700" font-size="12">en ajustant la base du NPN.</text>
+  <text x="75" y="722" font-size="12">Comme V_E = R_cal x I :</text>
+  <text x="75" y="747" font-size="14" font-weight="bold" fill="#c0392b">I = V_REF / R_cal</text>
+  <text x="75" y="770" font-size="13" font-weight="bold">  = 0.5 V / 10 = 50 mA</text>
+  <text x="75" y="790" font-size="10" fill="#555" font-style="italic">independant de R_fil</text>
+
+  <!-- ============ Legende V_E ============ -->
+  <rect x="600" y="730" width="360" height="80" fill="#e8f8f5" stroke="#27ae60" stroke-width="2" rx="5"/>
+  <text x="780" y="752" font-size="12" font-weight="bold" text-anchor="middle">Les deux noeuds "V_E" sont relies par UN</text>
+  <text x="780" y="770" font-size="12" font-weight="bold" text-anchor="middle">SEUL FIL (boucle de feedback)</text>
+  <text x="780" y="795" font-size="11" text-anchor="middle" fill="#555">emetteur NPN -> entree pin 2 du LM358</text>
+
+</svg>
+</div>
+
+<h2>Comment lire ce schema</h2>
+<ul>
+  <li><strong class="label-red">Rouge gras</strong> = boucle de COURANT (50 mA passe par la)</li>
+  <li><strong class="label-blue">Bleu</strong> = boucle de TENSION sense (aucun courant - HX711)</li>
+  <li><strong class="label-green">Vert</strong> = boucle de REGULATION (feedback LM358)</li>
+  <li><strong>Pointilles rouges</strong> = alimentation VCC des chips</li>
+  <li><strong>Pointilles noirs</strong> = retour GND des chips</li>
+  <li><strong>Boites "V_E"</strong> = noeuds avec le meme nom -> relies par un fil unique</li>
+</ul>
+
+<h2>Boucle de courant (en ROUGE)</h2>
+<p><code>VCC (3.3V) -> point B -> fil ER -> point A -> collecteur NPN -> emetteur NPN -> R_cal (10) -> GND</code></p>
+<p>Le courant <strong>I = 50 mA</strong> est force constant par le LM358. Peu importe si la resistance du fil change (corrosion), le courant reste exactement a 50 mA.</p>
+
+<h2>Boucle de mesure de tension (en BLEU)</h2>
+<p><code>HX711 A+ &lt;- point D --- fil ER --- point C -> HX711 A-</code></p>
+<p>Les points D et C sont des contacts <strong>sense</strong> : aucun courant ne passe (impedance HX711 = 10 M). Donc la chute de tension dans les contacts D et C est <strong>nulle</strong> - la tension lue est exactement V(D) - V(C), soit la tension aux bornes des 80 cm de fil entre D et C.</p>
+
+<h2>Boucle de regulation (LM358 - en VERT)</h2>
+<p>Le LM358 lit V_emetteur sur pin 2, compare a V_REF (trim pot) sur pin 3, ajuste sa sortie pin 1 pour ouvrir/fermer le NPN jusqu'a ce que V_E = V_REF. C'est ce qui rend le courant constant.</p>
+
+<h2>Differences vs ton schema actuel</h2>
+<table>
+<tr><th>Element</th><th>AVANT (faux)</th><th>MAINTENANT (correct)</th></tr>
+<tr><td><strong>Point B</strong></td><td>Connecte au milieu du diviseur 10K/10K (shunte le diviseur)</td><td>Connecte DIRECTEMENT a VCC</td></tr>
+<tr><td><strong>V_REF (pin 3)</strong></td><td>Diviseur 10K/10K fixe -> 1.65 V -> I = 165 mA (TROP)</td><td>Trim pot 10K reglable -> V_REF = 0.5 V -> I = 50 mA</td></tr>
+<tr><td><strong>R_base</strong></td><td>ABSENT (sortie LM358 directe sur base)</td><td>1 k entre pin 1 LM358 et base NPN</td></tr>
+<tr><td><strong>Pin 2 LM358</strong></td><td>(a verifier)</td><td>Fil DIRECT vers emetteur (PAS de 10 en serie)</td></tr>
+<tr><td><strong>Calcul firmware</strong></td><td>Formule pont Wheatstone (complexe, fragile)</td><td>R = V_sense / 0.050 (Loi d'Ohm directe)</td></tr>
+</table>
+
+<div class="warning">
+<strong>SEQUENCE DE MISE EN ROUTE - A RESPECTER STRICTEMENT</strong>
+<ol>
+  <li><strong>Cabler TOUT sans alimenter</strong></li>
+  <li>Verifier au multimetre : continuite sur les wires VCC et GND, <strong>pas de court-circuit</strong> entre VCC et GND</li>
+  <li><strong>Tourner le trim pot pour V_REF = 0 V</strong> - mesurer wiper vs GND au multimetre avant alim</li>
+  <li>Alimenter en 3.3V (idealement alim labo regulee, PAS l'ESP32 d'abord)</li>
+  <li>Mesurer tension aux bornes de R_cal : doit etre <strong>environ 0 V</strong> (transistor bloque)</li>
+  <li>Tourner DOUCEMENT le trim pot jusqu'a lire <strong>0.5 V aux bornes de R_cal</strong> (= 50 mA dans le fil)</li>
+  <li>Toucher du doigt : NPN, R_cal, fil. Si chaud (&gt; 50C) -> STOP, retour etape 3</li>
+  <li>Brancher le HX711 sur D et C</li>
+  <li>Brancher l'ESP32 et demarrer la mesure</li>
+</ol>
+</div>
+
+<div class="info">
+<strong>Position physique des 4 contacts sur le fil immerge (100 cm)</strong>
+<ul>
+  <li><strong class="label-red">B</strong> = a 5 cm du haut du bain (juste sous la surface du HCl)</li>
+  <li><strong class="label-blue">D</strong> = a 15 cm (10 cm sous B)</li>
+  <li><strong class="label-blue">C</strong> = a 95 cm (10 cm au-dessus de A)</li>
+  <li><strong class="label-red">A</strong> = a 105 cm (a 5 cm du fond du bain)</li>
+</ul>
+<p>Tu mesures la resistance des <strong>80 cm de fil immerge entre D et C</strong>. C'est la zone attaquee par le HCl dont la section diminue (R augmente).</p>
+</div>
+
+<h2>Composants requis (depuis ton kit)</h2>
+<table>
+<tr><th>Composant</th><th>Reference</th><th>Qte</th><th>Present dans le kit ?</th></tr>
+<tr><td>Op-amp</td><td>LM358 (DIP-8)</td><td>1</td><td>OUI (tu en as 2)</td></tr>
+<tr><td>Transistor NPN</td><td>2N2222 / BC547 / S8050 / BC337</td><td>1</td><td>OUI (170 transistors)</td></tr>
+<tr><td>Trim pot</td><td>10 k vertical 3-pin</td><td>1</td><td>OUI (tu en as 12)</td></tr>
+<tr><td>R_base</td><td>1 k 1/4W</td><td>1</td><td>OUI (1000 resistances)</td></tr>
+<tr><td>R_cal</td><td>10 1/2W ideal, 1% tolerance</td><td>1</td><td>A verifier - sinon 2x 22 en parallele = 11</td></tr>
+<tr><td>Fil fin sense (D, C)</td><td>jumper fin</td><td>2</td><td>OUI</td></tr>
+<tr><td>Pinces croco (B, A)</td><td>solides, metal nu</td><td>2</td><td>A verifier</td></tr>
+</table>
+
+<h2>Adaptation firmware Arduino</h2>
+<p>Le code actuel calcule R via le pont Wheatstone. Avec Kelvin, le calcul devient trivial :</p>
+<pre><code>// Constantes Kelvin (remplace tout le bloc pont Wheatstone)
+const double I_CONSTANT_A = 0.050;     // 50 mA - a calibrer au multimetre
+const double V_REF_HX711  = 4.2987;    // AVDD du HX711 mesure
+
+double lire_resistance() {
+  unsigned long t0 = millis();
+  while (!scale.is_ready() &amp;&amp; millis() - t0 &lt; 3000) delay(10);
+  if (!scale.is_ready()) return last_Rx;
+
+  long reading = scale.read_average(MESURES_PAR_CYCLE);
+  double v_sense = (double)reading * V_REF_HX711 / (128.0 * 8388608.0);
+
+  // Loi d'Ohm directe - pas de pont, pas de ratio
+  double Rx = v_sense / I_CONSTANT_A;
+
+  if (Rx &lt; 0.01 || Rx &gt; 100.0) return last_Rx;  // garde-fou
+  return Rx;
+}</code></pre>
+<p>Une fois le cablage valide et le courant calibre, je te genere le firmware complet adapte.</p>
+
+</body>
+</html>

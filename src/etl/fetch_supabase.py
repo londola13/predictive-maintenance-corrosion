@@ -20,6 +20,28 @@ HEADERS = {
 COLUMNS = ["timestamp_s", "vdiff_v", "rx_ohm", "temp_c", "delta_r_per_h"]
 
 
+def fix_rx_from_vdiff(df: pd.DataFrame, r_shunt: float = 970.0,
+                      cal: float = 33.7, vcc: float = 3.45) -> pd.DataFrame:
+    """Recalcule rx_ohm depuis vdiff_v là où le firmware l'a figé à 0.
+
+    Sur l'ancien ESP32 (USB mort, non reflashable), le garde-fou firmware (Rx>100)
+    gèle rx_ohm à 0 dès que la résistance dépasse la plage — MAIS vdiff_v reste sain.
+    On reconstruit alors la valeur que le firmware aurait dû calculer :
+        rx = vdiff × (2·R_shunt·CAL / VCC)        (formule firmware, R_shunt=R_lift)
+    N'affecte QUE les lignes figées (rx≈0 & vdiff>1 mV positif) : les runs valides
+    (firmware qui calcule un rx correct) sont laissés strictement intacts.
+    Principe : ne jamais faire confiance au rx_ohm buggé — vdiff est la vérité.
+    """
+    if "vdiff_v" not in df.columns or "rx_ohm" not in df.columns:
+        return df
+    rx = pd.to_numeric(df["rx_ohm"], errors="coerce")
+    vd = pd.to_numeric(df["vdiff_v"], errors="coerce")
+    fige = (rx.abs() < 1e-9) & (vd > 1e-3)
+    if fige.any():
+        df.loc[fige, "rx_ohm"] = vd[fige] * (2.0 * r_shunt * cal / vcc)
+    return df
+
+
 def fetch_run(run_id: str) -> pd.DataFrame:
     # Pagination par tranches de 1000 (limite PostgREST par defaut)
     page = 1000
@@ -50,6 +72,7 @@ def fetch_run(run_id: str) -> pd.DataFrame:
     df = pd.DataFrame(rows)[COLUMNS]
     for col in COLUMNS:
         df[col] = pd.to_numeric(df[col], errors="coerce")
+    df = fix_rx_from_vdiff(df)   # rx figé par le garde-fou -> recalculé depuis vdiff
     return df
 
 
