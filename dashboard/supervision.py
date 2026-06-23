@@ -38,7 +38,8 @@ with st.sidebar:
     st.markdown("---")
     page = st.radio(
         "Navigation",
-        ["🏭  Synoptique", "🔬  Supervision Run", "📡  Live", "🤖  ML & Prédiction"],
+        ["🏭  Synoptique", "🔬  Supervision Run", "📡  Live", "🤖  ML & Prédiction",
+         "🔮  Prédiction live", "🧰  Ordres de travail", "🧪  Inhibiteur / dilution"],
         label_visibility="collapsed",
     )
     st.markdown("---")
@@ -352,7 +353,7 @@ elif page.endswith("Live"):
 # ============================================================
 # PAGE 4 — ML & PRÉDICTION
 # ============================================================
-else:
+elif page.endswith("Prédiction"):
     ui.header("ML & PRÉDICTION", "Évaluation XGBoost — leave-one-run-out", EN_LIGNE)
     st.markdown("")
 
@@ -446,3 +447,117 @@ else:
         c1.image(f1, caption="XGBoost plafonne face à l'extrapolation linéaire (forecasting de R)")
     if os.path.exists(f2):
         c2.image(f2, caption="Architecture du système")
+
+
+# ============================================================
+# PAGE 5 — PRÉDICTION LIVE (service predict_loop)
+# ============================================================
+elif page.endswith("live"):
+    ui.header("PRÉDICTION TEMPS RÉEL", "Modèle ML sur le run actif", EN_LIGNE)
+    if not EN_LIGNE:
+        st.info("Aucun run actif. Lancez un run, puis le service de prédiction : "
+                "`python src/realtime/predict_loop.py` (les prédictions s'afficheront ici).")
+    else:
+        preds = dl.dernieres_predictions(run_actif_id)
+        if preds.empty:
+            st.warning("Run actif détecté, mais aucune prédiction encore. "
+                       "Démarrez le service de fond : `python src/realtime/predict_loop.py`.")
+        else:
+            last = preds.iloc[-1]
+            cr, rul = float(last["cr_pred"]), float(last["rul_pred"])
+            etat = "🔴 ROUGE" if rul <= 2 else ("🟠 ORANGE" if rul <= 5 else "🟢 VERT")
+            c1, c2, c3 = st.columns(3)
+            c1.metric("CR prédit (ML)", f"{cr:.1f}")
+            c2.metric("RUL estimé", f"{rul:.1f} h")
+            c3.metric("État (RUL)", etat)
+            st.caption(f"Dernière prédiction : {last['predicted_at']:%Y-%m-%d %H:%M} "
+                       f"· modèle {last['model_version']} · {len(preds)} points")
+            for col, titre, coul in [("rul_pred", "RUL estimé (h)", "#e08a1e"),
+                                     ("cr_pred", "CR prédit — ML", "#1f77b4")]:
+                fig = go.Figure(go.Scatter(x=preds["predicted_at"], y=preds[col],
+                                           mode="lines+markers", line=dict(color=coul)))
+                fig.update_layout(title=titre, height=300, template="plotly_dark",
+                                  margin=dict(l=10, r=10, t=40, b=10))
+                st.plotly_chart(fig, use_container_width=True)
+            st.caption("CR = modèle XGBoost (échelle labo) · RUL = extrapolation physique du pipeline.")
+
+
+# ============================================================
+# PAGE 6 — ORDRES DE TRAVAIL (CMMS maison)
+# ============================================================
+elif page.endswith("travail"):
+    ui.header("ORDRES DE TRAVAIL", "CMMS maison — généré au dépassement de seuil", EN_LIGNE)
+    from src.cmms.work_orders import list_work_orders, update_statut
+    try:
+        wos = list_work_orders()
+    except Exception as e:
+        st.error(f"Lecture cr_work_orders impossible : {e}")
+        wos = []
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Ouverts", sum(1 for w in wos if w["statut"] == "ouvert"))
+    c2.metric("En cours", sum(1 for w in wos if w["statut"] == "en_cours"))
+    c3.metric("Fermés", sum(1 for w in wos if w["statut"] == "ferme"))
+
+    st.markdown("### Ordres actifs")
+    actifs = [w for w in wos if w["statut"] != "ferme"]
+    if not actifs:
+        st.success("Aucun ordre de travail ouvert.")
+    for w in actifs:
+        emoji = "🔴" if w["niveau"] == "rouge" else "🟠"
+        with st.expander(f"{emoji} {w['titre']}  ·  [{w['statut']}]"):
+            st.text(w.get("description", ""))
+            cc1, cc2, cc3 = st.columns([2, 1, 1])
+            asg = cc1.text_input("Assigné à", value=w.get("assignee") or "", key=f"asg_{w['wo_id']}")
+            if cc2.button("Marquer en cours", key=f"enc_{w['wo_id']}"):
+                update_statut(w["wo_id"], "en_cours", asg or None)
+                st.rerun()
+            if cc3.button("Clôturer", key=f"clo_{w['wo_id']}"):
+                update_statut(w["wo_id"], "ferme", asg or None)
+                st.rerun()
+
+    if wos:
+        st.markdown("### Historique complet")
+        cols = ["created_at", "niveau", "titre", "statut", "section_pct", "rul_pred", "assignee"]
+        dfw = pd.DataFrame(wos)
+        st.dataframe(dfw[[c for c in cols if c in dfw.columns]],
+                     use_container_width=True, hide_index=True)
+
+
+# ============================================================
+# PAGE 7 — INHIBITEUR / DILUTION (estimateur indicatif)
+# ============================================================
+elif page.endswith("dilution"):
+    ui.header("EFFET INHIBITEUR / DILUTION", "Estimation indicative de l'allongement de vie", EN_LIGNE)
+    from src.analysis.inhibitor_calc import (
+        estimer_par_duree_cible, estimer_par_reduction, ANCRES, CAVEATS, BASELINE_PURE_H,
+    )
+    st.warning("⚠️ " + CAVEATS)
+    st.markdown(f"**Baseline acide pur** : {BASELINE_PURE_H:.1f} h (médiane des runs non dilués, 10–15 h). "
+                "Réduire l'agressivité (dilution / inhibiteur) abaisse le CR → allonge la vie (durée ≈ ∝ 1/CR).")
+    mode = st.radio("Mode de calcul", ["Par durée de vie cible", "Par réduction de CR visée"],
+                    horizontal=True)
+    if mode.startswith("Par durée"):
+        cible = st.slider("Durée de vie cible (h)", 12, 120, 40, 1)
+        r = estimer_par_duree_cible(cible)
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Réduction de CR nécessaire", f"{r['reduction_cr_pct']:.0f} %")
+        c2.metric("Facteur de vie", f"×{r['facteur_vie']:.1f}")
+        c3.metric("Analogue réel", r["analogue"]["label"])
+        st.info(f"Pour viser ~{cible} h, réduire le CR d'environ **{r['reduction_cr_pct']:.0f} %** "
+                f"(acide moins agressif / inhibiteur). Niveau comparable à **{r['analogue']['label']}** "
+                f"({r['analogue']['dilution']}, {r['analogue']['duree_h']:.0f} h).")
+    else:
+        red = st.slider("Réduction de CR visée (%)", 0, 95, 50, 5)
+        r = estimer_par_reduction(red)
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Durée de vie estimée", f"{r['duree_estimee_h']:.0f} h")
+        c2.metric("Gain", f"+{r['gain_h']:.0f} h")
+        c3.metric("Analogue réel", r["analogue"]["label"])
+        st.info(f"Réduire le CR de **{red} %** porterait la vie à ~**{r['duree_estimee_h']:.0f} h** "
+                f"(×{r['facteur_vie']:.1f}). Comparable à **{r['analogue']['label']}** "
+                f"({r['analogue']['dilution']}).")
+    st.markdown("### Points d'ancrage (runs réels)")
+    st.dataframe(
+        pd.DataFrame(ANCRES).rename(columns={"label": "Essai", "duree_h": "Durée (h)", "dilution": "Dilution"}),
+        use_container_width=True, hide_index=True,
+    )

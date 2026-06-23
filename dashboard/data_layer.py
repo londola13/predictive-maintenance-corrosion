@@ -36,9 +36,10 @@ from pipeline.corrosion_pipeline import traiter_run  # noqa: E402
 # ============================================================
 RUNS_REGISTRY = {
     "d6e31719-c3fb-4797-aa0b-65c4e605002a": {
-        "label": "Run #1", "condition": "HCl brut", "groupe": "Référence",
+        "label": "Run #1", "condition": "HCl dilué (proportion inconnue)", "groupe": "Référence",
         "temp": "29.4 °C", "duree": "22.3 h", "phase": "Exploratoire",
-        "note": "Run de référence — cycle de vie complet (0.97 → 84.7 Ω)",
+        "note": "Acide DILUÉ (proportion non consignée) — d'où une durée (22.3 h) plus longue "
+                "que les runs à acide pur (10–15 h). Cycle de vie complet (0.97 → 84.7 Ω).",
     },
     "66e66c0a-b4c6-40fd-937b-c25fcc71a56c": {
         "label": "Run #2", "condition": "HCl dilué 1:1", "groupe": "Auxiliaire",
@@ -179,6 +180,27 @@ def dernieres_mesures(run_id: str, n: int = 240) -> pd.DataFrame:
         for c in df.columns:
             df[c] = pd.to_numeric(df[c], errors="coerce")
         df = df.sort_values("timestamp_s").reset_index(drop=True)
+    return df
+
+
+@st.cache_data(ttl=25)
+def dernieres_predictions(run_id: str, n: int = 200) -> pd.DataFrame:
+    """Prédictions ML d'un run (alimentées par le service predict_loop)."""
+    params = {
+        "run_id": f"eq.{run_id}",
+        "order": "predicted_at.desc",
+        "select": "predicted_at,cr_pred,rul_pred,model_version",
+        "limit": str(n),
+    }
+    resp = requests.get(f"{SUPABASE_URL}/rest/v1/cr_predictions",
+                        headers=HEADERS, params=params, timeout=15)
+    resp.raise_for_status()
+    df = pd.DataFrame(resp.json())
+    if len(df):
+        df["predicted_at"] = pd.to_datetime(df["predicted_at"], errors="coerce")
+        for c in ("cr_pred", "rul_pred"):
+            df[c] = pd.to_numeric(df[c], errors="coerce")
+        df = df.sort_values("predicted_at").reset_index(drop=True)
     return df
 
 

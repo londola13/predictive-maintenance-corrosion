@@ -1,5 +1,5 @@
 ---
-title: "Système intégré de maintenance prédictive de la corrosion par apprentissage automatique : transition Industrie 3.0 → 4.0 par sonde ER instrumentée IoT, prédiction XGBoost CR/RUL et intégration à un CMMS open-source"
+title: "Maintenance prédictive de la corrosion : une transition Industrie 3.0 → 4.0 par sonde connectée et apprentissage automatique"
 ---
 
 \newpage
@@ -31,7 +31,7 @@ title: "Système intégré de maintenance prédictive de la corrosion par appren
 
 **Thème :**
 
-**SYSTÈME INTÉGRÉ DE MAINTENANCE PRÉDICTIVE DE LA CORROSION PAR APPRENTISSAGE AUTOMATIQUE : TRANSITION INDUSTRIE 3.0 → 4.0 PAR SONDE ER INSTRUMENTÉE IoT, PRÉDICTION DU TAUX DE CORROSION ET DE LA DURÉE DE VIE RÉSIDUELLE PAR XGBoost, ET INTÉGRATION À UN CMMS OPEN-SOURCE**
+**MAINTENANCE PRÉDICTIVE DE LA CORROSION : UNE TRANSITION INDUSTRIE 3.0 → 4.0 PAR SONDE CONNECTÉE ET APPRENTISSAGE AUTOMATIQUE**
 
 ---
 
@@ -328,7 +328,7 @@ Cette approche I3.0 présente plusieurs **limites structurelles** que la transit
 
 Sur la base du contexte exposé — ampleur économique mondiale de la corrosion, lacunes scientifiques persistantes (sous-exploitation des historiques ER, absence de prédiction CR + RUL combinée, absence de chaîne décision → action structurée), maturité numérique limitée à l'Industrie 3.0 chez la plupart des opérateurs subsahariens dont COTCO, cadre normatif et réglementaire — le sujet de ce mémoire est formulé comme suit :
 
-> **« Système intégré de maintenance prédictive de la corrosion par apprentissage automatique : transition Industrie 3.0 → 4.0 par sonde ER instrumentée IoT, prédiction du taux de corrosion et de la durée de vie résiduelle par XGBoost, et intégration à un CMMS open-source. »**
+> **« Maintenance prédictive de la corrosion : une transition Industrie 3.0 → 4.0 par sonde connectée et apprentissage automatique. »**
 
 Ce sujet articule **quatre axes** :
 1. **Axe instrumental** — conception d'une chaîne de mesure ER + IoT autonome (ESP32 + HX711 + DS18B20), démontrant qu'une chaîne d'acquisition I4.0 (déconnectée du DCS, déployable sur points isolés) est réalisable à partir de composants accessibles localement ;
