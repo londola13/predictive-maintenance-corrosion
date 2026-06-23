@@ -113,19 +113,16 @@ def fig_ii3_cycle_esp32():
     ax.set_xlim(0, 12); ax.set_ylim(0, 4); ax.axis('off')
 
     steps = [
-        ("Réveil RTC", "#FFE8B0"),
-        ("Init HX711\n+ DS18B20", "#FFE8B0"),
-        ("Lecture Rx\n(10 ech.)", "#D8F0D0"),
-        ("Lecture T\n(DS18B20)", "#D8F0D0"),
-        ("Wi-Fi +\nPOST Supabase", "#CDE8FF"),
-        ("Power-down\nHX711", "#FFD6CC"),
-        ("Deep sleep\n600 s", "#EADBFF"),
+        ("Lecture HX711\n(moy. 10 éch.)\n→ Rx", "#D8F0D0"),
+        ("Lecture DS18B20\n(12 bits)\n→ T", "#D8F0D0"),
+        ("Wi-Fi +\nHTTPS POST\nSupabase", "#CDE8FF"),
+        ("Temporisation\n30 s", "#EADBFF"),
     ]
     n = len(steps)
-    w, h = 1.45, 1.4
-    gap = 0.15
-    x0 = 0.3
-    y0 = 1.5
+    w, h = 2.1, 1.6
+    gap = 0.35
+    x0 = 1.3
+    y0 = 1.4
 
     for i, (t, c) in enumerate(steps):
         x = x0 + i*(w+gap)
@@ -142,10 +139,10 @@ def fig_ii3_cycle_esp32():
     ax.annotate('', xy=(first_x, y0-0.05), xytext=(last_x, y0-0.05),
                 arrowprops=dict(arrowstyle='-|>', color='gray', lw=1.3,
                                 connectionstyle="arc3,rad=-0.25"))
-    ax.text((first_x+last_x)/2, 0.4, "cycle = 10 minutes", ha='center',
+    ax.text((first_x+last_x)/2, 0.4, "cycle = 30 secondes (acquisition continue)", ha='center',
             fontsize=10, style='italic', color='gray', **SERIF)
 
-    ax.set_title("Figure II.3 — Cycle de fonctionnement ESP32 en deep sleep pulsé",
+    ax.set_title("Figure II.3 — Cycle d'acquisition continue de l'ESP32 (période 30 s)",
                  fontsize=12, pad=10, **SERIF)
     save(fig, 'fig_ii3_cycle_esp32.png')
 
@@ -196,7 +193,7 @@ def fig_c1_cablage():
                                    facecolor="#FFE8B0", edgecolor='black', lw=1.8))
     ax.text(1.75, 7.6, "ESP32\nDevKit V1", ha='center', fontsize=11, weight='bold', **SERIF)
     pins_esp = [("3V3", 7.0), ("GND", 6.5), ("GPIO 21 (DOUT)", 6.0),
-                ("GPIO 22 (SCK)", 5.5), ("GPIO 4 (1-Wire)", 5.0), ("GND", 4.5)]
+                ("GPIO 22 (SCK)", 5.5), ("GPIO 19 (1-Wire)", 5.0), ("GND", 4.5)]
     for label, y in pins_esp:
         ax.plot([3.0, 3.3], [y, y], 'k-', lw=1.3)
         ax.text(2.85, y, label, ha='right', va='center', fontsize=9, **SERIF)
@@ -204,7 +201,7 @@ def fig_c1_cablage():
     # HX711
     ax.add_patch(mp.FancyBboxPatch((4.5, 5), 2.0, 2.5, boxstyle="round,pad=0.08",
                                    facecolor="#CDE8FF", edgecolor='black', lw=1.8))
-    ax.text(5.5, 7.1, "HX711\n24 bits", ha='center', fontsize=11, weight='bold', **SERIF)
+    ax.text(5.5, 7.1, "HX711\n24 bits (gain 64)", ha='center', fontsize=10.5, weight='bold', **SERIF)
     pins_hx = [("VCC", 6.5), ("GND", 6.2), ("DT", 5.9), ("SCK", 5.6),
                ("A+", 5.3), ("A−", 5.0)]
     for label, y in pins_hx:
@@ -217,36 +214,28 @@ def fig_c1_cablage():
     ax.plot([3.3, 4.45], [7.0, 6.5], 'r-', lw=1.4)  # 3V3 → VCC
     ax.plot([3.3, 4.45], [6.5, 6.2], 'k-', lw=1.4)  # GND
 
-    # Pont Wheatstone (à droite)
-    cx, cy = 9.0, 6.5
-    A = (cx, cy+1.3); B = (cx+1.1, cy); C = (cx, cy-1.3); D = (cx-1.1, cy)
-    ax.plot(*zip(A, B, C, D, A), color='black', lw=1.6)
-
-    def br(p1, p2, lab):
-        mx, my = (p1[0]+p2[0])/2, (p1[1]+p2[1])/2
-        ax.add_patch(mp.Rectangle((mx-0.28, my-0.18), 0.56, 0.36,
-                                  facecolor='white', edgecolor='black', lw=1.3, zorder=3))
-        ax.text(mx, my, lab, ha='center', va='center', fontsize=8.5, zorder=4, **SERIF)
-
-    br(A, B, "R₂\n10Ω")
-    br(B, C, "R_REF\n0,5Ω")
-    br(C, D, "Rx\nFe")
-    br(D, A, "R₁\n10Ω")
-
-    # R_série au-dessus du pont
-    ax.add_patch(mp.Rectangle((cx-0.3, cy+1.7), 0.6, 0.3,
-                              facecolor='white', edgecolor='black', lw=1.3))
-    ax.text(cx, cy+1.85, "R_série\n100Ω", ha='center', fontsize=8, **SERIF)
-    ax.plot([cx, cx], [cy+1.3, cy+1.7], 'k-', lw=1.5)
-    ax.plot([cx, cx], [cy+2.0, cy+2.4], 'k-', lw=1.5)
-    ax.text(cx+0.1, cy+2.4, "+ 3,3 V", fontsize=9, **SERIF)
-    # GND bas pont
-    ax.plot([cx, cx], [cy-1.3, cy-1.6], 'k-', lw=1.5)
-    ax.text(cx-0.1, cy-1.7, "GND", ha='right', fontsize=9, **SERIF)
-
-    # Connexions A+/A− pont → HX711
-    ax.plot([cx+1.1, 6.5], [cy, 5.3], 'b-', lw=1.3)
-    ax.plot([cx-1.1, 6.5], [cy, 5.0], 'b-', lw=1.3)
+    # ── Montage série : 3V3 → R_shunt → [fil Fe] → R_lift → GND ──
+    yb = 6.6
+    x3, xs1, xs2, xAp, xAm, xl1, xl2, xg = 7.3, 7.8, 8.6, 9.0, 10.3, 10.7, 11.5, 11.9
+    ax.plot([x3, xg], [yb, yb], 'k-', lw=1.4, zorder=1)
+    ax.plot([x3, x3], [yb, yb+0.45], 'r-', lw=1.6)
+    ax.text(x3, yb+0.62, "+3,3 V", ha='center', color='red', fontsize=9, **SERIF)
+    ax.add_patch(mp.Rectangle((xs1, yb-0.18), xs2-xs1, 0.36, facecolor='white',
+                              edgecolor='black', lw=1.4, zorder=3))
+    ax.text((xs1+xs2)/2, yb+0.5, "R_shunt\n970 Ω", ha='center', fontsize=8.5, **SERIF)
+    ax.plot([xAp, xAm], [yb, yb], color='#E08A1E', lw=4.5, zorder=2)
+    ax.text((xAp+xAm)/2, yb-0.5, "Fil de fer (Rx)", ha='center', color='#E08A1E', fontsize=9, **SERIF)
+    for xn, lab in [(xAp, "A+"), (xAm, "A−")]:
+        ax.plot(xn, yb, 'ko', ms=4, zorder=4)
+        ax.text(xn, yb+0.24, lab, ha='center', color='blue', fontsize=8.5, **SERIF)
+    ax.add_patch(mp.Rectangle((xl1, yb-0.18), xl2-xl1, 0.36, facecolor='white',
+                              edgecolor='black', lw=1.4, zorder=3))
+    ax.text((xl1+xl2)/2, yb+0.5, "R_lift\n970 Ω", ha='center', fontsize=8.5, **SERIF)
+    ax.plot([xg, xg], [yb, yb-0.45], 'k-', lw=1.6)
+    ax.text(xg, yb-0.62, "GND", ha='center', fontsize=9, **SERIF)
+    # Connexions A+/A− → HX711
+    ax.plot([xAp, 6.5], [yb, 5.3], 'b-', lw=1.3, zorder=1)
+    ax.plot([xAm, 6.5], [yb, 5.0], 'b-', lw=1.3, zorder=1)
 
     # DS18B20 (en bas)
     ax.add_patch(mp.FancyBboxPatch((5.0, 1.5), 2.0, 1.3, boxstyle="round,pad=0.08",
@@ -265,15 +254,15 @@ def fig_c1_cablage():
     # Cellule de mesure (récipient HDPE)
     ax.add_patch(mp.FancyBboxPatch((9.5, 2.0), 2.0, 2.5, boxstyle="round,pad=0.08",
                                    facecolor="#F5E5D5", edgecolor='black', lw=1.8))
-    ax.text(10.5, 4.2, "Cellule HDPE\n(Detar Plus)", ha='center', fontsize=10, weight='bold', **SERIF)
+    ax.text(10.5, 4.2, "Bécher\n(HCl, bain 30 °C)", ha='center', fontsize=10, weight='bold', **SERIF)
     ax.text(10.5, 3.2, "Fil Fe (Rx)\n+ DS18B20\nimmergés", ha='center', fontsize=9, **SERIF)
-    # Liaisons cellule → pont (Rx) et DS18B20
-    ax.annotate('', xy=(cx-0.4, cy-1.3), xytext=(10.0, 4.5),
+    # Liaisons cellule → fil Fe (Rx) et DS18B20
+    ax.annotate('', xy=((xAp+xAm)/2, yb-0.1), xytext=(10.5, 4.5),
                 arrowprops=dict(arrowstyle='-', color='gray', lw=1.0, ls='--'))
     ax.annotate('', xy=(7.0, 2.1), xytext=(9.5, 2.8),
                 arrowprops=dict(arrowstyle='-', color='gray', lw=1.0, ls='--'))
 
-    ax.set_title("Figure C.1 — Schéma de câblage complet de la sonde ER\nESP32 + HX711 + Pont de Wheatstone + DS18B20",
+    ax.set_title("Figure C.1 — Schéma de câblage complet de la sonde ER\nESP32 + HX711 + montage shunt + R_lift + DS18B20",
                  fontsize=12, pad=12, **SERIF)
     save(fig, 'fig_c1_cablage.png')
 

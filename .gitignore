@@ -59,3 +59,7 @@ firmware/secrets*.h
 # Fichiers temporaires Word/Office
 ~$*
 *.tmp
+
+# Mémoire — intermédiaires de build Word
+memoire/_reference.docx
+memoire/_memoire_tmp.md

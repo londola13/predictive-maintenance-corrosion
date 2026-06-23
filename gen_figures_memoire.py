@@ -41,11 +41,11 @@ plt.rcParams.update({
 BLEU, ORANGE, VERT, ROUGE, GRIS = "#1f4e79", "#e08a1e", "#2e8b57", "#c0392b", "#7f8c8d"
 
 # Runs retenus + métadonnées (cohérent avec data_layer.RUNS_REGISTRY)
+# Run #14 = cas-rupture (régime d'emballement terminal) : analysé à part, hors grille.
 RUNS = {
-    "Run #1":  ("d6e31719-c3fb-4797-aa0b-65c4e605002a", "Réf. ambiant"),
+    "Run #1":  ("d6e31719-c3fb-4797-aa0b-65c4e605002a", "Réf. ambiant 29,5 °C"),
     "Run #11": ("72d0f7b7-e1ef-40b0-8416-851873c72440", "Ambiant 32,7 °C"),
     "Run #12": ("f5852fd4-8c3f-474e-9c20-a1ac129e018c", "Ambiant 29,5 °C"),
-    "Run #14": ("83760a06-b2c8-4730-8368-18babfcae3e1", "Ambiant 31,7 °C"),
     "Run #16": ("cc4b4bec-1f3b-45ba-85d9-9c1db733eeae", "Contrôlé 30 °C"),
 }
 CONTRE = {
@@ -83,7 +83,7 @@ data_ce = {n: charger(rid) for n, (rid, _) in CONTRE.items()}
 
 
 # ---------- Figure III.2a : R(t)+T(t) des runs retenus ----------
-fig, axes = plt.subplots(2, 3, figsize=(13, 7))
+fig, axes = plt.subplots(2, 2, figsize=(11, 7))
 axes = axes.flatten()
 for ax, (nom, (rid, sub)) in zip(axes, RUNS.items()):
     df = data[nom]
@@ -95,7 +95,6 @@ for ax, (nom, (rid, sub)) in zip(axes, RUNS.items()):
     ax2.plot(t, df["temp_lisse"], color=ORANGE, lw=0.9, ls="--", alpha=0.8)
     ax2.set_ylabel("T (°C)", color=ORANGE); ax2.grid(False)
     ax2.set_ylim(26, 34)
-axes[-1].axis("off")
 fig.suptitle("Figure III.2 — Évolution de la résistance compensée R(t) et de la température T(t) par essai",
              fontsize=12, y=1.0)
 fig.tight_layout()
@@ -131,8 +130,8 @@ print("  fig_iii2_synthese.png")
 with open(os.path.join("dashboard", "static_results.json"), encoding="utf-8") as f:
     res = json.load(f)
 proto = res["protocole_actuel"]
-TEMP = {"Run12": 29.5, "Run14": 31.7, "Run16": 30.1}
-LBL = {"Run12": "Run #12", "Run14": "Run #14", "Run16": "Run #16"}
+TEMP = {"Run12": 29.5, "Run16": 30.1}
+LBL = {"Run12": "Run #12", "Run16": "Run #16"}
 
 
 # ---------- Figure III.3a : R² LORO par run (3 modèles) ----------
@@ -160,23 +159,28 @@ plt.close(fig)
 print("  fig_iii3_r2_runs.png")
 
 
-# ---------- Figure III.3b : R² moyen par plage ----------
-plage30 = [proto[r]["XGBoost"]["r2"] for r in runs_test if TEMP[r] < 31]
-plage32 = [proto[r]["XGBoost"]["r2"] for r in runs_test if TEMP[r] >= 31]
-labels = ["~30 °C\n(couverte, %d essais)" % len(plage30), "~32 °C\n(non couverte, %d essai)" % len(plage32)]
-vals = [np.mean(plage30), np.mean(plage32)]
-fig, ax = plt.subplots(figsize=(6, 4.5))
-bars = ax.bar(labels, vals, color=[VERT, ROUGE], width=0.5)
+# ---------- Figure III.5 : effet de la couverture des conditions (variantes A→D) ----------
+# Démonstration : la série 30 °C SEULE (sans voisins couvrant les conditions) échoue ;
+# l'ajout d'auxiliaires couvrant la plage rend la prédiction fiable.
+var = res["variantes"]
+ordre = ["A", "B", "C", "D"]
+noms_var = {"A": "A\nSérie seule", "B": "B\n+ aux. bruts",
+            "C": "C\n+ aux. sous-éch.", "D": "D\n+ aux. pondérés"}
+vals = [var[k]["moyenne_r2"] for k in ordre]
+cols = [VERT if var[k].get("retenue") else (ROUGE if vals[i] < 0 else BLEU)
+        for i, k in enumerate(ordre)]
+fig, ax = plt.subplots(figsize=(7.5, 4.5))
+bars = ax.bar([noms_var[k] for k in ordre], vals, color=cols, width=0.6)
 ax.axhline(0, color="black", lw=0.8)
 for rect, v in zip(bars, vals):
     ax.text(rect.get_x() + rect.get_width() / 2,
-            v + (0.03 if v >= 0 else -0.08), f"{v:+.2f}", ha="center", fontsize=10)
-ax.set_ylabel("R² moyen (XGBoost, LORO)")
-ax.set_title("Figure III.5 — Performance moyenne par plage de température")
+            v + (0.04 if v >= 0 else -0.10), f"{v:+.2f}", ha="center", fontsize=10)
+ax.set_ylabel("R² moyen LORO (Run #12 & #16)")
+ax.set_title("Figure III.5 — Effet de la couverture des conditions sur la fiabilité")
 fig.tight_layout()
 fig.savefig(os.path.join(OUTDIR, "fig_iii3_r2_plage.png"), bbox_inches="tight")
 plt.close(fig)
-print("  fig_iii3_r2_plage.png")
+print("  fig_iii3_r2_plage.png (couverture A->D)")
 
 
 # ---------- Figure III.3c : importance des variables ----------

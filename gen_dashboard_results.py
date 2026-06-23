@@ -37,6 +37,7 @@ RUNS = {
     "Run15": "1d0762a0-c008-410c-a366-41411bebdc56",
     "Run16": "cc4b4bec-1f3b-45ba-85d9-9c1db733eeae",
     "Run17": "598f3857-6fac-4beb-aebc-57ced8b13e6b",
+    "Run20": "1955f61d-9583-4672-93b4-0c8837cc17cb",
 }
 # Série de test UNIQUE (cohérence : étude variantes ET protocole testent les mêmes runs).
 # Run11 = auxiliaire (jamais testé), Run13 = exclu.
@@ -44,8 +45,9 @@ RUNS = {
 #         Retiré de la série de corrosion STABLE pour homogénéité de régime, analysé à part
 #         comme cas-rupture. Distinction physique documentée, PAS un tri sur le résultat.
 # Run15 = contre-exemple (régulation thermique ratée), Run17 = contre-exemple (acide évaporé) : hors LORO.
+# Run20 = jumeau propre 30°C (répétition Run16, ESP32 ancien + pipeline vdiff) : auxiliaire, densifie la plage 30°C.
 SERIE_TEST = ["Run12", "Run16"]
-AUX_ACTUEL = ["Run1", "Run2", "Run3", "Run11"]
+AUX_ACTUEL = ["Run1", "Run2", "Run3", "Run11", "Run20"]
 SERIE_HIST = SERIE_TEST     # alias : l'étude des variantes utilise la même série
 AUX_HIST   = AUX_ACTUEL
 

@@ -1,5 +1,5 @@
 {
-  "genere_le": "2026-06-21T09:14:33.172631+00:00",
+  "genere_le": "2026-06-22T22:34:48.811728+00:00",
   "nb_points_par_run": {
     "Run1": 2490,
     "Run2": 5764,
@@ -9,7 +9,8 @@
     "Run14": 1457,
     "Run15": 968,
     "Run16": 1442,
-    "Run17": 2281
+    "Run17": 2281,
+    "Run20": 1005
   },
   "features": [
     "rx_corr",
@@ -41,88 +42,88 @@
       "nom": "+ Auxiliaires bruts",
       "runs": {
         "Run12": {
-          "r2": 0.498,
-          "mae": 84.3
+          "r2": 0.511,
+          "mae": 87.5
         },
         "Run16": {
-          "r2": -0.027,
-          "mae": 171.7
+          "r2": 0.056,
+          "mae": 152.5
         }
       },
-      "moyenne_r2": 0.235,
-      "moyenne_mae": 128.0,
+      "moyenne_r2": 0.284,
+      "moyenne_mae": 120.0,
       "retenue": false
     },
     "C": {
       "nom": "+ Auxiliaires sous-échantillonnés",
       "runs": {
         "Run12": {
-          "r2": 0.475,
-          "mae": 87.1
+          "r2": 0.503,
+          "mae": 83.0
         },
         "Run16": {
-          "r2": 0.05,
-          "mae": 156.2
+          "r2": 0.071,
+          "mae": 145.1
         }
       },
-      "moyenne_r2": 0.263,
-      "moyenne_mae": 121.6,
+      "moyenne_r2": 0.287,
+      "moyenne_mae": 114.0,
       "retenue": true
     },
     "D": {
       "nom": "+ Auxiliaires pondérés",
       "runs": {
         "Run12": {
-          "r2": 0.437,
-          "mae": 89.6
+          "r2": 0.458,
+          "mae": 84.8
         },
         "Run16": {
-          "r2": 0.083,
-          "mae": 165.6
+          "r2": 0.077,
+          "mae": 140.2
         }
       },
-      "moyenne_r2": 0.26,
-      "moyenne_mae": 127.6,
+      "moyenne_r2": 0.268,
+      "moyenne_mae": 112.5,
       "retenue": false
     }
   },
   "protocole_actuel": {
     "Run12": {
       "XGBoost": {
-        "r2": 0.475,
-        "mae": 87.1
+        "r2": 0.503,
+        "mae": 83.0
       },
       "Régression linéaire": {
-        "r2": 0.207,
-        "mae": 93.9
+        "r2": 0.211,
+        "mae": 118.2
       },
       "Moyenne constante": {
-        "r2": -0.008,
-        "mae": 138.1
+        "r2": -0.022,
+        "mae": 146.5
       }
     },
     "Run16": {
       "XGBoost": {
-        "r2": 0.05,
-        "mae": 156.2
+        "r2": 0.071,
+        "mae": 145.1
       },
       "Régression linéaire": {
-        "r2": 0.119,
-        "mae": 167.1
+        "r2": 0.137,
+        "mae": 127.2
       },
       "Moyenne constante": {
-        "r2": -0.0,
-        "mae": 169.2
+        "r2": -0.002,
+        "mae": 178.0
       }
     }
   },
   "importance_features": {
-    "rx_corr": 0.231,
-    "temp_lisse": 0.0708,
-    "temp_moy_6h": 0.0912,
-    "temps_immersion_h": 0.2273,
-    "delta_R_absolu": 0.326,
-    "section_perdue_pct": 0.0538
+    "rx_corr": 0.26,
+    "temp_lisse": 0.0834,
+    "temp_moy_6h": 0.0984,
+    "temps_immersion_h": 0.1977,
+    "delta_R_absolu": 0.2741,
+    "section_perdue_pct": 0.0864
   },
   "narratif": {
     "mecanisme": "La prédiction réussit quand l'entraînement couvre la plage de température du run testé. La couverture thermique compte plus que le volume brut de données.",
