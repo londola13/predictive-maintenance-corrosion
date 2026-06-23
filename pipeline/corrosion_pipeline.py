@@ -194,7 +194,8 @@ def feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
 def calculer_RUL(df: pd.DataFrame, r_critique_fraction: float = 0.15) -> pd.DataFrame:
     """
     RUL = temps restant avant que le rayon atteigne r_critique.
-    r_critique = r0 × r_critique_fraction (10% du rayon initial = rupture imminente)
+    r_critique = r0 × r_critique_fraction (15% du rayon initial subsistant
+    ≈ 98% de section perdue = rupture imminente ; convention labo, cf. mémoire §II.4.5)
 
     Si le run va jusqu'à la rupture : RUL calculé depuis la fin.
     Si non : RUL estimé par extrapolation linéaire de la tendance.

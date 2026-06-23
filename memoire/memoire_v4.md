@@ -382,7 +382,7 @@ Quatre objectifs spécifiques (OS), chronologiquement ordonnés et logiquement a
 
 - **QR1 :** Dans quelle mesure une sonde ER à fil de fer, mesurée par injection de courant et instrumentée par un amplificateur HX711 24 bits et un microcontrôleur ESP32, permet-elle de mesurer des variations de résistance au dixième de milliohm, avec une stabilité et une résolution suffisantes pour quantifier le taux de corrosion en mm/an dans un milieu acide concentré ?
 
-- **QR2 :** Dans quelle mesure un modèle XGBoost entraîné sur des séries temporelles de résistance et de température collectées en protocole *run-to-failure* permet-il de prédire simultanément le taux de corrosion (CR) et la durée de vie résiduelle (RUL) avec une erreur relative inférieure à 15 % (RMSE), tout en restant interprétable par analyse SHAP ?
+- **QR2 :** Dans quelle mesure un modèle XGBoost entraîné sur des séries temporelles de résistance et de température collectées en protocole *run-to-failure* permet-il de prédire simultanément le taux de corrosion (CR) et la durée de vie résiduelle (RUL) avec une erreur relative inférieure à 15 % (RMSE) — **objectif de conception fixé a priori**, non une exigence normative —, tout en restant interprétable par analyse SHAP ?
 
 - **QR3 :** Dans quelle mesure les sorties du modèle XGBoost permettent-elles de diagnostiquer le régime de corrosion en cours (induction, croissance, emballement, pré-rupture), et dans quelle mesure l'identification des facteurs de variabilité expérimentale — en particulier la température — et la répétabilité des conditions conditionnent-elles la fiabilité de la prédiction et la calibration d'un système d'alertes graduées (vert / orange / rouge) ?
 
@@ -964,9 +964,11 @@ Les **deux variables cibles** sont :
 - **CR_lisse** (mm/an) : taux de corrosion lissé Savitzky-Golay ;
 - **RUL_h** (heures) : durée de vie résiduelle.
 
+La cible visée étant la **vitesse de corrosion stable** (et non l'emballement terminal, qui relève de la défaillance — §III.4.1), les valeurs de *CR* de la phase de pré-rupture, fortement non stationnaires, sont **écrêtées à 2 000 µm/an**. Ce plafond est une **convention de prétraitement** documentée, destinée à empêcher les pics aberrants de cette phase de biaiser l'apprentissage du régime stationnaire ; il n'affecte pas la plage de fonctionnement nominale.
+
 ### II.4.5. Calcul du RUL
 
-Le critère de fin de vie est défini à *r*_critique = 0,1 × *r*(0), soit une perte de 90 % du rayon initial (équivalent à une réduction de section de 99 %). Pour les **runs RTF complets** (rupture observée) :
+Le critère de fin de vie est fixé à *r*_critique = 0,15 × *r*(0), soit un rayon résiduel de 15 % (≈ 98 % de section perdue) — proxy d'une section quasi nulle annonçant la rupture mécanique imminente. Cette valeur est une **convention de laboratoire** : la norme **ISO 13381-1** définit le pronostic par rapport à un « seuil de santé prédéfini » sans en imposer la valeur numérique (ISO, 2015) ; le choix de 0,15 est **provisoire**, à recaler sur un critère mécanique (contrainte à rupture du fil) en conditions réelles. Pour les **runs RTF complets** (rupture observée), la durée de vie résiduelle est mesurée directement depuis l'instant de rupture :
 
 $$RUL(t) = t_{rupture} - t$$
 
@@ -1038,7 +1040,7 @@ Les régimes correspondent aux phases physiques observées sur un essai RTF du f
 | **Emballement** | accélération marquée de dR/dt, tendance_6h croissante | Orange |
 | **Pré-rupture** | dR/dt diverge ET RUL < 12 h | Rouge |
 
-Les seuils sont calibrés empiriquement à partir des distributions observées dans les runs de référence, ce qui constitue une démarche reproductible.
+Les seuils de transition entre régimes sont **calibrés sur les distributions observées** dans les runs de référence, conformément au principe de « seuil de santé prédéfini » de l'**ISO 13381-1** (ISO, 2015). Ils constituent à ce stade une **convention de laboratoire provisoire**, à consolider sur un volume d'essais accru. Le seuil de pré-rupture (*RUL* < 12 h) est un **objectif de conception** — l'horizon d'anticipation visé pour déclencher une intervention — et non une valeur normative.
 
 La fonction `diagnostiquer(features)` du pipeline Python prend en entrée le vecteur de features de l'instant courant et retourne un dictionnaire `{régime: str, confiance: float, signal: dict}` exploité ensuite par le module GMAO (OS4) pour générer les alertes.
 
@@ -1093,6 +1095,8 @@ Les seuils d'alerte sont définis à partir des deux sorties du modèle (taux de
 | Vert (nominal) | *CR* < 1 mm/an ET *RUL* > 48 h | Surveillance normale |
 | Orange (vigilance) | 1 ≤ *CR* < 5 mm/an OU 12 ≤ *RUL* < 48 h | Planifier une inspection / intervention |
 | Rouge (critique) | *CR* ≥ 5 mm/an OU *RUL* < 12 h | Inspection immédiate + arrêt préventif |
+
+> **Provenance et statut de ces seuils (important).** Les valeurs de *CR* ci-dessus constituent un **cadre cible industriel illustratif**, destiné à un acier de pipeline ; elles ne sont **ni des bandes normatives NACE, ni les seuils opérationnels du prototype**. À titre de référence normative, la norme **NACE/AMPP SP0775** classe la sévérité de corrosion de l'acier au carbone en bandes faible / modérée / élevée / sévère aux alentours de 0,025 / 0,12 / 0,25 mm/an (AMPP, 2023) — c'est sur ces bandes qu'un déploiement réel devra être recalibré. Le **prototype de laboratoire**, dont le fil de fer en HCl corrode à des vitesses très supérieures à celles d'un pipeline acier (et dont le *CR* est écrêté à 2 mm/an, §II.4.4), n'utilise pas ces seuils absolus : il déclenche ses alertes sur la **section perdue (%)** et le **RUL (h)** (§III.4.3), grandeurs intrinsèques indépendantes de l'échelle de *CR*. Ces seuils opérationnels sont **provisoires**, calibrés sur les essais de référence et à consolider (§III.6.4).
 
 ---
 
@@ -1196,6 +1200,8 @@ GLPI fournit nativement ou par requête SQL/plugin les KPIs maintenance suivants
 | **Efficacité d'inhibition** | (CR_avant − CR_après) / CR_avant × 100 | Pipeline ML + tags GLPI | > 90 % |
 | **Précision du modèle** | 1 − (alertes annulées / alertes totales) | Champ `solutiontype` GLPI | > 85 % |
 | **Taux de fausses alertes** | tickets résolus en `false positive` / total | Champ `status` + `solution` | < 15 % |
+
+> *La colonne « Cible » liste des **objectifs de conception** (valeurs usuelles de l'ingénierie de maintenance : p. ex. disponibilité > 95 %), et non des seuils normatifs ; ils servent de référence d'évaluation et seront confrontés aux performances réelles sur un historique d'interventions suffisant (§III.5, §III.6.4).*
 
 ---
 
@@ -1318,7 +1324,7 @@ Sur la plage 30 °C couverte, le modèle obtient une **moyenne positive (R² = +
 L'entraînement peut être enrichi de plusieurs manières : série de test seule, ou ajout d'essais auxiliaires bruts, sous-échantillonnés, ou pondérés. La figure III.5 compare ces quatre variantes (R² moyen LORO sur Run #12 et #16). Le résultat est net :
 
 - entraîner sur la **série 30 °C seule**, sans essais couvrant les conditions, échoue lourdement (**R² = −1,77**) ;
-- **ajouter des auxiliaires** couvrant la plage rétablit une prédiction fiable (**+0,29**, variante retenue : auxiliaires sous-échantillonnés à 1 500 points).
+- **ajouter des auxiliaires** couvrant la plage rétablit une prédiction fiable (**+0,29**, variante retenue : auxiliaires sous-échantillonnés à 1 500 points). Le sous-échantillonnage corrige le **déséquilibre ≈ 4,5:1** entre auxiliaires volumineux et série de test, qui sinon « noie » cette dernière — un rééquilibrage du jeu d'entraînement étant une pratique établie de l'apprentissage sur données déséquilibrées (He et Garcia, 2009).
 
 ![Figure III.5 — Effet de la couverture des conditions sur la fiabilité](figures/fig_iii3_r2_plage.png){ width=72% }
 
@@ -1342,7 +1348,7 @@ Le module de diagnostic (§II.5.5) classe chaque instant dans l'un des régimes 
 
 ### III.4.2. Facteurs de variabilité : deux contre-exemples instructifs
 
-Au-delà de la température, deux essais se sont révélés **imprédictibles** par le modèle malgré une plage thermique a priori couverte. Leur analyse, loin d'être un échec, **isole expérimentalement deux facteurs de variabilité** qu'il faut contrôler.
+Au-delà de la température, deux essais se sont révélés **imprédictibles** par le modèle malgré une plage thermique a priori couverte. Leur analyse, loin d'être un échec, **isole expérimentalement deux facteurs de variabilité** qu'il faut contrôler. Cette démarche relève du **contrôle des variables** propre au plan d'expériences (Montgomery, 2017) : en ne laissant dériver qu'un seul facteur à la fois, chaque contre-exemple en isole l'effet — ce qui fonde la stratégie de « vitrine 30 °C » (conditions maîtrisées et répétées) opposée aux contre-exemples.
 
 La figure III.7 confronte la courbe d'un essai propre (Run #16) à celles de ces deux contre-exemples.
 
@@ -1397,7 +1403,7 @@ L'intégration à un CMMS open-source (GLPI) plutôt qu'un développement *ex ni
 
 ### III.6.4. Limites du travail
 
-**Limites matérielles :** le fil de fer utilisé n'est pas le matériau des pipelines COTCO (acier API 5L). Les valeurs absolues de *CR* ne sont pas directement transposables — limitation assumée dans une preuve de concept visant à valider la chaîne et la méthode.
+**Limites matérielles :** le fil de fer utilisé n'est pas le matériau des pipelines COTCO (acier API 5L). Les valeurs absolues de *CR* ne sont pas directement transposables — limitation assumée dans une preuve de concept visant à valider la chaîne et la méthode. Par ailleurs, en HCl concentré, l'**électrolyte conducteur shunte partiellement la mesure ER** (un courant parasite circule dans la solution en parallèle du fil), ce qui plafonne la résistance mesurable et peut masquer la rupture des fils épais ; ce phénomène physique impose l'emploi d'un **fil fin** (Ø ≈ 1,15 mm), qui rompt sous le plafond de mesure et rend l'événement de défaillance observable.
 
 **Limites du jeu de données :** le nombre d'essais exploités à ce stade reste réduit, ce qui rend les métriques **bruitées** (un même essai peut voir son R² varier sensiblement selon la composition du jeu d'entraînement). La campagne en cours vise précisément à augmenter ce volume.
 
@@ -1597,6 +1603,10 @@ Ce chapitre a présenté les résultats provisoires de la campagne. **OS1** : la
 
 77. Saxena, A., Goebel, K., Simon, D., & Eklund, N. (2008). Damage propagation modeling for aircraft engine run-to-failure simulation. *International Conference on Prognostics and Health Management (PHM)*, 1–9. IEEE. https://doi.org/10.1109/PHM.2008.4711414
 
+78. He, H., & Garcia, E. A. (2009). Learning from imbalanced data. *IEEE Transactions on Knowledge and Data Engineering*, 21(9), 1263–1284. https://doi.org/10.1109/TKDE.2008.239
+
+79. Montgomery, D. C. (2017). *Design and Analysis of Experiments* (9th ed.). John Wiley & Sons.
+
 \newpage
 
 <!-- ═══════════════════════════════════════════════════════════ -->
@@ -1758,6 +1768,59 @@ FROM work_orders wo GROUP BY asset_id;
 | `memoire/memoire_v4.docx` | Mémoire (version Word ENSPD) |
 
 Lien GitHub : `londola13/predictive-maintenance-corrosion`
+
+\newpage
+
+## Annexe H — Tableau de traçabilité des choix, seuils et données (matrice de provenance)
+
+En réponse à l'exigence méthodologique de **traçabilité intégrale** — toute donnée, tout seuil, toute méthode et toute décision d'orientation doit découler d'une source identifiable —, le présent tableau récapitule la provenance de chaque élément structurant du mémoire. Quatre types de source sont distingués : **(N)** norme ou standard ; **(R)** référence scientifique ; **(P)** loi physique ; **(E)** provenance expérimentale documentée. Les éléments dépourvus d'ancrage normatif disponible sont explicitement marqués **« convention / objectif de laboratoire — provisoire »** : conformément au principe de rigueur retenu, aucun seuil n'est présenté comme normatif s'il ne l'est pas, et tout choix de valeur sans norme est assumé comme provisoire, à recaler en conditions réelles.
+
+**H.1 — Données, grandeurs et lois physiques**
+
+| Élément | Valeur / formule | Type | Source exacte |
+|---|---|---|---|
+| Calcul du CR (perte de masse) | CR = f(Δm, ρ, A, t) | N · P | ASTM G1-03 (ASTM, 2017) ; loi de Faraday (1834) |
+| Principe de la sonde ER | R = ρL/(π r²) | P · N | loi d'Ohm ; ASTM G96 (ASTM, 2018) |
+| Compensation thermique | ρ(T) = ρ₀[1 + α(T−T_ref)], α = 6,5·10⁻³ | P · R | loi de Matthiessen ; Pollock (1991) |
+| Calibration HX711 (×33,7) | facteur empirique k_cal | E | étalonnage sur résistances étalons (§III.1.1) |
+| Cadence d'acquisition (30 s) | — | E · P | adéquation corrosion lente ; firmware (§II.2.4) |
+| Effet de la température | loi d'Arrhenius | P · R | §I.7.7 ; Schweitzer (2010), Roberge (2008) |
+
+**H.2 — Méthodes d'apprentissage et de validation**
+
+| Élément | Choix | Type | Source exacte |
+|---|---|---|---|
+| Suppression d'outliers (IQR) | [Q5 − 3·IQR ; Q95 + 3·IQR] | R | Tukey (1977) |
+| Lissage et dérivation | Savitzky-Golay | R | Savitzky & Golay (1964) |
+| Algorithme + hyperparamètres | XGBoost (n=500, depth=4, lr=0,05…) | R | Chen & Guestrin (2016) |
+| Stratégie de validation | leave-one-run-out (LORO) | R | Bergmeir & Benítez (2012) |
+| Métriques | MAE / RMSE / R² | R | Hyndman & Koehler (2006) |
+| Interprétabilité | SHAP (top-3 variables) | R | Lundberg & Lee (2017) |
+| Sous-échantillonnage auxiliaires (1 500 pts) | corrige le déséquilibre ≈ 4,5:1 | R · E | He & Garcia (2009) ; mesuré sur les runs |
+| Contrôle des variables (vitrine 30 °C / contre-exemples) | un facteur à la fois | R · E | Montgomery (2017) ; Run #15, #17 |
+
+**H.3 — Seuils et conventions (statut explicite)**
+
+| Seuil / valeur | Valeur | Statut | Ancrage / provenance |
+|---|---|---|---|
+| `r_critique` (fin de vie, RUL) | 0,15·r₀ (≈ 98 % section) | convention labo — **provisoire** | principe ISO 13381-1 (ISO, 2015) ; valeur à recaler (critère mécanique) |
+| Écrêtage du CR | 2 000 µm/an | convention de prétraitement | documentée §II.4.4 (exclut l'emballement non stationnaire) |
+| Seuils des régimes ; pré-rupture | distributions des runs ; RUL < 12 h | principe normatif + objectif de conception | ISO 13381-1 (seuil de santé) ; **provisoire** |
+| Seuils d'alerte CR (Tableau II.9) | 1 / 5 mm/an | cadre cible industriel — **non NACE** | réf. NACE/AMPP SP0775 : bandes 0,025 / 0,12 / 0,25 mm/an (AMPP, 2023) |
+| Seuils opérationnels du prototype | section 60 / 85 % ; RUL 5 / 2 h | convention labo — **provisoire** | calibrés sur les runs de référence (§III.4.3) |
+| Cible RMSE < 15 % ; KPIs (dispo > 95 %…) | — | **objectifs de conception** | valeurs usuelles, non normatives |
+
+**H.4 — Décisions d'orientation**
+
+| Décision | Justification | Type | Source exacte |
+|---|---|---|---|
+| Repositionnement Industrie 3.0 → 4.0 | verrou = intelligence applicative, non l'instrumentation | R | Lasi et al. (2014) ; Lu (2017) ; Xu et al. (2018) ; Bagheri et al. (2024) |
+| Recours au ML | modèles physiques : 40–60 % d'erreur réelle | R | de Waard & Milliams (1975) ; Coelho (2022) ; NORSOK M-506 |
+| ML « preuve de concept » (Option B) | limites = conditions du passage à l'échelle | R | Coelho (2022) ; Wei (2024), Yan & Yan (2024), Hu et al. (2024) |
+| Protocole run-to-failure | cycle complet + événement de défaillance observé | N | ISO 13381-1 (ISO, 2015) |
+| Intégration CMMS open-source (vs ex nihilo) | maturité, transposabilité, on-premise | N · R | ISO 14224 (ISO, 2016) ; GLPI Project (2024) ; Bagheri et al. (2024) |
+| Fil fin obligatoire | l'électrolyte shunte la mesure ER (fils épais masqués) | P · E | conduction de l'électrolyte ; Run #18 (§III.6.4) |
+| Jumeau numérique (perspective III.6) | bande prédictive de durée de vie | R | Avrami (1939) ; Saxena et al. (2008) / NASA C-MAPSS |
 
 \newpage
 
