@@ -330,7 +330,7 @@ Sur la base du contexte exposé — ampleur économique mondiale de la corrosion
 Ce sujet articule **quatre axes** :
 1. **Axe instrumental** — conception d'une chaîne de mesure ER + IoT autonome (ESP32 + HX711 + DS18B20), démontrant qu'une chaîne d'acquisition I4.0 (déconnectée du DCS, déployable sur points isolés) est réalisable à partir de composants accessibles localement ;
 2. **Axe algorithmique** — apprentissage automatique XGBoost à double sortie CR + RUL avec interprétabilité SHAP, **applicable indifféremment aux flux de données du prototype maison ou aux flux des sondes ER commerciales déjà en place chez COTCO** ;
-3. **Axe intégration** — connexion via API REST entre l'application Streamlit (frontend ML) et un CMMS open-source (GLPI ou équivalent) pour la création automatique des ordres de travail, structurant la boucle décision → action ;
+3. **Axe intégration** — structuration de la boucle décision → action par un **module GMAO maison** intégré à l'application Streamlit (persistance Supabase) qui génère automatiquement les ordres de travail, transposable à un CMMS open-source ;
 4. **Axe applicatif et de transposabilité** — démonstration que l'ensemble de la chaîne est doublement transposable : (a) en industrie chez COTCO, où le saut I3.0 → I4.0 est essentiellement logiciel et n'exige pas le remplacement des sondes ; (b) en autonomie chez les PME industrielles africaines à budget réduit.
 
 ---
@@ -413,7 +413,7 @@ Ce mémoire est organisé en trois chapitres principaux, encadrés par une intro
 
 Le **Chapitre I (Contexte et problématique)** établit le cadre théorique, normatif et industriel de la recherche selon les six approches du protocole de recherche, formule la problématique, les objectifs et les questions de recherche, expose l'importance de l'étude, et présente une revue détaillée de la littérature sur la corrosion, ses mécanismes, ses méthodes de surveillance, ses modèles prédictifs, le diagnostic en maintenance industrielle et les systèmes de Gestion de Maintenance Assistée par Ordinateur (GMAO).
 
-Le **Chapitre II (Outils et méthodes)** présente le prototype développé (sonde ER + acquisition IoT ESP32 + pipeline ML + intégration CMMS), s'ouvre sur une **§II.0 dédiée à la justification des choix technologiques** (matrice de décision pour chaque brique : ESP32, HX711, DS18B20, XGBoost, stratégie de validation, Streamlit, CMMS open-source retenu), puis détaille l'ensemble des matériels mobilisés, les méthodes d'acquisition et de traitement des données, la méthodologie d'entraînement du modèle XGBoost (validation *leave-one-run-out*, hyperparamètres, interprétabilité SHAP), le module de diagnostic des régimes de corrosion, le protocole expérimental *run-to-failure* en série répétée, l'**architecture d'intégration Streamlit ↔ CMMS open-source par API REST** (mapping prédiction ML → ticket CMMS, KPIs maintenance), et le tableau synoptique de la démarche méthodologique.
+Le **Chapitre II (Outils et méthodes)** présente le prototype développé (sonde ER + acquisition IoT ESP32 + pipeline ML + module GMAO maison), s'ouvre sur une **§II.0 dédiée à la justification des choix technologiques** (matrice de décision pour chaque brique : ESP32, HX711, DS18B20, XGBoost, stratégie de validation, Streamlit, GMAO maison), puis détaille l'ensemble des matériels mobilisés, les méthodes d'acquisition et de traitement des données, la méthodologie d'entraînement du modèle XGBoost (validation *leave-one-run-out*, hyperparamètres, interprétabilité SHAP), le module de diagnostic des régimes de corrosion, le protocole expérimental *run-to-failure* en série répétée, la **boucle décision → action par un module GMAO maison** (mapping prédiction ML → ordre de travail, KPIs maintenance ; transposable à un CMMS open-source), et le tableau synoptique de la démarche méthodologique.
 
 Le **Chapitre III (Résultats et discussions)** présente les résultats expérimentaux issus du prototype, les performances métrologiques de la sonde ER, les résultats de la série d'essais RTF, les métriques de validation inter-essais du modèle XGBoost, l'analyse des variables d'influence, le diagnostic des régimes observés, l'effet de la température et des facteurs de variabilité sur la fiabilité de la prédiction, la fonctionnalité du prototype GMAO et ses KPIs, et la discussion comparative des résultats au regard de la littérature.
 
@@ -552,7 +552,7 @@ $$v_{corr}(T) = A \cdot \exp\!\left(-\frac{E_a}{R\,T}\right)$$
 
 où *A* est un facteur pré-exponentiel, *E_a* l'énergie d'activation de la réaction et *R* la constante des gaz parfaits. Cette relation traduit une **croissance exponentielle** de la vitesse de corrosion avec la température ; une règle empirique fréquemment citée indique qu'une élévation de 10 °C peut approximativement doubler la vitesse de réaction (Schweitzer, 2010).
 
-Cette sensibilité a une conséquence directe pour la **modélisation prédictive** : dans une campagne d'essais, toute variation non maîtrisée de la température introduit une variabilité importante entre essais, susceptible de masquer ou de fausser les relations apprises par un modèle. Dans le cadre de ce travail, ce constat justifie deux leviers complémentaires : (i) intégrer la température comme **variable explicative** du modèle, et (ii) **contrôler la température** par bain-marie thermostaté afin d'isoler les autres facteurs et garantir la répétabilité des essais — démarche dont le Chapitre III démontre la nécessité.
+Cette sensibilité a une conséquence directe pour la **modélisation prédictive** : dans une campagne d'essais, toute variation non maîtrisée de la température introduit une variabilité importante entre essais, susceptible de masquer ou de fausser les relations apprises par un modèle. Dans le cadre de ce travail, ce constat justifie deux leviers complémentaires : (i) intégrer la température comme **variable explicative** du modèle, et (ii) **contrôler la température** par un chauffe-eau d'aquarium étanche immergé directement dans la cellule afin d'isoler les autres facteurs et garantir la répétabilité des essais — démarche dont le Chapitre III démontre la nécessité.
 
 ### I.7.8. Diagnostic en maintenance industrielle
 
@@ -619,7 +619,7 @@ Ce premier chapitre a permis de poser les bases théoriques, normatives et conte
 - II.4. Méthodes d'acquisition et de traitement des données
 - II.5. Méthodologie d'entraînement du modèle XGBoost
 - II.6. Protocole expérimental run-to-failure
-- II.7. Architecture d'intégration au CMMS open-source par API REST
+- II.7. Boucle décision → action : module GMAO intégré, transposable à un CMMS open-source
 - II.8. Tableau synoptique de la démarche méthodologique
 - II.9. Conclusion
 
@@ -627,7 +627,7 @@ Ce premier chapitre a permis de poser les bases théoriques, normatives et conte
 
 ## II.0. Introduction
 
-Dans ce chapitre, il sera question de présenter (i) la **justification des choix technologiques** mobilisés à chaque étage du prototype (matrice de décision pour chaque brique : microcontrôleur, amplificateur, capteur de température, méthode de mesure de la corrosion, algorithme ML, méthode de validation, frontend, CMMS), (ii) le cadre institutionnel et physique de l'étude, (iii) l'architecture du prototype de sonde ER développé (description et principe de fonctionnement), (iv) l'ensemble des matériels mobilisés, (v) les méthodes d'acquisition et de traitement des données, (vi) la méthodologie d'entraînement du modèle XGBoost (validation *leave-one-run-out*, hyperparamètres, interprétabilité SHAP), (vii) le protocole expérimental *run-to-failure* en série répétée, l'**architecture d'intégration au CMMS open-source par API REST**, et (viii) le tableau synoptique de la démarche méthodologique.
+Dans ce chapitre, il sera question de présenter (i) la **justification des choix technologiques** mobilisés à chaque étage du prototype (matrice de décision pour chaque brique : microcontrôleur, amplificateur, capteur de température, méthode de mesure de la corrosion, algorithme ML, méthode de validation, frontend, CMMS), (ii) le cadre institutionnel et physique de l'étude, (iii) l'architecture du prototype de sonde ER développé (description et principe de fonctionnement), (iv) l'ensemble des matériels mobilisés, (v) les méthodes d'acquisition et de traitement des données, (vi) la méthodologie d'entraînement du modèle XGBoost (validation *leave-one-run-out*, hyperparamètres, interprétabilité SHAP), (vii) le protocole expérimental *run-to-failure* en série répétée, la **boucle décision → action par module GMAO maison** (transposable à un CMMS open-source), et (viii) le tableau synoptique de la démarche méthodologique.
 
 ---
 
@@ -670,7 +670,9 @@ Cette section consolide en un seul endroit les arbitrages techniques qui sous-te
 | Pt100 | ±0,1 °C | Analogique 4 fils | Selon montage | Précision excellente mais conditionnement complexe |
 | **DS18B20** | **±0,5 °C** | **1-Wire numérique** | **Sondes étanches disponibles** | **Retenu** |
 
-**Choix retenu : DS18B20.** Critère décisif : interface numérique 1-Wire (1 seul GPIO, pas de bruit analogique), précision suffisante pour la compensation thermique (α_Fe = 6,5×10⁻³ °C⁻¹ × ±0,5 °C ≈ ±0,3 % de correction), et disponibilité de versions étanches en gaine inox.
+**Choix retenu : DS18B20.** Critère décisif : interface numérique 1-Wire (1 seul GPIO, pas de bruit analogique), précision suffisante pour la compensation thermique (α_Fe = 6,5×10⁻³ °C⁻¹ × ±0,5 °C ≈ ±0,3 % de correction), et possibilité d'une protection étanche du capteur.
+
+**Protection et couplage thermique du capteur (montage réel).** Le DS18B20 a été protégé du milieu acide par un **tube plastique étanche** (corps de stylo à bille Schneider) obturé à une extrémité. Pour supprimer la **lame d'air** résiduelle entre le capteur et la paroi du tube — l'air étant un **isolant thermique** qui ralentit et fausse la réponse —, le tube est **rempli d'huile** (huile de cuisine, substitut local et économique de l'huile silicone), qui assure un **couplage thermique par conduction** entre le milieu et l'élément sensible. Le remplissage d'un doigt de gant (*thermowell*) par un fluide caloporteur pour accélérer le temps de réponse et fiabiliser la mesure est une pratique d'instrumentation établie (Webster, 2014).
 
 ### II.0.5.4. Méthode de mesure de la corrosion — Sonde ER
 
@@ -697,7 +699,7 @@ Cette section consolide en un seul endroit les arbitrages techniques qui sous-te
 | LSTM | Élevé (>1000 séquences) | Excellente | Faible (boîte noire) | Volume de données insuffisant ici |
 | Transformer temporel | Très élevé | Excellente | Faible | Surdimensionné pour 4 runs RTF |
 
-**Choix retenu : XGBoost.** Critère décisif : performance reconnue en time-series sur faibles volumes (Chen et Guestrin, 2016 ; Ma et al., 2021 ; Wei et al., 2024), interprétabilité native par SHAP (Lundberg et Lee, 2017), régularisation L1/L2 limitant le sur-apprentissage. Limite acceptée : architecture point-par-point (pas de mémoire séquentielle native comme LSTM) — compensée par feature engineering temporel explicite (EMA, pente locale, lag).
+**Choix retenu : XGBoost.** Critère décisif : performance reconnue en time-series sur faibles volumes (Chen et Guestrin, 2016 ; Ma et al., 2021 ; Wei et al., 2024), interprétabilité native par SHAP (Lundberg et Lee, 2017), régularisation L1/L2 limitant le sur-apprentissage. **Pourquoi écarter les réseaux de neurones** (MLP, LSTM, Transformer — §I.1.3) : chaque run fournit certes **~1 000 à 2 500 lectures** (cadence de 30 s), mais l'apprentissage de la dégradation se raisonne *par essai*, et la campagne ne compte qu'**une poignée de runs** — soit beaucoup de **points** mais **très peu de séquences indépendantes**. Or les réseaux profonds exigent un grand nombre de séquences/exemples pour généraliser et **sur-apprennent** sur ce volume (boîte noire, surdimensionnés ici). XGBoost, qui opère sur des **données tabulaires point par point** (quelques milliers de lignes suffisent) avec une régularisation efficace, est donc le mieux adapté à ce régime « beaucoup de points, peu de runs ». Limite acceptée : architecture point-par-point (pas de mémoire séquentielle native comme LSTM) — compensée par un feature engineering temporel explicite (EMA, pente locale, lag).
 
 ### II.0.5.6. Stratégie de validation — leave-one-run-out
 
@@ -725,13 +727,13 @@ Cette section consolide en un seul endroit les arbitrages techniques qui sous-te
 
 **Choix retenu : Streamlit.** Critère décisif : permet de coder le dashboard et le pipeline ML dans le même langage (Python), avec un déploiement gratuit sur Streamlit Community Cloud. Limite acceptée : moins flexible qu'une stack full-web pour la personnalisation visuelle avancée.
 
-### II.0.5.8. CMMS — GLPI (open-source)
+### II.0.5.8. GMAO — module maison (Streamlit / Supabase)
 
-Justification déjà détaillée en §II.7.2 (matrice comparative GLPI / OpenMaint / Snipe-IT / Fiix / MaintainX). **Choix retenu : GLPI** pour sa maturité, son API REST native, sa communauté francophone et sa compatibilité on-premise.
+La matrice comparative des CMMS open-source (§II.7.2 : GLPI / OpenMaint / Snipe-IT / Fiix / MaintainX) révèle un verrou décisif : **aucun ne propose d'accès API exploitable dans sa version gratuite ou d'essai**, ce qui interdit une intégration automatisée à coût nul. **Choix retenu : un module GMAO maison léger** — table `cr_work_orders` (Supabase) + interface « Ordres de travail » intégrée à l'application Streamlit — couvrant le périmètre nécessaire (création, assignation, clôture d'ordres de travail, KPIs) sans dépendance à une API tierce, et transposable à un CMMS open-source si l'opérateur en déploie un.
 
 ### II.0.5.9. Synthèse des choix technologiques
 
-L'ensemble des choix forme une **chaîne cohérente** orientée par trois principes : (i) **simplicité d'intégration locale** (composants disponibles au Cameroun, langages Python pour la majeure partie de la chaîne ML+frontend), (ii) **rigueur méthodologique** (validation *leave-one-run-out*, SHAP, conformité ASTM/ISO), (iii) **transposabilité industrielle** (ER conformes ASTM G96 ; CMMS open-source on-premise compatible OT/réseau industriel).
+L'ensemble des choix forme une **chaîne cohérente** orientée par trois principes : (i) **simplicité d'intégration locale** (composants disponibles au Cameroun, langages Python pour la majeure partie de la chaîne ML+frontend), (ii) **rigueur méthodologique** (validation *leave-one-run-out*, SHAP, conformité ASTM/ISO), (iii) **transposabilité industrielle** (ER conformes ASTM G96 ; module GMAO maison transposable à un CMMS open-source on-premise compatible OT/réseau industriel).
 
 ---
 
@@ -743,11 +745,11 @@ Le présent travail est réalisé dans le cadre du **Master 2 Professionnel en M
 
 ### II.1.2. Cadre physique du prototype
 
-Le prototype reproduit en laboratoire des conditions de **corrosion généralisée accélérée en milieu acide**. Il est constitué d'une cellule de corrosion ouverte (récipient en HDPE) contenant le milieu corrosif, dans laquelle est immergé le fil de fer ER. La sonde est connectée à un montage de mesure de résistance instrumenté par un amplificateur HX711 24 bits, lui-même piloté par un microcontrôleur ESP32 en acquisition continue (cycle de mesure de 30 secondes). La température du milieu est mesurée par un capteur DS18B20 numérique 1-Wire.
+Le prototype reproduit en laboratoire des conditions de **corrosion généralisée accélérée en milieu acide**. Il est constitué d'une cellule de corrosion ouverte (récipient en plastique) contenant le milieu corrosif, dans laquelle est immergé le fil de fer ER. La sonde est connectée à un montage de mesure de résistance instrumenté par un amplificateur HX711 24 bits, lui-même piloté par un microcontrôleur ESP32 en acquisition continue (cycle de mesure de 30 secondes). La température du milieu est mesurée par un capteur DS18B20 numérique 1-Wire.
 
-Plusieurs milieux corrosifs sont employés dans les essais de corrosion accélérée du fer (acides minéraux — HCl, H₂SO₄ —, solutions salines NaCl, détartrants industriels multi-acides). Dans le cadre de ce travail, le **milieu de référence retenu est une solution d'acide chlorhydrique concentré (HCl)**. Ce choix se justifie par trois critères : (i) la **simplicité et la reproductibilité** d'un milieu mono-acide, indispensable pour isoler proprement l'effet d'un facteur unique (la température) ; (ii) la **représentativité** du mécanisme d'attaque acide pure (H⁺ + Fe → Fe²⁺ + H₂), dominant dans de nombreux effluents industriels ; (iii) la **disponibilité locale** au Cameroun.
+Plusieurs milieux corrosifs sont employés dans les essais de corrosion accélérée du fer (acides minéraux — HCl, H₂SO₄ —, solutions salines NaCl, détartrants industriels multi-acides). Dans le cadre de ce travail, le **milieu de référence retenu est une solution d'acide chlorhydrique concentré (HCl)**. Ce choix se justifie par quatre critères : (i) la **simplicité et la reproductibilité** d'un milieu mono-acide, indispensable pour isoler proprement l'effet d'un facteur unique (la température) ; (ii) la **représentativité** du mécanisme d'attaque acide pure (H⁺ + Fe → Fe²⁺ + H₂), dominant dans de nombreux effluents industriels ; (iii) la **disponibilité locale** au Cameroun ; (iv) la **cinétique rapide** : en HCl concentré, la corrosion conduit à la rupture (cycle *run-to-failure* complet) en quelques heures à quelques dizaines d'heures — condition **déterminante au regard du temps imparti avant la soutenance**, puisqu'elle permet d'enchaîner **plusieurs essais complets** et de constituer la série répétée nécessaire à l'apprentissage. Cette cinétique est en outre fortement **accélérée par la température** suivant une loi d'Arrhenius (énergie d'activation de l'ordre de 40 à 90 kJ/mol pour l'acier en HCl), ce qui justifie l'étude de ce facteur (Khadom et al., 2009 ; §I.7.7).
 
-Ce milieu génère un **pH ≈ 1**. La température ambiante du laboratoire varie entre 25 et 32 °C selon les conditions météorologiques — variabilité qui s'est révélée déterminante (voir Chapitre III) et a motivé l'introduction d'une phase à température contrôlée par bain-marie thermostaté.
+Ce milieu génère un **pH ≈ 1**. La température ambiante du laboratoire varie entre 25 et 32 °C selon les conditions météorologiques — variabilité qui s'est révélée déterminante (voir Chapitre III) et a motivé l'introduction d'une phase à température contrôlée par un **chauffe-eau d'aquarium étanche immergé directement dans la cellule**.
 
 ---
 
@@ -771,13 +773,15 @@ $$CR(t) \ (\text{mm/an}) = \left|\frac{dr}{dt}\right| \times 8760 \times 1000$$
 
 ### II.2.2. Architecture de mesure : montage 2 fils à injection de courant
 
-La mesure d'une résistance faible et de ses variations fines peut être réalisée de plusieurs manières : **pont de Wheatstone** (déséquilibre de deux diviseurs), **méthode 4 fils de Kelvin** (séparation des circuits d'injection et de mesure), ou **montage 2 fils à injection de courant** (lecture de la tension aux bornes de l'élément parcouru par un courant connu). Le pont et le montage Kelvin, plus complexes à câbler et sensibles au mode commun de l'amplificateur dans notre configuration, ont été **écartés après essais**. Dans le cadre de ce travail, nous retenons le **montage 2 fils à injection de courant**, le plus simple et le plus stable avec les composants disponibles localement.
+La mesure d'une résistance faible et de ses variations fines peut être réalisée de plusieurs manières : **pont de Wheatstone** (déséquilibre de deux diviseurs), **méthode 4 fils de Kelvin** (séparation des circuits d'injection et de mesure), ou **montage 2 fils à injection de courant** (lecture de la tension aux bornes de l'élément parcouru par un courant connu). Le **pont de Wheatstone a été le choix initial**, puis **abandonné après essais** : couplé au HX711, le très faible déséquilibre du pont (le fil ne varie que de fractions d'ohm) se présentait à un **potentiel de mode commun** voisin de la mi-alimentation, hors de la plage où l'amplificateur établit correctement son gain, de sorte que le **signal utile était noyé dans le bruit et l'offset**. La méthode Kelvin 4 fils, plus lourde à câbler, partageait cette sensibilité au mode commun dans notre configuration. Nous retenons donc le **montage 2 fils à injection de courant** — le plus simple et le plus stable avec les composants disponibles localement, et compatible avec la plage d'entrée différentielle du HX711 (AVIA Semiconductor, 2017 ; Webster, 2014).
 
 Le fil de fer (sonde ER) est monté **en série** entre deux résistances de polarisation identiques — la résistance shunt *R*_shunt et la résistance de relèvement *R*_lift, 970 Ω chacune — sous l'alimentation 3,3 V de l'ESP32 (figure II.2). La résistance du fil étant très faible devant ces deux résistances, le courant qui le traverse est **imposé et quasi constant** :
 
 $$I = \frac{V_{CC}}{R_{shunt} + R_{lift}} \approx \frac{3{,}45}{1\,940} \approx 1{,}78 \text{ mA}$$
 
 La tension aux bornes du fil, *V*_sense = *I* · *R*_fil, est lue en différentiel par le HX711 (entrées A+ / A−). La résistance *R*_lift, placée côté masse, **remonte le potentiel de mode commun** des entrées dans la plage de fonctionnement de l'amplificateur (sans elle, les entrées seraient trop proches de la masse et le gain interne ne pourrait s'établir). Lorsque la corrosion réduit la section du fil, *R*_fil augmente, donc *V*_sense augmente proportionnellement : c'est le signal exploité pour reconstituer *R*_fil(t).
+
+**Justification de la valeur 970 Ω.** Les deux résistances fixent le courant d'injection à *I* = *V*_CC/(*R*_shunt + *R*_lift) ≈ 1,8 mA. Cette valeur résulte d'un **compromis physique** : un courant **suffisamment faible** pour éviter l'échauffement par effet Joule et la **polarisation électrochimique** du fil (qui fausseraient la mesure de résistance), mais **suffisamment élevé** pour que la tension lue *V*_sense = *I*·*R*_fil (quelques millivolts) reste mesurable dans la plage différentielle du HX711 (± 40 mV au gain 64) (AVIA Semiconductor, 2017). La valeur de 970 Ω correspond aux résistances réellement employées (≈ 1 kΩ, tolérance 1 %) : c'est un **choix pratique dicté par ce compromis**, non une valeur normative — toute paire de résistances appariées de l'ordre du kΩ conviendrait. Le pull-up de 4,7 kΩ du bus 1-Wire (DS18B20) suit, lui, la valeur recommandée par le fabricant du capteur.
 
 **Tableau II.1 — Composants du montage de mesure de résistance**
 
@@ -844,9 +848,9 @@ Le tableau ci-dessous consolide la totalité des matériels mobilisés dans le c
 | Fil ER actif | Élément corrodable | Fil de fer recuit, Ø 1,15 mm, *L* ≈ 2 m |
 | Résistances de polarisation | Injection du courant + relèvement du mode commun | *R*_shunt = *R*_lift = 970 Ω (1 %) |
 | Pull-up DS18B20 | Bus 1-Wire | 4,7 kΩ |
-| Cellule de corrosion | Contenant milieu | Récipient HDPE |
+| Cellule de corrosion | Contenant milieu | Récipient en plastique |
 | Milieu corrosif | Environnement test | Acide chlorhydrique concentré (HCl), pH ≈ 1 |
-| Bain-marie thermostaté | Contrôle de la température | Chauffe-eau d'aquarium 25 W, plage 16–35 °C (phase contrôlée) |
+| Régulation thermique | Contrôle de la température (in situ) | Chauffe-eau d'aquarium 25 W **étanche**, plage 16–35 °C, immergé directement dans la cellule (phase contrôlée) |
 | pH-mètre papier | Vérification pH | Plages 0–14, résolution ±0,5 |
 | Câble USB-UART | Liaison ESP32-PC | CP2102 ou CH340 |
 | Multimètre numérique | Mesure *R*₀ initiale | Précision 0,1 % |
@@ -964,7 +968,7 @@ La cible visée étant la **vitesse de corrosion stable** (et non l'emballement 
 
 ### II.4.5. Calcul du RUL
 
-Le critère de fin de vie est fixé à *r*_critique = 0,15 × *r*(0), soit un rayon résiduel de 15 % (≈ 98 % de section perdue) — proxy d'une section quasi nulle annonçant la rupture mécanique imminente. Cette valeur est une **convention de laboratoire** : la norme **ISO 13381-1** définit le pronostic par rapport à un « seuil de santé prédéfini » sans en imposer la valeur numérique (ISO, 2025) ; le choix de 0,15 est **provisoire**, à recaler sur un critère mécanique (contrainte à rupture du fil) en conditions réelles. Pour les **runs RTF complets** (rupture observée), la durée de vie résiduelle est mesurée directement depuis l'instant de rupture :
+Le critère de fin de vie répond à une question simple : **à partir de quand considère-t-on le fil « mort » ?** À mesure que la corrosion ronge le fil, son rayon *r* diminue ; la section variant comme *r*², elle **chute bien plus vite que le rayon**. On fixe le seuil de fin de vie à *r*_critique = **0,15 × *r*(0)** : lorsqu'il ne reste que **15 % du rayon initial**, il ne subsiste plus qu'environ **2 % de la section** (≈ 98 % de section perdue) — le fil n'a alors quasiment plus de matière porteuse et **sa rupture mécanique est imminente**. On ne retient pas 0 % strict car, en pratique, le fil casse (et la mesure sature) **avant** que la section n'atteigne réellement zéro : 0,15 est donc un **curseur pragmatique placé juste avant la rupture**. Ce seuil est une **convention de laboratoire** — la norme **ISO 13381-1** impose le *principe* d'un « seuil de santé prédéfini » mais pas sa valeur (ISO, 2025) — **réglable**, **validé a posteriori** par sa concordance avec les instants de rupture réellement observés, et assumé **provisoire** (à recaler sur un critère mécanique, contrainte à rupture, en conditions réelles). Pour les **runs RTF complets** (rupture observée), la durée de vie résiduelle est mesurée directement depuis l'instant de rupture :
 
 $$RUL(t) = t_{rupture} - t$$
 
@@ -1055,7 +1059,7 @@ Dans le cadre de ce travail, nous retenons le protocole **run-to-failure (RTF)**
 Le plan expérimental ne repose pas sur un nombre figé de runs, mais sur une **série d'essais RTF répétés** dans des conditions nominales identiques (même milieu HCl, même montage), conçue de manière **itérative**. Deux phases structurent la campagne :
 
 - une **phase exploratoire**, à température ambiante *subie* (non régulée), destinée à constituer les premières séries et à identifier les facteurs de variabilité ;
-- une **phase contrôlée**, à température *régulée* par bain-marie thermostaté, destinée à isoler l'effet de la température et à démontrer la répétabilité.
+- une **phase contrôlée**, à température *régulée* par un chauffe-eau d'aquarium étanche immergé directement dans la cellule, destinée à isoler l'effet de la température et à démontrer la répétabilité.
 
 **Tableau II.8 — Plan de la série d'essais run-to-failure (campagne en cours)**
 
@@ -1070,15 +1074,15 @@ La campagne se poursuit : des essais complémentaires aux consignes 30 °C et 32
 
 Pour chaque run, la procédure suivante est appliquée :
 
-1. **Préparation de la cellule** : nettoyage du récipient, découpe d'un fil de fer neuf, nettoyage, séchage, mesure de *R*₀ au multimètre, vérification du pH ;
+1. **Préparation de la cellule et du fil** : nettoyage du récipient, découpe d'un fil de fer neuf, nettoyage, séchage ; **isolation d'environ 10 cm à chaque extrémité** du fil (vernis/gaine) afin d'exclure la **zone de ligne de flottaison** — siège d'une corrosion par **aération différentielle** (cellule à concentration d'oxygène à l'interface air-liquide) — et de garantir une corrosion **uniforme** sur la seule longueur immergée (Roberge, 2008) ; mesure de *R*₀ au multimètre, vérification du pH ;
 2. **Câblage de la sonde** : montage du fil, connexion HX711 → ESP32, vérification de la réception des premiers points dans la table Supabase `cr_measurements` via l'application Streamlit ;
-3. **Mise en condition thermique** (phase contrôlée) : mise en route du bain-marie thermostaté et stabilisation à la consigne **avant** immersion ;
+3. **Mise en condition thermique** (phase contrôlée) : le **chauffe-eau d'aquarium étanche** est immergé directement dans la cellule (au même titre que le DS18B20) et porte le milieu à la consigne ; la cellule est **couverte** pour limiter l'évaporation du HCl accélérée par le chauffage ;
 4. **Démarrage de l'acquisition** : préparation d'**acide frais** et **immersion immédiate** du fil (sans délai d'exposition de l'acide à l'air, le HCl étant volatil), récipient **couvert** pour limiter l'évaporation ; création du run dans Supabase (`cr_runs.started_at`) et début de l'envoi des mesures ;
 5. **Surveillance périodique** : vérification de la continuité de l'acquisition via le dashboard Streamlit ;
 6. **Détection de la fin de run** : la rupture du fil est identifiée par un **critère objectif** — saturation de *R*ₓ (circuit ouvert), la valeur se figeant à sa borne haute. Le run est clôturé au premier point de saturation (`cr_runs.ended_at`) ;
 7. **Post-run** : photographie du fil corrodé, nettoyage et préparation du run suivant.
 
-> **Note de protocole.** Deux exigences se sont révélées critiques pour la répétabilité (Chapitre III) : (i) la **stabilité thermique** du bain avant immersion ; (ii) l'**emploi d'acide frais immergé sans délai**, l'exposition prolongée de l'acide à l'air abaissant sa concentration par volatilisation du HCl.
+> **Note de protocole.** Deux exigences se sont révélées critiques pour la répétabilité (Chapitre III) : (i) la **stabilité thermique** du milieu à la consigne ; (ii) l'**emploi d'acide frais immergé sans délai**, l'exposition prolongée de l'acide à l'air abaissant sa concentration par volatilisation du HCl.
 
 ### II.6.4. Seuils d'alerte gradués
 
@@ -1108,8 +1112,8 @@ L'objectif d'OS4 est de structurer la **boucle décision → action** en aval du
 L'approche retenue **pour le prototype est (A) — un module GMAO maison**, son architecture étant conçue pour être **directement transposable** à l'approche (B). Justification :
 
 1. **Périmètre suffisant** : la boucle visée (OT générés à partir des alertes + traçabilité + KPIs) est couverte par un module léger, sans imposer le déploiement d'un CMMS complet pour la démonstration ;
-2. **Indépendance opérationnelle** : éviter une dépendance à l'API d'un CMMS tiers — dont l'accès est fréquemment restreint dans les offres gratuites — garantit une démonstration de bout en bout reproductible ;
-3. **Transposabilité** : le mapping prédiction → ordre de travail (§II.7.5) est défini de façon générique et se reporte tel quel sur un CMMS open-source (GLPI retenu comme **cible de référence**, voir matrice §II.7.2), OpenMaint ou Snipe-IT ;
+2. **Disponibilité de l'API (raison décisive)** : aucune des solutions évaluées (§II.7.2) ne met à disposition une **API exploitable dans une version gratuite ou d'essai** déployable dans le cadre du projet — l'accès programmatique étant réservé aux offres payantes (Fiix, MaintainX) ou conditionné à l'hébergement d'une instance serveur complète (GLPI, OpenMaint), hors périmètre. Le module maison évite cette dépendance et garantit une démonstration de bout en bout reproductible ;
+3. **Transposabilité** : le mapping prédiction → ordre de travail (§II.7.5) est défini de façon **générique** et se reporterait sur tout CMMS open-source exposant une API (GLPI, OpenMaint, Snipe-IT) ;
 4. **Compatibilité industrielle** : le module maison comme le CMMS open-source sont auto-hébergeables (on-premise), compatibles avec un réseau OT isolé.
 
 ### II.7.2. Matrice comparative des CMMS open-source candidats
@@ -1118,7 +1122,7 @@ L'approche retenue **pour le prototype est (A) — un module GMAO maison**, son 
 
 | CMMS | Maturité | API REST | Modules ticketing | Auto-hébergeable | Communauté | Verdict |
 |---|---|---|---|---|---|---|
-| **GLPI** | 20 ans, v10 stable | ✅ native, OAuth2 | Tickets / Problems / Changes (ITIL) | ✅ Linux/Docker | Très large (FR + INT) | **Cible de référence** |
+| **GLPI** | 20 ans, v10 stable | API en auto-hébergement | Tickets / Problems / Changes (ITIL) | ✅ Linux/Docker | Très large (FR + INT) | Instance serveur requise (hors périmètre) |
 | OpenMaint (CMDBuild) | 12 ans | ✅ REST + SOAP | Work orders + Assets | ✅ Tomcat | Moyenne (IT) | Alternative crédible |
 | Snipe-IT | 10 ans | ✅ REST documenté | Asset-centric (limité OT) | ✅ PHP/Laravel | Large | Trop asset-centric |
 | Fiix Free | 15 ans | API limitée free tier | Complet (cloud) | ❌ SaaS uniquement | Commercial | Non-libre |
@@ -1126,7 +1130,7 @@ L'approche retenue **pour le prototype est (A) — un module GMAO maison**, son 
 
 Sources : GLPI Project (2024) ; CMMS Wikipedia (2024) ; documentations officielles consultées 2026.
 
-**Cible de transposition retenue : GLPI** — meilleure couverture fonctionnelle, API REST native documentée, communauté francophone active, déployable on-premise. Le prototype implémente le même périmètre (création/suivi d'OT, KPIs) dans un module maison, dont les appels se reportent sur l'API REST de GLPI sans changement d'architecture.
+**Conclusion de la comparaison.** Aucune des solutions ne combine une API exploitable **et** un déploiement gratuit/léger compatible avec les contraintes du projet : les offres SaaS gratuites (Fiix, MaintainX) **réservent l'API au plan payant**, tandis que les solutions auto-hébergeables (GLPI, OpenMaint, Snipe-IT) imposent le déploiement et la maintenance d'une instance serveur complète. C'est précisément ce constat qui a motivé le choix d'un **module GMAO maison** (§II.0.5.8), implémentant le périmètre nécessaire (création/suivi d'OT, KPIs) dans l'application Streamlit, tout en restant transposable à l'une de ces solutions si l'opérateur en exploite déjà une.
 
 ### II.7.3. Stack technologique de la chaîne intégrée
 
@@ -1139,63 +1143,61 @@ Sources : GLPI Project (2024) ; CMMS Wikipedia (2024) ; documentations officiell
 | Pipeline ML | Python (Pandas, SciPy, XGBoost, SHAP) | CR + RUL + diagnostic + interprétabilité | Gratuit (open-source) |
 | Frontend ML / dashboard | **Streamlit** | UI temps réel, courbes, alertes | Gratuit (open-source) |
 | Hébergement frontend | **Streamlit Community Cloud** | Déploiement public | Gratuit |
-| **Module GMAO** | **Maison** (table `cr_work_orders`) — transposable GLPI | Ordres de travail, assignation, clôture, KPIs | Gratuit |
-| Couche d'intégration | Module OT (Python) ; **mapping API REST GLPI** | Génération automatique d'OT (transposable en tickets GLPI) | Gratuit |
+| **Module GMAO** | **Maison** (table `cr_work_orders`, Supabase) | Ordres de travail, assignation, clôture, KPIs | Gratuit |
+| Communication app ↔ données | Client / REST **Supabase** (PostgREST) | Lecture-écriture des mesures, prédictions et OT | Gratuit |
 | Communication ESP32 → Supabase | HTTPS POST | Ingestion mesures | Gratuit |
 
-Sources : Streamlit (2024) ; Supabase (2024) ; GLPI Project (2024) ; XGBoost Documentation (Chen et Guestrin, 2016).
+Sources : Streamlit (2024) ; Supabase (2024) ; XGBoost Documentation (Chen et Guestrin, 2016).
 
 ### II.7.4. Architecture de la boucle complète intégrée
 
-![Figure II.1 — Architecture de la boucle intégrée Sonde ER → Supabase → Streamlit → CMMS open-source](figures/fig_ii1_architecture.png){ width=80% }
+![Figure II.1 — Architecture de la boucle intégrée Sonde ER → Supabase → Streamlit (module GMAO)](figures/fig_ii1_architecture.png){ width=80% }
 
-### II.7.5. Mapping prédiction ML → ordre de travail (transposable ticket CMMS)
+### II.7.5. Mapping prédiction ML → ordre de travail
 
-Le tableau ci-dessous décrit le mapping entre les sorties du pipeline ML et les champs d'un ordre de travail. Le module GMAO maison l'implémente directement ; les mêmes champs se reportent sur un ticket GLPI créé automatiquement par API REST (cible de transposition) :
+Le tableau ci-dessous décrit le mapping entre les sorties du pipeline ML et les champs d'un **ordre de travail**, tel qu'implémenté par le module GMAO maison (les mêmes champs se reporteraient sur un CMMS open-source exposant une API) :
 
-**Tableau II.13 — Mapping des champs prédiction ML → ordre de travail (exemple GLPI)**
+**Tableau II.13 — Mapping des champs prédiction ML → ordre de travail**
 
-| Champ ticket GLPI | Source dans la prédiction ML | Exemple |
+| Champ de l'ordre de travail | Source dans la prédiction ML | Exemple |
 |---|---|---|
-| `name` (titre) | Concaténation `asset.nom` + diagnostic | "Pipeline-Komé-Sect-12 — Corrosion accélérée détectée" |
-| `urgency` | Niveau d'alerte (vert=1, orange=3, rouge=5) | 5 |
-| `impact` | Criticité de l'asset (configuration) | 5 |
-| `priority` | Calcul GLPI = f(urgency, impact) | "Très haute" |
-| `content` (description) | Template enrichi : CR_pred, RUL_pred, top-3 SHAP, régime diagnostiqué | "CR=4,2 mm/an ; RUL=18 h ; régime : emballement ; top-3 SHAP : ΔR/Δt, T_avg, Rx_corr. Recommandation : inspection immédiate." |
-| `entities_id` | Asset surveillé (entité GLPI) | ID de la section pipeline |
-| `itilcategories_id` | Catégorie « Corrosion » | ID GLPI catégorie |
-| `_users_id_assign` | Technicien d'astreinte (configuration) | ID utilisateur |
+| Titre | `asset` + diagnostic | "Pipeline-Komé-Sect-12 — Corrosion accélérée détectée" |
+| Urgence | Niveau d'alerte (vert = 1, orange = 3, rouge = 5) | 5 |
+| Impact | Criticité de l'asset (configuration) | 5 |
+| Priorité | f(urgence, impact) | "Très haute" |
+| Description | Template enrichi : CR_pred, RUL_pred, top-3 SHAP, régime diagnostiqué | "CR=4,2 mm/an ; RUL=18 h ; régime : emballement ; top-3 SHAP : ΔR/Δt, T_avg, Rx_corr. Recommandation : inspection immédiate." |
+| Asset | Section surveillée | ID de la section pipeline |
+| Catégorie | « Corrosion » | — |
+| Assigné à | Technicien d'astreinte (configuration) | ID utilisateur |
 
-L'appel API se fait depuis l'application Streamlit en Python via la librairie `requests` :
+En pratique, l'ordre de travail est **écrit dans la table `cr_work_orders` de Supabase** depuis l'application Streamlit — **aucun appel n'est émis vers un CMMS externe**. La seule API REST mobilisée est celle de **Supabase** (PostgREST), via le client Python :
 
 ```python
-ticket = {
-    "input": {
-        "name": f"{asset.nom} — {diagnostic}",
-        "urgency": niveau_to_urgency[alerte.niveau],
-        "content": template_description.format(**prediction),
-        "itilcategories_id": GLPI_CAT_CORROSION,
-    }
+ot = {
+    "run_id": run_id, "niveau": alerte.niveau,
+    "titre": f"{asset} — {diagnostic}",
+    "cr_pred": prediction["CR"], "rul_pred": prediction["RUL"],
+    "section_pct": prediction["section"], "statut": "ouvert",
 }
-requests.post(f"{GLPI_URL}/apirest.php/Ticket",
-              headers={"Session-Token": session_token},
-              json=ticket)
+supabase.table("cr_work_orders").insert(ot).execute()
 ```
+
+La transposition vers un CMMS open-source (GLPI…) consisterait simplement à rediriger cette écriture vers l'API du CMMS, **sans changer le mapping** ci-dessus.
 
 ### II.7.6. KPIs maintenance calculés à partir de l'historique des ordres de travail
 
-Les KPIs maintenance suivants sont calculés à partir de l'historique des ordres de travail tenu par le module GMAO maison ; ils se calculent à l'identique côté GLPI (requête SQL ou plugin) après transposition :
+Les KPIs maintenance suivants sont calculés à partir de l'historique des ordres de travail tenu par le module GMAO maison (table `cr_work_orders`) ; ils se calculeraient à l'identique côté CMMS après transposition :
 
 **Tableau II.14 — Indicateurs de performance maintenance (KPIs)**
 
-| KPI | Formule | Source (module OT / GLPI) | Cible |
+| KPI | Formule | Source (module OT) | Cible |
 |---|---|---|---|
-| **MTBF** (Mean Time Between Failures) | Σ temps entre tickets corrosion / nb tickets | Table `glpi_tickets` | maximiser |
-| **MTTR** (Mean Time To Repair) | Σ (close_date − open_date) / nb tickets | Table `glpi_tickets` | minimiser |
+| **MTBF** (Mean Time Between Failures) | Σ temps entre OT corrosion / nb OT | Table `cr_work_orders` | maximiser |
+| **MTTR** (Mean Time To Repair) | Σ (`closed_at` − `created_at`) / nb OT | Table `cr_work_orders` | minimiser |
 | **Disponibilité** | MTBF / (MTBF + MTTR) | Calculé | > 95 % |
-| **Efficacité d'inhibition** | (CR_avant − CR_après) / CR_avant × 100 | Pipeline ML + tags GLPI | > 90 % |
-| **Précision du modèle** | 1 − (alertes annulées / alertes totales) | Champ `solutiontype` GLPI | > 85 % |
-| **Taux de fausses alertes** | tickets résolus en `false positive` / total | Champ `status` + `solution` | < 15 % |
+| **Efficacité d'inhibition** | (CR_avant − CR_après) / CR_avant × 100 | Pipeline ML + tags OT | > 90 % |
+| **Précision du modèle** | 1 − (alertes annulées / alertes totales) | Champ statut/résolution de l'OT | > 85 % |
+| **Taux de fausses alertes** | OT résolus en `false positive` / total | Champ `statut` + résolution | < 15 % |
 
 > *La colonne « Cible » liste des **objectifs de conception** (valeurs usuelles de l'ingénierie de maintenance : p. ex. disponibilité > 95 %), et non des seuils normatifs ; ils servent de référence d'évaluation et seront confrontés aux performances réelles sur un historique d'interventions suffisant (§III.5, §III.6.4).*
 
@@ -1210,7 +1212,7 @@ Les KPIs maintenance suivants sont calculés à partir de l'historique des ordre
 | **OS1** — Concevoir et valider la sonde ER instrumentée IoT | (i) Montage de la sonde ER ; (ii) Programmation du firmware ESP32 (acquisition 30 s, HX711, DS18B20) ; (iii) Tests de résolution sur résistances étalons ; (iv) Validation de la stabilité en milieu corrosif | Montage de mesure de résistance ; HX711 ; ESP32 acquisition continue 30 s ; Multimètre de précision | Sonde fonctionnelle, résolution suffisante pour quantifier le CR — démonstration de la brique d'acquisition I4.0 |
 | **OS2** — Entraîner et valider le modèle XGBoost (CR + RUL) | (i) Collecte d'une série de runs RTF ; (ii) Nettoyage IQR + Savitzky-Golay ; (iii) Compensation thermique ; (iv) Feature engineering ; (v) Validation LORO ; (vi) Entraînement XGBoost ; (vii) MAE/RMSE/R² ; (viii) SHAP | Python : Pandas, SciPy, XGBoost, Scikit-learn, SHAP ; *n*=500, depth=4, lr=0,05, L1=0,1, L2=1,0 | Prédiction CR + RUL ; comparaison aux baselines ; SHAP : variables physiquement plausibles |
 | **OS3** — Diagnostic des régimes + facteurs de variabilité + alertes | (i) Diagnostic des régimes (induction, croissance, emballement, pré-rupture) par règles métier ; (ii) Identification et quantification des facteurs de variabilité (température, concentration) par LORO ; (iii) Démonstration du rôle de la répétabilité ; (iv) Calibration des seuils vert/orange/rouge sur CR et RUL | Pipeline Python : `diagnostiquer(features)` ; validation LORO par plage thermique ; analyse des contre-exemples ; calibration empirique | Diagnostic exploitable ; effet température quantifié ; seuils calibrés (CR=1, 5 mm/an ; RUL=12, 48 h) |
-| **OS4** — Boucle décision → action : module GMAO intégré, transposable à un CMMS open-source | (i) Application Streamlit (frontend ML + dashboard) ; (ii) Module GMAO maison (table `cr_work_orders` : OT, assignation, clôture) ; (iii) Mapping prédiction ML → ordre de travail ; (iv) Matrice comparative GLPI/OpenMaint/Snipe-IT + mapping API REST GLPI (transposition) ; (v) Calcul KPIs (MTBF, MTTR, η inhibition) | Streamlit + Streamlit Community Cloud ; module OT Python + Supabase ; **GLPI** comme cible de transposition (API REST) ; ISO 14224 codes anomalie | Boucle Sonde → ML → OT démontrée end-to-end ; KPIs calculés ; coût de licence = 0 FCFA |
+| **OS4** — Boucle décision → action : module GMAO intégré, transposable à un CMMS open-source | (i) Application Streamlit (frontend ML + dashboard) ; (ii) Module GMAO maison (table `cr_work_orders` : OT, assignation, clôture) ; (iii) Mapping prédiction ML → ordre de travail ; (iv) Matrice comparative des CMMS open-source (justifiant le module maison, faute d'API en version gratuite) ; (v) Calcul KPIs (MTBF, MTTR, η inhibition) | Streamlit + Streamlit Community Cloud ; module OT Python + Supabase ; transposable à un CMMS open-source ; ISO 14224 codes anomalie | Boucle Sonde → ML → OT démontrée end-to-end ; KPIs calculés ; coût de licence = 0 FCFA |
 
 L'usage des outils suit une chronologie stricte : conception matérielle (OS1) → acquisition expérimentale et modélisation (OS2) → diagnostic des régimes et analyse des facteurs de variabilité (OS3) → intégration applicative GMAO (OS4).
 
@@ -1218,7 +1220,7 @@ L'usage des outils suit une chronologie stricte : conception matérielle (OS1) �
 
 ## II.9. Conclusion du Chapitre II
 
-Ce chapitre a présenté l'ensemble des outils et de la méthodologie retenus pour répondre aux **quatre objectifs spécifiques** du mémoire. Une **§II.0.5 dédiée à la justification des choix technologiques** a consolidé les arbitrages techniques (microcontrôleur ESP32, amplificateur HX711, capteur DS18B20, méthode ER, algorithme XGBoost, stratégie de validation, frontend Streamlit, CMMS GLPI) sous forme de matrices de décision. Le prototype de sonde ER (montage de mesure de résistance + HX711 + ESP32 en acquisition continue 30 s) a ensuite été décrit dans son principe physique et son implémentation matérielle. Les matériels électroniques, chimiques et logiciels mobilisés ont été consolidés en tableaux récapitulatifs. Les méthodes d'acquisition, de nettoyage, de compensation thermique, de feature engineering, d'entraînement XGBoost et d'interprétabilité SHAP ont été détaillées, ainsi que le module de diagnostic des régimes de corrosion et la stratégie de validation *leave-one-run-out*. L'**architecture d'intégration Streamlit ↔ CMMS open-source par API REST** (matrice comparative GLPI / OpenMaint / Snipe-IT, mapping prédiction ML → ticket, KPIs maintenance côté CMMS) a été spécifiée. Le protocole expérimental *run-to-failure* en série répétée et le tableau synoptique de la démarche ont été présentés. Le **Chapitre III** présente à présent les résultats issus de la mise en œuvre de cette méthodologie, leur analyse et leur discussion.
+Ce chapitre a présenté l'ensemble des outils et de la méthodologie retenus pour répondre aux **quatre objectifs spécifiques** du mémoire. Une **§II.0.5 dédiée à la justification des choix technologiques** a consolidé les arbitrages techniques (microcontrôleur ESP32, amplificateur HX711, capteur DS18B20, méthode ER, algorithme XGBoost, stratégie de validation, frontend Streamlit, GMAO maison) sous forme de matrices de décision. Le prototype de sonde ER (montage de mesure de résistance + HX711 + ESP32 en acquisition continue 30 s) a ensuite été décrit dans son principe physique et son implémentation matérielle. Les matériels électroniques, chimiques et logiciels mobilisés ont été consolidés en tableaux récapitulatifs. Les méthodes d'acquisition, de nettoyage, de compensation thermique, de feature engineering, d'entraînement XGBoost et d'interprétabilité SHAP ont été détaillées, ainsi que le module de diagnostic des régimes de corrosion et la stratégie de validation *leave-one-run-out*. La **boucle décision → action par un module GMAO maison** (Streamlit / Supabase ; la matrice comparative des CMMS open-source motivant le recours à ce module faute d'API exploitable en version gratuite ; mapping prédiction ML → ordre de travail ; KPIs maintenance) a été présentée, son architecture restant transposable à un CMMS open-source. Le protocole expérimental *run-to-failure* en série répétée et le tableau synoptique de la démarche ont été présentés. Le **Chapitre III** présente à présent les résultats issus de la mise en œuvre de cette méthodologie, leur analyse et leur discussion.
 
 \newpage
 
@@ -1377,7 +1379,7 @@ Une application web de supervision a été développée (Streamlit). Elle se con
 
 ### III.5.2. Module GMAO maison : génération d'ordres de travail et KPIs
 
-Un **module de gestion des ordres de travail (GMAO maison)** a été développé : il persiste les OT dans une table dédiée (`cr_work_orders`, Supabase) et expose une page « Ordres de travail » dans l'application (création, assignation, clôture). À chaque dépassement de seuil, une alerte génère automatiquement un **ordre de travail enrichi** (CR, RUL, régime diagnostiqué, section perdue), avec déduplication (un OT ouvert par run et par niveau). Le mapping prédiction → OT (§II.7.5) est défini de façon générique : les mêmes champs se reportent sur un **ticket GLPI** par API REST, transposition validée au niveau de la spécification mais **non déployée** (l'accès API des CMMS gratuits étant restreint). Les KPIs de maintenance (MTBF, MTTR, disponibilité, taux de fausses alertes) sont calculés à partir de l'historique des OT.
+Un **module de gestion des ordres de travail (GMAO maison)** a été développé : il persiste les OT dans une table dédiée (`cr_work_orders`, Supabase) et expose une page « Ordres de travail » dans l'application (création, assignation, clôture). À chaque dépassement de seuil, une alerte génère automatiquement un **ordre de travail enrichi** (CR, RUL, régime diagnostiqué, section perdue), avec déduplication (un OT ouvert par run et par niveau). Le mapping prédiction → OT (§II.7.5) est défini de façon générique : les mêmes champs se reporteraient sur un **CMMS open-source exposant une API**, transposition restée au stade de **spécification (non déployée)**, l'accès API des solutions gratuites étant restreint. Les KPIs de maintenance (MTBF, MTTR, disponibilité, taux de fausses alertes) sont calculés à partir de l'historique des OT. Toute la chaîne reste à ce stade **interne à Streamlit/Supabase** : aucun appel n'est émis vers un CMMS externe.
 
 > **État d'avancement.** L'écran de supervision et le module GMAO maison (génération/clôture d'OT, KPIs) sont **opérationnels** et démontrent la boucle Sonde → ML → OT de bout en bout. L'intégration à un CMMS open-source mature (GLPI) reste au stade de **spécification transposable**. Les KPIs n'auront de valeur statistique que sur un volume d'essais et d'interventions plus important — ils constituent à ce stade une démonstration de la chaîne de calcul.
 
@@ -1511,7 +1513,9 @@ Ce chapitre a présenté les résultats provisoires de la campagne. **OS1** : la
 
 38. ISO. (2020). *ISO 15156-1:2020 — Petroleum and natural gas industries — Materials for use in H₂S-containing environments in oil and gas production*.
 
-39. Koch, G. H., Brongers, M. P. H., Thompson, N. G., Virmani, Y. P., & Payer, J. H. (2016). *International Measures of Prevention, Application, and Economics of Corrosion Technology (IMPACT) Study*. NACE International. http://impact.nace.org/
+39. Khadom, A. A., Yaro, A. S., Kadhum, A. A. H., AlTaie, A. S., & Musa, A. Y. (2009). The effect of temperature and acid concentration on corrosion of low carbon steel in hydrochloric acid media. *American Journal of Applied Sciences*, 6(8), 1403–1409.
+
+40. Koch, G. H., Brongers, M. P. H., Thompson, N. G., Virmani, Y. P., & Payer, J. H. (2016). *International Measures of Prevention, Application, and Economics of Corrosion Technology (IMPACT) Study*. NACE International. http://impact.nace.org/
 
 40. Liu, J., et al. (2025). Intelligent prediction model for pitting corrosion risk in pipelines using developed ResNet and feature reconstruction with interpretability analysis. *Reliability Engineering & System Safety*, 257, 110548.
 
@@ -1653,7 +1657,7 @@ def feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
 
 ## Annexe C — Schéma de câblage de la sonde ER
 
-![Figure C.1 — Schéma de câblage complet : ESP32 + HX711 + montage shunt + R_lift + DS18B20 + cellule HDPE](figures/fig_c1_cablage.png){ width=95% }
+![Figure C.1 — Schéma de câblage complet : ESP32 + HX711 + montage shunt + R_lift + DS18B20 + cellule en plastique](figures/fig_c1_cablage.png){ width=95% }
 
 ## Annexe D — Fiche de sécurité du milieu corrosif (acide chlorhydrique)
 
@@ -1669,12 +1673,12 @@ En cas de contact cutané : rincer abondamment à l'eau claire pendant au moins 
 
 ## Annexe E — Dispositif de contrôle de la température (phase contrôlée)
 
-La phase contrôlée de la campagne s'appuie sur un **bain-marie thermostaté** isolant la cellule de corrosion des fluctuations de la température ambiante :
+La phase contrôlée de la campagne régule la température du **milieu corrosif directement**, sans bain d'eau intermédiaire :
 
-- **Chauffe-eau d'aquarium** à thermostat intégré, puissance 25 W, plage de consigne 16–35 °C ;
-- **Bain d'eau** (4–5 L) jouant le rôle d'inertie thermique stabilisatrice ; la cellule de corrosion (HCl) y est immergée, sans contact direct entre la résistance chauffante et l'acide ;
-- **Contrôle** : stabilisation à la consigne **avant** immersion du fil ; suivi de la température réelle du milieu par le capteur DS18B20 du dispositif de mesure ;
-- **Limite** : à consigne élevée (≥ 32 °C), la puissance de 25 W impose de couvrir le bain pour limiter les pertes et atteindre la consigne au-dessus de la température ambiante de Douala (≈ 28–29 °C).
+- **Chauffe-eau d'aquarium étanche** à thermostat intégré, puissance 25 W, plage de consigne 16–35 °C, **immergé directement dans la cellule de corrosion** (au même titre que le capteur DS18B20), son corps scellé assurant l'isolation électrique vis-à-vis du milieu ;
+- **Régulation in situ** : le thermostat maintient le milieu à la consigne ; la température réelle est suivie en continu par le capteur DS18B20 du dispositif de mesure ;
+- **Cellule couverte** : le récipient est couvert pendant l'essai pour limiter l'évaporation du HCl — accentuée par le chauffage — et stabiliser la concentration (cohérent avec le protocole acide, §II.6.3) ;
+- **Limite** : à consigne élevée (≥ 32 °C), la puissance de 25 W impose de bien couvrir la cellule pour atteindre et tenir la consigne au-dessus de la température ambiante de Douala (≈ 28–29 °C) ; la compatibilité chimique du corps étanche avec le HCl reste un point de vigilance pratique.
 
 ## Annexe F — Schéma de base de données du prototype GMAO
 
