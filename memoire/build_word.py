@@ -175,11 +175,13 @@ def preprocess():
     # (centrage de la page de titre : fait en post-traitement sur le .docx)
 
     # LISTE DES FIGURES / TABLEAUX -> champs Word (table des illustrations par style)
+    # NB: séparateur d'arguments ';' (locale FR de Word) — avec ',' Word FR lit "Style,1"
+    # comme un seul nom de style et n'affiche "aucune entrée".
     def tof(style):
         return (
             "\n\n```{=openxml}\n"
             '<w:p><w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r>'
-            f'<w:r><w:instrText xml:space="preserve"> TOC \\h \\z \\t "{style},1" </w:instrText></w:r>'
+            f'<w:r><w:instrText xml:space="preserve"> TOC \\h \\z \\t "{style};1" </w:instrText></w:r>'
             '<w:r><w:fldChar w:fldCharType="separate"/></w:r>'
             "<w:r><w:t>Liste générée par Word — sélectionner puis F9 pour mettre à jour.</w:t></w:r>"
             '<w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>\n```\n'
