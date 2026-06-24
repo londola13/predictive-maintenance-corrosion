@@ -40,7 +40,6 @@ title: "Maintenance prédictive de la corrosion : une transition Industrie 3.0 �
 | **Rédigé par :** | BATOUMBI IKOND Ricky Parfait |
 | **Matricule :** | 0111 II17 |
 | **Sous encadrement académique de :** | À compléter |
-| **Sous l'encadrement professionnel de :** | M. FEZEU (COTCO) |
 | **Sous la supervision de :** | Dr. TCHAWE |
 | **Année académique :** | 2025 — 2026 |
 
@@ -60,7 +59,6 @@ Au terme de notre formation pour l'obtention du Master II en Maintenance Industr
 
 - À notre **encadreur académique**, pour ses conseils éclairés, sa rigueur scientifique et sa disponibilité tout au long de la rédaction de ce mémoire ;
 - À notre **superviseur**, pour son approche méthodologique et la qualité de ses remarques structurantes ;
-- À notre **encadreur professionnel** au sein de la **Cameroon Oil Transportation Company (COTCO)**, pour la qualité de son accompagnement, le partage d'expérience terrain et l'accès aux problématiques industrielles concrètes ayant nourri ce travail ;
 - À l'ensemble du **corps enseignant du Département de Génie Industriel et Maintenance** pour la formation théorique et pratique de qualité ;
 - À mes **camarades de promotion** pour les échanges intellectuels stimulants ;
 - À mes **parents** pour leur soutien moral et matériel constant.
@@ -73,7 +71,7 @@ Que tous ceux qui, de près ou de loin, ont contribué à la réussite de ce mé
 
 L'**École Supérieure Technique La Salle (ESTL)** de Douala est un établissement d'enseignement supérieur privé catholique de la Fondation La Salle, dont la vocation est de former des ingénieurs et techniciens supérieurs ancrés dans les réalités industrielles de l'Afrique centrale. Le département de **Génie Industriel et Maintenance** propose, au niveau Master II, l'option **Maintenance Industrielle et Productique**, qui forme des ingénieurs capables d'assurer la fiabilité des systèmes de production, d'implémenter des stratégies de maintenance conditionnelle et prédictive, et d'intégrer les outils numériques au service de la performance industrielle.
 
-Dans le cadre de notre cursus, la formation en Master II s'achève par un stage de fin d'études sanctionné par la rédaction d'un mémoire. Ce stage nous a conduit au sein de la **Cameroon Oil Transportation Company (COTCO)**, opérateur du pipeline Tchad-Cameroun, infrastructure pétrolière stratégique de 1 070 km qui représente l'un des défis de maintenance les plus exigeants du pays. La problématique de la corrosion — première cause de dégradation des pipelines au niveau mondial — constituait le cœur de notre mission, dans un contexte industriel où les outils de maintenance prédictive restaient largement sous-exploités.
+Dans le cadre de notre cursus, la formation en Master II s'achève par la rédaction d'un mémoire de fin d'études. Notre travail prend pour cas d'étude la **Cameroon Oil Transportation Company (COTCO)**, opérateur du pipeline Tchad-Cameroun, infrastructure pétrolière stratégique de 1 070 km qui représente l'un des défis de maintenance les plus exigeants du pays. La problématique de la corrosion — première cause de dégradation des pipelines au niveau mondial — constitue le cœur de notre étude, dans un contexte industriel où les outils de maintenance prédictive restent largement sous-exploités.
 
 C'est de cette expérience terrain, conjuguée aux enseignements reçus à l'ESTL, qu'est né le projet présenté dans ce mémoire : la conception et le développement d'un **système intégré de prédiction du taux de corrosion par apprentissage automatique**, couvrant l'ensemble de la chaîne depuis la mesure physique par sonde à résistance électrique (ER) jusqu'à la création automatique d'ordres de travail dans un CMMS open-source. Ce travail s'inscrit dans une démarche de transition **Industrie 3.0 → 4.0** adaptée aux contraintes des entreprises industrielles africaines : budget limité, dépendance aux solutions propriétaires, et besoin de maîtrise locale de la chaîne de données.
 
@@ -227,11 +225,11 @@ Dans ce chapitre, nous allons d'abord cadrer le contexte et la justification de 
 
 ### I.1.1. Approche définitionnelle et historique de la corrosion
 
-La corrosion est définie par la norme **ISO 8044 :2015** comme « une interaction physico-chimique entre un métal et son environnement qui entraîne des modifications des propriétés du métal et qui peut conduire à une dégradation significative de la fonction du métal, de l'environnement ou du système technique dont ils font partie » (ISO, 2015). Ce phénomène naturel et thermodynamiquement spontané traduit la tendance des métaux à retourner à leur état d'oxyde stable — l'état sous lequel ils existent dans la croûte terrestre avant tout traitement métallurgique (Schweitzer, 2010).
+La corrosion est définie par la norme **ISO 8044 :2024** comme « une interaction physico-chimique entre un métal et son environnement qui entraîne des modifications des propriétés du métal et qui peut conduire à une dégradation significative de la fonction du métal, de l'environnement ou du système technique dont ils font partie » (ISO, 2024). Ce phénomène naturel et thermodynamiquement spontané traduit la tendance des métaux à retourner à leur état d'oxyde stable — l'état sous lequel ils existent dans la croûte terrestre avant tout traitement métallurgique (Schweitzer, 2010).
 
 L'étude scientifique de la corrosion remonte aux travaux fondateurs de **Michael Faraday (1834)**, qui établit la relation quantitative entre le courant électrique et la masse de métal dissous, posant ainsi les bases de l'électrochimie de la corrosion (Faraday, 1834). Au XXᵉ siècle, **Wagner et Traud (1938)** formalisent la théorie des électrodes mixtes et de la cinétique électrochimique, permettant de modéliser quantitativement la vitesse de corrosion à partir des courbes de polarisation. Le modèle semi-empirique de **de Waard et Milliams (1975)**, développé pour la prédiction de la corrosion CO₂ dans les pipelines pétroliers, devient la référence industrielle mondiale (de Waard et Milliams, 1975 ; de Waard, Lotz et Milliams, 1991).
 
-La maintenance industrielle, quant à elle, a connu une évolution parallèle. La norme **EN 13306 :2018** définit la maintenance prédictive comme une « maintenance conditionnelle effectuée en suivant les prévisions extrapolées de l'analyse et de l'évaluation de paramètres significatifs de la dégradation du bien » (CEN, 2018). La norme **ISO 13381-1 :2015** précise quant à elle les principes du pronostic et de l'estimation de la durée de vie résiduelle (RUL) à partir des données de surveillance (ISO, 2015). C'est précisément à l'intersection de ces deux normes que se positionne ce travail : instrumenter pour mesurer, mesurer pour prédire, prédire pour intervenir.
+La maintenance industrielle, quant à elle, a connu une évolution parallèle. La norme **EN 13306 :2017** définit la maintenance prédictive comme une « maintenance conditionnelle effectuée en suivant les prévisions extrapolées de l'analyse et de l'évaluation de paramètres significatifs de la dégradation du bien » (CEN, 2017). La norme **ISO 13381-1 :2025** précise quant à elle les principes du pronostic et de l'estimation de la durée de vie résiduelle (RUL) à partir des données de surveillance (ISO, 2025). C'est précisément à l'intersection de ces deux normes que se positionne ce travail : instrumenter pour mesurer, mesurer pour prédire, prédire pour intervenir.
 
 ### I.1.2. Contexte international et national
 
@@ -263,24 +261,23 @@ La gestion de la corrosion dans les infrastructures pétrolières est encadrée 
 
 **Au niveau international :**
 
-- **ISO 8044 :2015** — Définitions et terminologie de la corrosion (ISO, 2015) ;
+- **ISO 8044 :2024** — Corrosion des métaux et alliages — Vocabulaire (ISO, 2024) ;
 - **ASTM G1-03** — Préparation, nettoyage et évaluation des éprouvettes de corrosion (ASTM, 2017) ;
 - **ASTM G31-12a** — Essais d'immersion en laboratoire (ASTM, 2012) ;
-- **ASTM G96-90** — Surveillance de la corrosion en service par méthodes électriques (ER, LPR) (ASTM, 2018) ;
-- **NACE/AMPP SP0775-2023** — Préparation, installation, analyse et interprétation des coupons de corrosion en service pétrolier (AMPP, 2023) ;
-- **NACE TM0190** — Méthodes d'essai pour sondes ER en service pétrolier (NACE, 2012) ;
+- **ASTM G96-90(2018)** — Surveillance en service de la corrosion par méthodes électriques et électrochimiques (ER, LPR) (ASTM, 2018) ;
+- **NACE/AMPP SP0775-2023** — Préparation, installation, analyse et interprétation des coupons de corrosion en exploitation des hydrocarbures (AMPP, 2023) ;
 - **NACE MR0175 / ISO 15156** — Matériaux résistant à la corrosion sous H₂S (ISO, 2020) ;
-- **API 570** — Inspection des systèmes de tuyauteries en service (API, 2016a) ;
-- **API 580 / 581** — Inspection basée sur le risque (RBI) (API, 2016b ; API, 2016c) ;
-- **ISO 13381-1 :2015** — Maintenance — Pronostic — Lignes directrices générales (ISO, 2015) ;
-- **EN 13306 :2018** — Terminologie de la maintenance (CEN, 2018) ;
+- **API 570** — Inspection des systèmes de tuyauteries en service (API, 2024) ;
+- **API 580 / 581** — Inspection basée sur le risque (RBI) (API, 2023 ; API, 2025) ;
+- **ISO 13381-1 :2025** — Surveillance et diagnostic d'état des systèmes de machines — Pronostic — Partie 1 : Lignes directrices générales et exigences (ISO, 2025) ;
+- **EN 13306 :2017** — Terminologie de la maintenance (CEN, 2017) ;
 - **NORSOK M-506** — Calcul du taux de corrosion CO₂ (Standards Norway, 2017).
 
 **Au niveau national camerounais :**
 
-- **Loi n° 99/013 du 22 décembre 1999** portant Code Pétrolier, qui impose aux opérateurs de maintenir leurs installations dans un état de sécurité conforme aux normes internationales (République du Cameroun, 1999) ;
-- **Décret n° 2000/465 du 30 juin 2000** fixant les conditions d'exploitation des hydrocarbures, prévoyant des obligations de surveillance et de contrôle (République du Cameroun, 2000) ;
-- **Loi-cadre sur l'environnement** (loi n° 96/12) imposant des études d'impact et des plans de prévention des pollutions (République du Cameroun, 1996).
+- **Loi n° 2019/008 du 25 avril 2019** portant Code Pétrolier (abrogeant la loi n° 99/013 du 22 décembre 1999), qui impose aux opérateurs de maintenir leurs installations dans un état de sécurité conforme aux normes internationales (République du Cameroun, 2019) ;
+- **Décret n° 2023/232 du 4 mai 2023** fixant les modalités d'application de la loi n° 2019/008 portant Code Pétrolier, prévoyant des obligations de surveillance et de contrôle (République du Cameroun, 2023) ;
+- **Loi-cadre sur l'environnement** (loi n° 96/12 du 5 août 1996) imposant des études d'impact et des plans de prévention des pollutions (République du Cameroun, 1996).
 
 L'ensemble de ce corpus normatif établit le cadre dans lequel s'inscrit toute démarche de surveillance de la corrosion sur le territoire camerounais. Le présent travail contribue à ce cadre en proposant un outil aligné sur les principes de l'**ASTM G96** (mesure ER continue) et de l'**ISO 13381-1** (pronostic et RUL).
 
@@ -319,7 +316,7 @@ Cette approche I3.0 présente plusieurs **limites structurelles** que la transit
 
 - **Absence de corrélation algorithmique multi-variables** : la dérive du taux de corrosion peut résulter d'une élévation thermique, d'un changement de composition du fluide ou d'une défaillance de l'injection inhibiteur — ces causes ne sont pas distinguées en temps réel ;
 - **Absence d'estimation explicite du RUL** (durée de vie résiduelle) : les seuils fixes informent que le système est en alerte, mais pas dans combien d'heures la défaillance est probable ;
-- **Absence de boucle décision → action structurée** : les interventions correctives ne sont pas systématiquement tracées dans une GMAO, ce qui prive l'opérateur d'historiques exploitables pour le calcul de KPIs maintenance (MTBF, MTTR, disponibilité) ;
+- **Absence de boucle décision → action *prédictive* structurée** : l'opérateur trace certes ses interventions dans une GMAO (chez COTCO, via SAP), mais les sorties prédictives (CR, RUL) n'y sont **pas reliées automatiquement** — aucun ordre de travail n'est généré directement à partir d'une dérive *prédite*, et la chaîne prédiction → intervention demeure manuelle ;
 - **Sous-exploitation du flux de données** : les historiques des sondes ER constituent un actif informationnel non valorisé.
 
 **Le verrou n'est donc plus l'instrumentation** (déjà en place et performante), **mais l'intelligence applicative** : ajouter au-dessus du flux ER existant une couche d'apprentissage automatique capable de corréler résistance / température / temps, de prédire CR + RUL, et d'orchestrer les ordres de travail via une GMAO interconnectée. C'est précisément la transition **Industrie 3.0 → Industrie 4.0** que ce mémoire propose d'opérer.
@@ -340,11 +337,11 @@ Ce sujet articule **quatre axes** :
 
 ## I.2. Problématique
 
-La maintenance des infrastructures de transport pétrolier au Cameroun, et plus particulièrement chez COTCO, fait face à un **paradoxe fondamental** : les opérateurs disposent déjà d'un flux **continu** de données de surveillance produit par les sondes ER et LPR commerciales câblées au DCS (Cosasco, Emerson Roxar), complété par des inspections UT périodiques, des rapports de laboratoire et des journaux d'injection d'inhibiteurs. Pourtant, ces données — d'une grande richesse informationnelle — ne sont ni corrélées algorithmiquement aux variables de procédé (température, pression, débit), ni exploitées par des modèles prédictifs de durée de vie résiduelle, ni intégrées dans un système de gestion de maintenance assistée par ordinateur permettant la traçabilité des actions correctives. Le verrou n'est donc plus l'instrumentation, mais bien l'**intelligence applicative** au-dessus du flux existant. Ce paradoxe correspond exactement à la **frontière Industrie 3.0 / Industrie 4.0** identifiée dans la littérature de la transformation numérique industrielle (Lasi et al., 2014 ; Lu, 2017 ; Xu et al., 2018) : les machines mesurent, mais les données ne « parlent » pas entre elles, et la chaîne décision-action reste à dominante humaine.
+La maintenance des infrastructures de transport pétrolier au Cameroun, et plus particulièrement chez COTCO, fait face à un **paradoxe fondamental** : les opérateurs disposent déjà d'un flux **continu** de données de surveillance produit par les sondes ER et LPR commerciales câblées au DCS (Cosasco, Emerson Roxar), complété par des inspections UT périodiques, des rapports de laboratoire et des journaux d'injection d'inhibiteurs. Pourtant, ces données — d'une grande richesse informationnelle — ne sont ni corrélées algorithmiquement aux variables de procédé (température, pression, débit), ni exploitées par des modèles prédictifs de durée de vie résiduelle, ni reliées à la GMAO de l'opérateur (SAP chez COTCO) pour déclencher et tracer automatiquement les actions correctives issues d'une prédiction. Le verrou n'est donc plus l'instrumentation, mais bien l'**intelligence applicative** au-dessus du flux existant. Ce paradoxe correspond exactement à la **frontière Industrie 3.0 / Industrie 4.0** identifiée dans la littérature de la transformation numérique industrielle (Lasi et al., 2014 ; Lu, 2017 ; Xu et al., 2018) : les machines mesurent, mais les données ne « parlent » pas entre elles, et la chaîne décision-action reste à dominante humaine.
 
 Sur le plan **scientifique**, les modèles physiques classiques de prédiction de la corrosion (modèle de de Waard et Milliams, modèle NORSOK M-506) ont montré des limites importantes en conditions d'exploitation réelle, avec des erreurs systématiques de 40 à 60 % attribuables à la non-prise en compte des interactions complexes entre les multiples composants des fluides de procédé (de Waard et Milliams, 1975 ; Coelho, 2022). Les approches par apprentissage automatique offrent une alternative prometteuse, capable de capturer ces non-linéarités, mais leur déploiement en contexte africain se heurte à plusieurs verrous : (i) l'**absence de données d'entraînement locales**, (ii) l'**absence de protocoles *run-to-failure* publiés** permettant la prédiction conjointe CR + RUL, et (iii) la **rareté des plateformes intégrées** prouvant la chaîne complète de la mesure jusqu'à l'ordre de travail.
 
-Sur le plan **algorithmique**, la grande majorité des travaux ML sur la corrosion se limitent à la prédiction instantanée du taux de corrosion, sans extrapolation explicite vers la durée de vie résiduelle (RUL), pourtant définie de manière claire par la norme ISO 13381-1 (ISO, 2015 ; Akash, 2024). Cette absence de double prédiction CR + RUL prive les opérateurs d'une information essentielle à la planification optimisée des interventions.
+Sur le plan **algorithmique**, la grande majorité des travaux ML sur la corrosion se limitent à la prédiction instantanée du taux de corrosion, sans extrapolation explicite vers la durée de vie résiduelle (RUL), pourtant définie de manière claire par la norme ISO 13381-1 (ISO, 2025 ; Akash, 2024). Cette absence de double prédiction CR + RUL prive les opérateurs d'une information essentielle à la planification optimisée des interventions.
 
 Sur le plan **applicatif**, l'opérateur COTCO et la plupart des PME industrielles africaines partagent un même besoin : se doter d'une **boucle décision → action structurée** qui exploite les sorties prédictives pour générer automatiquement les ordres de travail, tracer les interventions et calculer les KPIs maintenance (MTBF, MTTR, disponibilité). Le marché GMAO est dominé par des solutions propriétaires (SAP PM, IBM Maximo, Mainpac) dont les coûts de licence (souvent supérieurs à 10 000 USD par site et par an) sont incompatibles avec les budgets de la plupart des opérateurs subsahariens et de l'ensemble des PME industrielles. Une **alternative open-source intégrée** est donc à construire.
 
@@ -360,7 +357,7 @@ La **question centrale** de ce travail est donc :
 
 ### I.3.1. Objectif général
 
-Concevoir, développer et valider expérimentalement un **système intégré de maintenance prédictive de la corrosion** matérialisant une transition **Industrie 3.0 → Industrie 4.0**, couvrant la chaîne complète **détection → diagnostic → pronostic → décision → action** définie par la norme ISO 13381-1, et combinant une sonde ER instrumentée IoT (ESP32 + HX711 + DS18B20), un modèle d'apprentissage automatique XGBoost à double sortie (CR + RUL) avec module de diagnostic des régimes de corrosion, un système d'alertes calibrées sur les régimes de corrosion et les facteurs de variabilité identifiés, et une **application web Streamlit intégrée par API REST à un CMMS open-source** pour la génération automatique des ordres de travail, le tout doublement transposable (a) aux opérateurs disposant déjà d'une instrumentation ER commerciale (cas COTCO) et (b) aux PME industrielles africaines en déploiement autonome.
+Concevoir, développer et valider expérimentalement un **système intégré de maintenance prédictive de la corrosion** matérialisant une transition **Industrie 3.0 → Industrie 4.0**, couvrant la chaîne complète **détection → diagnostic → pronostic → décision → action** définie par la norme ISO 13381-1, et combinant une sonde ER instrumentée IoT (ESP32 + HX711 + DS18B20), un modèle d'apprentissage automatique XGBoost à double sortie (CR + RUL) avec module de diagnostic des régimes de corrosion, un système d'alertes calibrées sur les régimes de corrosion et les facteurs de variabilité identifiés, et une **application web Streamlit dotée d'un module de gestion des ordres de travail (GMAO maison), dont l'architecture est transposable par API REST à un CMMS open-source existant**, pour la génération automatique des ordres de travail, le tout doublement transposable (a) aux opérateurs disposant déjà d'une instrumentation ER commerciale (cas COTCO) et (b) aux PME industrielles africaines en déploiement autonome.
 
 ### I.3.2. Objectifs spécifiques
 
@@ -372,7 +369,7 @@ Quatre objectifs spécifiques (OS), chronologiquement ordonnés et logiquement a
 
 - **OS3 — Diagnostiquer les régimes de corrosion, identifier les facteurs de variabilité conditionnant la fiabilité de la prédiction et définir un système d'alertes graduées (étapes *Diagnostic* et *Décision*).** Il s'agit (i) de classifier le régime de corrosion observé (induction, croissance, emballement, pré-rupture) à partir des sorties du modèle ; (ii) d'identifier et de quantifier les **facteurs expérimentaux qui conditionnent la reproductibilité des essais et donc la fiabilité de la prédiction** — au premier rang desquels la **température**, identifiée comme variable dominante, ainsi que la concentration du milieu ; (iii) de démontrer, par une stratégie de validation inter-essais, que la **répétabilité des conditions** est la condition d'une prédiction fiable ; et (iv) de définir un système d'alertes à trois niveaux (vert / orange / rouge) fondé sur les seuils de taux de corrosion (CR) et de durée de vie résiduelle (RUL).
 
-- **OS4 — Intégrer le système prédictif à un CMMS open-source via API REST (étape *Action*).** Il s'agit (i) de réaliser une application web Streamlit servant de frontend ML et de dashboard temps réel des sondes, hébergée sur Streamlit Community Cloud ; (ii) d'établir une connexion API REST vers un **CMMS open-source existant** (GLPI ou équivalent à préciser après matrice comparative) pour la création automatique d'ordres de travail à partir des alertes prédictives ; (iii) de définir le mapping prédiction ML → ticket CMMS (asset, sévérité, description, régime diagnostiqué) ; (iv) de calculer les KPIs maintenance (MTBF, MTTR, disponibilité, taux de fausses alertes) à partir des historiques CMMS. Cette approche démontre qu'un opérateur ou une PME peut structurer sa boucle décision → action **sans développer de GMAO ex nihilo et sans payer de licence propriétaire** (SAP PM, IBM Maximo).
+- **OS4 — Structurer la boucle décision → action par un module GMAO intégré, transposable à un CMMS open-source (étape *Action*).** Il s'agit (i) de réaliser une application web Streamlit servant de frontend ML et de dashboard temps réel des sondes, hébergée sur Streamlit Community Cloud ; (ii) d'y intégrer un **module de gestion des ordres de travail (GMAO maison)** générant et traçant automatiquement les OT à partir des alertes prédictives (création, assignation, clôture) ; (iii) de définir le mapping prédiction ML → ordre de travail (asset, sévérité, description, régime diagnostiqué), **directement transposable à un CMMS open-source existant** via API REST, GLPI étant retenu comme cible de référence après matrice comparative ; (iv) de calculer les KPIs maintenance (MTBF, MTTR, disponibilité, taux de fausses alertes) à partir de l'historique des OT. Cette approche démontre qu'un opérateur ou une PME peut structurer sa boucle décision → action **sans licence propriétaire** (SAP PM, IBM Maximo), au moyen d'un module léger ou d'un CMMS open-source.
 
 ---
 
@@ -386,7 +383,7 @@ Quatre objectifs spécifiques (OS), chronologiquement ordonnés et logiquement a
 
 - **QR3 :** Dans quelle mesure les sorties du modèle XGBoost permettent-elles de diagnostiquer le régime de corrosion en cours (induction, croissance, emballement, pré-rupture), et dans quelle mesure l'identification des facteurs de variabilité expérimentale — en particulier la température — et la répétabilité des conditions conditionnent-elles la fiabilité de la prédiction et la calibration d'un système d'alertes graduées (vert / orange / rouge) ?
 
-- **QR4 :** Dans quelle mesure une **application Streamlit intégrée par API REST à un CMMS open-source existant** (GLPI ou équivalent) peut-elle exploiter les alertes et les recommandations issues du système prédictif pour générer automatiquement les ordres de travail, tracer les interventions et calculer les KPIs de maintenance (MTBF, MTTR, disponibilité), avec une couverture fonctionnelle équivalente aux GMAO propriétaires (SAP PM, IBM Maximo) sans coût de licence ?
+- **QR4 :** Dans quelle mesure une **application Streamlit dotée d'un module GMAO intégré (transposable par API REST à un CMMS open-source existant, type GLPI)** peut-elle exploiter les alertes et les recommandations issues du système prédictif pour générer automatiquement les ordres de travail, tracer les interventions et calculer les KPIs de maintenance (MTBF, MTTR, disponibilité), sans coût de licence propriétaire (SAP PM, IBM Maximo) ?
 
 ---
 
@@ -394,7 +391,7 @@ Quatre objectifs spécifiques (OS), chronologiquement ordonnés et logiquement a
 
 Ce travail revêt un intérêt à plusieurs niveaux et pour plusieurs catégories de parties prenantes :
 
-**Pour le lecteur académique :** ce mémoire propose une démarche reproductible combinant instrumentation IoT, protocole expérimental rigoureux *run-to-failure*, apprentissage automatique interprétable (SHAP) et intégration à un CMMS open-source par API. Il s'inscrit dans le cadre théorique de la transformation numérique industrielle (Industrie 4.0) et comble un vide bibliographique sur la maintenance prédictive de la corrosion en contexte africain.
+**Pour le lecteur académique :** ce mémoire propose une démarche reproductible combinant instrumentation IoT, protocole expérimental rigoureux *run-to-failure*, apprentissage automatique interprétable (SHAP) et structuration de la boucle décision → action par un module GMAO transposable à un CMMS open-source. Il s'inscrit dans le cadre théorique de la transformation numérique industrielle (Industrie 4.0) et comble un vide bibliographique sur la maintenance prédictive de la corrosion en contexte africain.
 
 **Pour l'auteur :** ce travail constitue l'aboutissement académique du Master 2 et la matérialisation concrète de l'intégration de compétences pluridisciplinaires (corrosion, électronique embarquée, apprentissage automatique, méthodologie scientifique). Il prépare directement à l'insertion professionnelle dans le secteur industriel, et plus particulièrement dans les métiers de la maintenance prédictive.
 
@@ -404,7 +401,7 @@ Ce travail revêt un intérêt à plusieurs niveaux et pour plusieurs catégorie
 
 **Pour COTCO et les opérateurs pétroliers camerounais :** le mémoire fournit une **preuve de concept industriellement transposable** dont la valeur principale n'est pas le coût matériel mais la **chaîne de valeur logicielle I3.0 → I4.0**. Le pipeline ML développé est applicable directement aux flux des sondes ER commerciales déjà en place (Cosasco, Roxar) via export DCS, sans remplacement matériel. La chaîne d'acquisition autonome ESP32 développée constitue par ailleurs une option d'extension pour les sections où le câblage DCS est absent ou indisponible.
 
-**Pour les PME industrielles africaines :** au-delà du contexte pétrolier, l'architecture d'intégration **Streamlit ↔ CMMS open-source** démontrée dans ce travail est directement transposable à toutes les PME confrontées à des coûts de licence prohibitifs des GMAO industrielles (SAP PM, IBM Maximo, Mainpac), dont les tarifs annuels (souvent supérieurs à 10 000 USD par site) sont incompatibles avec les budgets de la majorité des PME subsahariennes. Le recours à un CMMS open-source mature (GLPI ou équivalent) permet une **démocratisation effective de la maintenance assistée par ordinateur** sans développement *ex nihilo* — approche pragmatique d'intégration plutôt que de réinvention.
+**Pour les PME industrielles africaines :** au-delà du contexte pétrolier, l'architecture **module GMAO ↔ CMMS open-source** démontrée dans ce travail est directement transposable à toutes les PME confrontées à des coûts de licence prohibitifs des GMAO industrielles (SAP PM, IBM Maximo, Mainpac), dont les tarifs annuels (souvent supérieurs à 10 000 USD par site) sont incompatibles avec les budgets de la majorité des PME subsahariennes. Un module GMAO léger — ou un CMMS open-source mature (GLPI ou équivalent) vers lequel il est directement transposable — permet une **démocratisation effective de la maintenance assistée par ordinateur** sans licence propriétaire.
 
 **Pour la société et l'environnement :** la prévention des ruptures de pipeline par prédiction précoce de la dégradation réduit le risque de déversement d'hydrocarbures aux conséquences écologiques potentiellement irréversibles dans une zone de forêt équatoriale et de cours d'eau. C'est un apport indirect mais réel à la protection des écosystèmes et des populations riveraines.
 
@@ -534,7 +531,7 @@ Les performances rapportées dans la littérature récente sur la corrosion sont
 
 ### I.7.6. Pronostic et durée de vie résiduelle (RUL)
 
-La **norme ISO 13381-1 :2015** définit le pronostic comme « l'estimation du temps avant défaillance et le risque d'existence ou d'apparition d'un ou plusieurs modes de défaillance » (ISO, 2015). La **durée de vie résiduelle (RUL — Remaining Useful Life)** est définie comme « la durée pendant laquelle un système peut continuer à fonctionner avant que sa santé ne tombe sous un seuil prédéfini » (Akash, 2024 ; Liu et al., 2022).
+La **norme ISO 13381-1 :2025** définit le pronostic comme « l'estimation du temps avant défaillance et le risque d'existence ou d'apparition d'un ou plusieurs modes de défaillance » (ISO, 2025). La **durée de vie résiduelle (RUL — Remaining Useful Life)** est définie comme « la durée pendant laquelle un système peut continuer à fonctionner avant que sa santé ne tombe sous un seuil prédéfini » (Akash, 2024 ; Liu et al., 2022).
 
 Quatre familles d'approches existent (Liu et al., 2022) :
 
@@ -543,7 +540,7 @@ Quatre familles d'approches existent (Liu et al., 2022) :
 3. **Modèles par apprentissage automatique** : XGBoost, LSTM, Transformers ;
 4. **Approches hybrides** : combinaison physique + ML.
 
-Pour la corrosion spécifiquement, les approches ML *run-to-failure* sont les mieux adaptées car elles exploitent l'intégralité du cycle de dégradation (état initial → rupture). C'est la voie retenue dans ce travail.
+Pour la corrosion spécifiquement, les approches par **apprentissage automatique** *run-to-failure* sont les mieux adaptées car elles exploitent l'intégralité du cycle de dégradation (état initial → rupture) : c'est la voie **principale** retenue dans ce travail, via le modèle **XGBoost (famille 3)**. En complément, la perspective d'un **jumeau numérique** (§III.6) mobilise les **familles 1 et 2** — une loi de cinétique de corrosion (sigmoïde d'Avrami) couplée à une simulation statistique de type Monte-Carlo —, relevant ainsi d'une **approche hybride (famille 4)** pour borner la durée de vie. Le présent travail se positionne donc explicitement dans cette taxonomie, l'apprentissage automatique en constituant le cœur et le jumeau numérique le prolongement physico-statistique.
 
 ### I.7.7. Facteurs influençant la cinétique de corrosion — rôle de la température
 
@@ -559,7 +556,7 @@ Cette sensibilité a une conséquence directe pour la **modélisation prédictiv
 
 ### I.7.8. Diagnostic en maintenance industrielle
 
-Le **diagnostic** est l'étape de la chaîne de maintenance prédictive (ISO 13381-1) consistant à *identifier la nature, la localisation et la cause d'une défaillance ou d'une dérive*, à partir des informations issues de la phase de détection (Akash, 2024 ; ISO, 2015). Il se distingue du **pronostic** — qui prédit le moment de la défaillance future — et précède la **décision** — qui choisit l'action corrective appropriée. La chaîne complète est ainsi :
+Le **diagnostic** est l'étape de la chaîne de maintenance prédictive (ISO 13381-1) consistant à *identifier la nature, la localisation et la cause d'une défaillance ou d'une dérive*, à partir des informations issues de la phase de détection (Akash, 2024 ; ISO, 2025). Il se distingue du **pronostic** — qui prédit le moment de la défaillance future — et précède la **décision** — qui choisit l'action corrective appropriée. La chaîne complète est ainsi :
 
 > **Détection → Diagnostic → Pronostic → Décision → Action**
 
@@ -892,12 +889,11 @@ Le tableau ci-dessous consolide la totalité des matériels mobilisés dans le c
 
 | Référence | Organisme | Objet |
 |---|---|---|
-| ISO 8044 | ISO | Définitions corrosion |
+| ISO 8044 | ISO | Vocabulaire de la corrosion |
 | ASTM G1 | ASTM | Évaluation éprouvettes corrosion |
 | ASTM G31 | ASTM | Essais immersion laboratoire |
 | ASTM G96 | ASTM | Surveillance ER en service |
-| NACE SP0775 | AMPP | Sondes/coupons O&G |
-| NACE TM0190 | AMPP | Sondes ER service pétrolier |
+| NACE SP0775 | AMPP | Coupons de corrosion O&G |
 | API 570 | API | Inspection tuyauteries |
 | ISO 13381-1 | ISO | Maintenance prévisionnelle, RUL |
 | EN 13306 | CEN | Terminologie maintenance |
@@ -968,7 +964,7 @@ La cible visée étant la **vitesse de corrosion stable** (et non l'emballement 
 
 ### II.4.5. Calcul du RUL
 
-Le critère de fin de vie est fixé à *r*_critique = 0,15 × *r*(0), soit un rayon résiduel de 15 % (≈ 98 % de section perdue) — proxy d'une section quasi nulle annonçant la rupture mécanique imminente. Cette valeur est une **convention de laboratoire** : la norme **ISO 13381-1** définit le pronostic par rapport à un « seuil de santé prédéfini » sans en imposer la valeur numérique (ISO, 2015) ; le choix de 0,15 est **provisoire**, à recaler sur un critère mécanique (contrainte à rupture du fil) en conditions réelles. Pour les **runs RTF complets** (rupture observée), la durée de vie résiduelle est mesurée directement depuis l'instant de rupture :
+Le critère de fin de vie est fixé à *r*_critique = 0,15 × *r*(0), soit un rayon résiduel de 15 % (≈ 98 % de section perdue) — proxy d'une section quasi nulle annonçant la rupture mécanique imminente. Cette valeur est une **convention de laboratoire** : la norme **ISO 13381-1** définit le pronostic par rapport à un « seuil de santé prédéfini » sans en imposer la valeur numérique (ISO, 2025) ; le choix de 0,15 est **provisoire**, à recaler sur un critère mécanique (contrainte à rupture du fil) en conditions réelles. Pour les **runs RTF complets** (rupture observée), la durée de vie résiduelle est mesurée directement depuis l'instant de rupture :
 
 $$RUL(t) = t_{rupture} - t$$
 
@@ -1040,7 +1036,7 @@ Les régimes correspondent aux phases physiques observées sur un essai RTF du f
 | **Emballement** | accélération marquée de dR/dt, tendance_6h croissante | Orange |
 | **Pré-rupture** | dR/dt diverge ET RUL < 12 h | Rouge |
 
-Les seuils de transition entre régimes sont **calibrés sur les distributions observées** dans les runs de référence, conformément au principe de « seuil de santé prédéfini » de l'**ISO 13381-1** (ISO, 2015). Ils constituent à ce stade une **convention de laboratoire provisoire**, à consolider sur un volume d'essais accru. Le seuil de pré-rupture (*RUL* < 12 h) est un **objectif de conception** — l'horizon d'anticipation visé pour déclencher une intervention — et non une valeur normative.
+Les seuils de transition entre régimes sont **calibrés sur les distributions observées** dans les runs de référence, conformément au principe de « seuil de santé prédéfini » de l'**ISO 13381-1** (ISO, 2025). Ils constituent à ce stade une **convention de laboratoire provisoire**, à consolider sur un volume d'essais accru. Le seuil de pré-rupture (*RUL* < 12 h) est un **objectif de conception** — l'horizon d'anticipation visé pour déclencher une intervention — et non une valeur normative.
 
 La fonction `diagnostiquer(features)` du pipeline Python prend en entrée le vecteur de features de l'instant courant et retourne un dictionnaire `{régime: str, confiance: float, signal: dict}` exploité ensuite par le module GMAO (OS4) pour générer les alertes.
 
@@ -1052,7 +1048,7 @@ La fonction `diagnostiquer(features)` du pipeline Python prend en entrée le vec
 
 Plusieurs protocoles permettent d'étudier la corrosion d'un métal : les **essais électrochimiques** (polarisation, spectroscopie d'impédance EIS), la **perte de masse** par immersion sur durée fixe, et les essais **run-to-failure (RTF)** où l'échantillon est suivi en continu jusqu'à sa rupture. Les essais électrochimiques fournissent des grandeurs instantanées mais nécessitent un instrument coûteux ; la perte de masse est simple mais ne donne qu'une vitesse moyenne, sans dynamique temporelle ni événement de défaillance.
 
-Dans le cadre de ce travail, nous retenons le protocole **run-to-failure (RTF)**, car il est le seul à constituer un jeu d'apprentissage couvrant l'intégralité du cycle de dégradation — de l'état initial jusqu'à la rupture — et à fournir un **événement de défaillance réellement observé**, indispensable à l'apprentissage de la prédiction de durée de vie résiduelle (RUL). Ce choix est conforme à l'esprit de la norme **ISO 13381-1 :2015** sur la maintenance prévisionnelle (ISO, 2015 ; Akash, 2024).
+Dans le cadre de ce travail, nous retenons le protocole **run-to-failure (RTF)**, car il est le seul à constituer un jeu d'apprentissage couvrant l'intégralité du cycle de dégradation — de l'état initial jusqu'à la rupture — et à fournir un **événement de défaillance réellement observé**, indispensable à l'apprentissage de la prédiction de durée de vie résiduelle (RUL). Ce choix est conforme à l'esprit de la norme **ISO 13381-1 :2025** sur la maintenance prévisionnelle (ISO, 2025 ; Akash, 2024).
 
 ### II.6.2. Plan expérimental
 
@@ -1100,21 +1096,21 @@ Les seuils d'alerte sont définis à partir des deux sorties du modèle (taux de
 
 ---
 
-## II.7. Architecture d'intégration au CMMS open-source par API REST (OS4)
+## II.7. Boucle décision → action : module GMAO intégré, transposable à un CMMS open-source (OS4)
 
-### II.7.1. Choix d'architecture : intégration plutôt que développement *ex nihilo*
+### II.7.1. Choix d'architecture : module GMAO maison + transposabilité à un CMMS open-source
 
 L'objectif d'OS4 est de structurer la **boucle décision → action** en aval du système prédictif. Deux approches étaient envisageables :
 
-- **(A) Développer une GMAO complète *ex nihilo*** (stack Supabase + Next.js + Vercel) couvrant gestion d'actifs, ordres de travail, KPIs maintenance ;
-- **(B) Réutiliser un CMMS open-source mature** et y connecter, par API REST, l'application web Streamlit servant de frontend ML et de dashboard temps réel.
+- **(A) Développer un module GMAO maison léger**, intégré à l'application Streamlit (table d'ordres de travail + interface de gestion), couvrant le strict nécessaire : création d'OT sur alerte, assignation, clôture, KPIs ;
+- **(B) Réutiliser un CMMS open-source mature** (GLPI, OpenMaint, Snipe-IT…) et y connecter, par API REST, l'application web Streamlit.
 
-L'approche **(B) a été retenue** pour les raisons suivantes :
+L'approche retenue **pour le prototype est (A) — un module GMAO maison**, son architecture étant conçue pour être **directement transposable** à l'approche (B). Justification :
 
-1. **Maturité fonctionnelle** : un CMMS open-source mature (GLPI compte plus de 20 ans de développement, plus de 200 contributeurs, des modules Tickets / Problems / Changes natifs) couvre dès l'installation un périmètre fonctionnel qui demanderait plusieurs mois de développement *ex nihilo* ;
-2. **Pragmatisme industriel** : démontrer une approche d'intégration est plus pertinent pour un mémoire de Master en Maintenance Industrielle qu'un développement *not-invented-here* — c'est précisément ce que ferait un ingénieur en entreprise face à une contrainte budgétaire ;
-3. **Transposabilité** : l'architecture d'intégration (Streamlit ↔ REST API ↔ CMMS) est reproductible quel que soit le CMMS retenu par l'opérateur (GLPI chez l'un, OpenMaint chez l'autre, Snipe-IT chez un troisième) ;
-4. **Compatibilité COTCO** : un CMMS auto-hébergeable (on-premise) est compatible avec les contraintes de sécurité industrielle (réseau OT isolé, pas de cloud public) — ce qui n'est pas le cas de Supabase + Vercel.
+1. **Périmètre suffisant** : la boucle visée (OT générés à partir des alertes + traçabilité + KPIs) est couverte par un module léger, sans imposer le déploiement d'un CMMS complet pour la démonstration ;
+2. **Indépendance opérationnelle** : éviter une dépendance à l'API d'un CMMS tiers — dont l'accès est fréquemment restreint dans les offres gratuites — garantit une démonstration de bout en bout reproductible ;
+3. **Transposabilité** : le mapping prédiction → ordre de travail (§II.7.5) est défini de façon générique et se reporte tel quel sur un CMMS open-source (GLPI retenu comme **cible de référence**, voir matrice §II.7.2), OpenMaint ou Snipe-IT ;
+4. **Compatibilité industrielle** : le module maison comme le CMMS open-source sont auto-hébergeables (on-premise), compatibles avec un réseau OT isolé.
 
 ### II.7.2. Matrice comparative des CMMS open-source candidats
 
@@ -1122,7 +1118,7 @@ L'approche **(B) a été retenue** pour les raisons suivantes :
 
 | CMMS | Maturité | API REST | Modules ticketing | Auto-hébergeable | Communauté | Verdict |
 |---|---|---|---|---|---|---|
-| **GLPI** | 20 ans, v10 stable | ✅ native, OAuth2 | Tickets / Problems / Changes (ITIL) | ✅ Linux/Docker | Très large (FR + INT) | **Retenu (priorité)** |
+| **GLPI** | 20 ans, v10 stable | ✅ native, OAuth2 | Tickets / Problems / Changes (ITIL) | ✅ Linux/Docker | Très large (FR + INT) | **Cible de référence** |
 | OpenMaint (CMDBuild) | 12 ans | ✅ REST + SOAP | Work orders + Assets | ✅ Tomcat | Moyenne (IT) | Alternative crédible |
 | Snipe-IT | 10 ans | ✅ REST documenté | Asset-centric (limité OT) | ✅ PHP/Laravel | Large | Trop asset-centric |
 | Fiix Free | 15 ans | API limitée free tier | Complet (cloud) | ❌ SaaS uniquement | Commercial | Non-libre |
@@ -1130,7 +1126,7 @@ L'approche **(B) a été retenue** pour les raisons suivantes :
 
 Sources : GLPI Project (2024) ; CMMS Wikipedia (2024) ; documentations officielles consultées 2026.
 
-**Choix retenu : GLPI** — meilleure couverture fonctionnelle, API REST native documentée, communauté francophone active, déployable on-premise.
+**Cible de transposition retenue : GLPI** — meilleure couverture fonctionnelle, API REST native documentée, communauté francophone active, déployable on-premise. Le prototype implémente le même périmètre (création/suivi d'OT, KPIs) dans un module maison, dont les appels se reportent sur l'API REST de GLPI sans changement d'architecture.
 
 ### II.7.3. Stack technologique de la chaîne intégrée
 
@@ -1139,25 +1135,25 @@ Sources : GLPI Project (2024) ; CMMS Wikipedia (2024) ; documentations officiell
 | Couche | Technologie | Rôle | Coût |
 |---|---|---|---|
 | Capteur + acquisition | ESP32 + HX711 + DS18B20 | Mesure ER + température | Matériel ~50 000 FCFA |
-| Stockage mesures + prédictions | SQLite (intégré Streamlit) | Persistance time-series + sorties ML | Gratuit |
+| Stockage mesures + prédictions + OT | Supabase (PostgreSQL) | Persistance time-series + sorties ML + ordres de travail | Gratuit (free-tier) |
 | Pipeline ML | Python (Pandas, SciPy, XGBoost, SHAP) | CR + RUL + diagnostic + interprétabilité | Gratuit (open-source) |
 | Frontend ML / dashboard | **Streamlit** | UI temps réel, courbes, alertes | Gratuit (open-source) |
 | Hébergement frontend | **Streamlit Community Cloud** | Déploiement public | Gratuit |
-| **CMMS open-source** | **GLPI** (PHP/MariaDB) | Tickets, OT, KPIs maintenance | Gratuit (auto-hébergé) |
-| Couche d'intégration | **API REST GLPI** (HTTP/JSON) | Création automatique de tickets | Gratuit |
-| Communication ESP32 → Streamlit | HTTPS POST | Ingestion mesures | Gratuit |
+| **Module GMAO** | **Maison** (table `cr_work_orders`) — transposable GLPI | Ordres de travail, assignation, clôture, KPIs | Gratuit |
+| Couche d'intégration | Module OT (Python) ; **mapping API REST GLPI** | Génération automatique d'OT (transposable en tickets GLPI) | Gratuit |
+| Communication ESP32 → Supabase | HTTPS POST | Ingestion mesures | Gratuit |
 
-Sources : Streamlit (2024) ; GLPI Project (2024) ; XGBoost Documentation (Chen et Guestrin, 2016).
+Sources : Streamlit (2024) ; Supabase (2024) ; GLPI Project (2024) ; XGBoost Documentation (Chen et Guestrin, 2016).
 
 ### II.7.4. Architecture de la boucle complète intégrée
 
 ![Figure II.1 — Architecture de la boucle intégrée Sonde ER → Supabase → Streamlit → CMMS open-source](figures/fig_ii1_architecture.png){ width=80% }
 
-### II.7.5. Mapping prédiction ML → ticket CMMS
+### II.7.5. Mapping prédiction ML → ordre de travail (transposable ticket CMMS)
 
-Le tableau ci-dessous décrit le mapping entre les sorties du pipeline ML et les champs d'un ticket GLPI créé automatiquement :
+Le tableau ci-dessous décrit le mapping entre les sorties du pipeline ML et les champs d'un ordre de travail. Le module GMAO maison l'implémente directement ; les mêmes champs se reportent sur un ticket GLPI créé automatiquement par API REST (cible de transposition) :
 
-**Tableau II.13 — Mapping des champs prédiction ML → ticket GLPI**
+**Tableau II.13 — Mapping des champs prédiction ML → ordre de travail (exemple GLPI)**
 
 | Champ ticket GLPI | Source dans la prédiction ML | Exemple |
 |---|---|---|
@@ -1186,13 +1182,13 @@ requests.post(f"{GLPI_URL}/apirest.php/Ticket",
               json=ticket)
 ```
 
-### II.7.6. KPIs maintenance calculés (côté CMMS)
+### II.7.6. KPIs maintenance calculés à partir de l'historique des ordres de travail
 
-GLPI fournit nativement ou par requête SQL/plugin les KPIs maintenance suivants, alimentés par l'historique des tickets et des interventions :
+Les KPIs maintenance suivants sont calculés à partir de l'historique des ordres de travail tenu par le module GMAO maison ; ils se calculent à l'identique côté GLPI (requête SQL ou plugin) après transposition :
 
 **Tableau II.14 — Indicateurs de performance maintenance (KPIs)**
 
-| KPI | Formule | Source GLPI | Cible |
+| KPI | Formule | Source (module OT / GLPI) | Cible |
 |---|---|---|---|
 | **MTBF** (Mean Time Between Failures) | Σ temps entre tickets corrosion / nb tickets | Table `glpi_tickets` | maximiser |
 | **MTTR** (Mean Time To Repair) | Σ (close_date − open_date) / nb tickets | Table `glpi_tickets` | minimiser |
@@ -1214,7 +1210,7 @@ GLPI fournit nativement ou par requête SQL/plugin les KPIs maintenance suivants
 | **OS1** — Concevoir et valider la sonde ER instrumentée IoT | (i) Montage de la sonde ER ; (ii) Programmation du firmware ESP32 (acquisition 30 s, HX711, DS18B20) ; (iii) Tests de résolution sur résistances étalons ; (iv) Validation de la stabilité en milieu corrosif | Montage de mesure de résistance ; HX711 ; ESP32 acquisition continue 30 s ; Multimètre de précision | Sonde fonctionnelle, résolution suffisante pour quantifier le CR — démonstration de la brique d'acquisition I4.0 |
 | **OS2** — Entraîner et valider le modèle XGBoost (CR + RUL) | (i) Collecte d'une série de runs RTF ; (ii) Nettoyage IQR + Savitzky-Golay ; (iii) Compensation thermique ; (iv) Feature engineering ; (v) Validation LORO ; (vi) Entraînement XGBoost ; (vii) MAE/RMSE/R² ; (viii) SHAP | Python : Pandas, SciPy, XGBoost, Scikit-learn, SHAP ; *n*=500, depth=4, lr=0,05, L1=0,1, L2=1,0 | Prédiction CR + RUL ; comparaison aux baselines ; SHAP : variables physiquement plausibles |
 | **OS3** — Diagnostic des régimes + facteurs de variabilité + alertes | (i) Diagnostic des régimes (induction, croissance, emballement, pré-rupture) par règles métier ; (ii) Identification et quantification des facteurs de variabilité (température, concentration) par LORO ; (iii) Démonstration du rôle de la répétabilité ; (iv) Calibration des seuils vert/orange/rouge sur CR et RUL | Pipeline Python : `diagnostiquer(features)` ; validation LORO par plage thermique ; analyse des contre-exemples ; calibration empirique | Diagnostic exploitable ; effet température quantifié ; seuils calibrés (CR=1, 5 mm/an ; RUL=12, 48 h) |
-| **OS4** — Intégration au CMMS open-source par API REST | (i) Application Streamlit (frontend ML + dashboard) ; (ii) Matrice comparative GLPI/OpenMaint/Snipe-IT ; (iii) Mapping prédiction ML → ticket CMMS ; (iv) API REST `/Ticket` (POST automatique) ; (v) Calcul KPIs (MTBF, MTTR, η inhibition) | Streamlit + Streamlit Community Cloud ; **GLPI** (PHP/MariaDB, auto-hébergé) ; API REST GLPI ; Python `requests` ; ISO 14224 codes anomalie | Boucle Sonde→ML→Ticket CMMS démontrée end-to-end ; KPIs calculés ; coût de licence = 0 FCFA |
+| **OS4** — Boucle décision → action : module GMAO intégré, transposable à un CMMS open-source | (i) Application Streamlit (frontend ML + dashboard) ; (ii) Module GMAO maison (table `cr_work_orders` : OT, assignation, clôture) ; (iii) Mapping prédiction ML → ordre de travail ; (iv) Matrice comparative GLPI/OpenMaint/Snipe-IT + mapping API REST GLPI (transposition) ; (v) Calcul KPIs (MTBF, MTTR, η inhibition) | Streamlit + Streamlit Community Cloud ; module OT Python + Supabase ; **GLPI** comme cible de transposition (API REST) ; ISO 14224 codes anomalie | Boucle Sonde → ML → OT démontrée end-to-end ; KPIs calculés ; coût de licence = 0 FCFA |
 
 L'usage des outils suit une chronologie stricte : conception matérielle (OS1) → acquisition expérimentale et modélisation (OS2) → diagnostic des régimes et analyse des facteurs de variabilité (OS3) → intégration applicative GMAO (OS4).
 
@@ -1371,19 +1367,19 @@ Les seuils d'alerte (tableau II.9) sont fixés à partir des distributions de CR
 
 ---
 
-## III.5. Intégration au CMMS open-source — démonstration (OS4)
+## III.5. Boucle décision → action : module GMAO maison — démonstration (OS4)
 
-La boucle décision → action peut être structurée de deux manières : développer une GMAO *ex nihilo*, ou intégrer un CMMS open-source existant (§II.7.1). Conformément au choix retenu, cette section présente l'état de l'intégration à ce stade.
+La boucle décision → action est structurée par un **module GMAO maison** intégré à l'application, dont l'architecture est transposable à un CMMS open-source (§II.7.1). Cette section présente l'état de la démonstration à ce stade.
 
 ### III.5.1. Écran de supervision temps réel
 
 Une application web de supervision a été développée (Streamlit). Elle se connecte en temps réel à la base Supabase et affiche, par essai, la résistance compensée, la température, le taux de corrosion et l'état de l'acquisition, dans une interface de type salle de contrôle. Elle détecte automatiquement un run actif et s'actualise en continu. *[Captures d'écran de l'écran de supervision à insérer.]*
 
-### III.5.2. Mapping alerte → ticket et KPIs
+### III.5.2. Module GMAO maison : génération d'ordres de travail et KPIs
 
-Le mapping entre une prédiction et un ticket CMMS (GLPI) a été spécifié (§II.7.5) : une alerte rouge génère un ordre de travail enrichi (CR, RUL, régime diagnostiqué, top-3 SHAP). Les KPIs de maintenance (MTBF, MTTR, disponibilité, taux de fausses alertes) sont calculables côté CMMS à partir de l'historique des interventions.
+Un **module de gestion des ordres de travail (GMAO maison)** a été développé : il persiste les OT dans une table dédiée (`cr_work_orders`, Supabase) et expose une page « Ordres de travail » dans l'application (création, assignation, clôture). À chaque dépassement de seuil, une alerte génère automatiquement un **ordre de travail enrichi** (CR, RUL, régime diagnostiqué, section perdue), avec déduplication (un OT ouvert par run et par niveau). Le mapping prédiction → OT (§II.7.5) est défini de façon générique : les mêmes champs se reportent sur un **ticket GLPI** par API REST, transposition validée au niveau de la spécification mais **non déployée** (l'accès API des CMMS gratuits étant restreint). Les KPIs de maintenance (MTBF, MTTR, disponibilité, taux de fausses alertes) sont calculés à partir de l'historique des OT.
 
-> **État d'avancement.** L'écran de supervision est opérationnel ; la connexion automatisée au CMMS GLPI et le calcul des KPIs sur un historique significatif sont en cours de finalisation. Les KPIs n'auront de valeur statistique que sur un volume d'essais et d'interventions plus important — ils constituent à ce stade une démonstration de la chaîne de calcul.
+> **État d'avancement.** L'écran de supervision et le module GMAO maison (génération/clôture d'OT, KPIs) sont **opérationnels** et démontrent la boucle Sonde → ML → OT de bout en bout. L'intégration à un CMMS open-source mature (GLPI) reste au stade de **spécification transposable**. Les KPIs n'auront de valeur statistique que sur un volume d'essais et d'interventions plus important — ils constituent à ce stade une démonstration de la chaîne de calcul.
 
 ---
 
@@ -1397,9 +1393,9 @@ Les sondes ER commerciales (Cosasco, Emerson Roxar, Permasense) offrent une rés
 
 La littérature rapporte d'excellentes performances pour les modèles ML de prédiction du taux de corrosion sur de **grands jeux de données homogènes** (Wei et al., 2024 ; Yan et Yan, 2024 ; Hu et al., 2024, avec des R² > 0,96). Nos résultats, plus modestes en valeur absolue, s'expliquent par un nombre d'essais réduit et, surtout, par le caractère **inter-essais** de notre validation (LORO), bien plus exigeante qu'une validation intra-jeu. Le résultat marquant n'est pas tant la valeur du R² que sa **structure** : positif là où les conditions sont couvertes et répétées, négatif sinon. Cette lecture, rarement explicitée dans la littérature, constitue l'apport méthodologique de ce travail.
 
-### III.6.3. Apport de l'intégration au CMMS open-source
+### III.6.3. Apport d'une boucle GMAO légère et transposable
 
-L'intégration à un CMMS open-source (GLPI) plutôt qu'un développement *ex nihilo* offre un coût total de possession très faible (de l'ordre de quelques dizaines de dollars, contre 50–250 k USD pour SAP PM ou IBM Maximo), ouvrant la maintenance structurée aux PME industrielles africaines. Cette approche reste compatible avec un déploiement on-premise, exigé par les contraintes de sécurité industrielle (cas COTCO).
+Structurer la boucle décision → action par un **module GMAO maison léger**, transposable à un CMMS open-source (GLPI) plutôt que par une suite propriétaire, offre un coût total de possession très faible (de l'ordre de quelques dizaines de dollars, contre 50–250 k USD pour SAP PM ou IBM Maximo), ouvrant la maintenance structurée aux PME industrielles africaines. Cette approche reste compatible avec un déploiement on-premise, exigé par les contraintes de sécurité industrielle (cas COTCO).
 
 ### III.6.4. Limites du travail
 
@@ -1421,7 +1417,7 @@ Un quatrième axe, exploratoire, vise à **densifier synthétiquement l'espace d
 
 ## III.7. Conclusion du Chapitre III
 
-Ce chapitre a présenté les résultats provisoires de la campagne. **OS1** : la chaîne d'acquisition ER est fonctionnelle et a permis de suivre sans interruption une série d'essais run-to-failure complets jusqu'à la rupture. **OS2** : le modèle XGBoost prédit le taux de corrosion et surpasse les méthodes de référence, mais sa performance dépend de la couverture des conditions. **OS3** : l'analyse a établi que la **température est la variable dominante** et que la **répétabilité des conditions** — couverture thermique, qualité de régulation, constance de la concentration — conditionne la fiabilité de la prédiction ; deux contre-exemples (Run #15, Run #17) l'ont démontré expérimentalement. **OS4** : l'écran de supervision est opérationnel et le mapping vers le CMMS spécifié, la finalisation de l'automatisation étant en cours. Au regard de l'état d'avancement, les objectifs sont **partiellement atteints et en voie de consolidation** par les essais en cours. La conclusion générale dresse le bilan d'ensemble et les perspectives.
+Ce chapitre a présenté les résultats provisoires de la campagne. **OS1** : la chaîne d'acquisition ER est fonctionnelle et a permis de suivre sans interruption une série d'essais run-to-failure complets jusqu'à la rupture. **OS2** : le modèle XGBoost prédit le taux de corrosion et surpasse les méthodes de référence, mais sa performance dépend de la couverture des conditions. **OS3** : l'analyse a établi que la **température est la variable dominante** et que la **répétabilité des conditions** — couverture thermique, qualité de régulation, constance de la concentration — conditionne la fiabilité de la prédiction ; deux contre-exemples (Run #15, Run #17) l'ont démontré expérimentalement. **OS4** : l'écran de supervision et le module GMAO maison (génération automatique d'ordres de travail, KPIs) sont opérationnels et démontrent la boucle Sonde → ML → OT de bout en bout, l'intégration à un CMMS open-source mature (GLPI) restant une spécification transposable. Au regard de l'état d'avancement, les objectifs sont **partiellement atteints et en voie de consolidation** par les essais en cours. La conclusion générale dresse le bilan d'ensemble et les perspectives.
 
 \newpage
 
@@ -1443,15 +1439,15 @@ Ce chapitre a présenté les résultats provisoires de la campagne. **OS1** : la
 
 2. Akash, S. (2024). *Decoding ISO 13381 Part 1: General Guidelines for Prognostics (RUL Estimation)*. LinkedIn Pulse. https://www.linkedin.com/pulse/decoding-iso-13381-part-1-general-guidelines-rul-akash-shrivastava
 
-3. AMPP. (2023). *SP0775-2023 — Preparation, Installation, Analysis, and Interpretation of Corrosion Coupons in Oilfield Operations*. Association for Materials Protection and Performance.
+3. AMPP. (2023). *NACE SP0775-2023 — Preparation, Installation, Analysis, and Interpretation of Corrosion Coupons in Hydrocarbon Operations*. Association for Materials Protection and Performance.
 
 4. Aniobi, C. C. (2018). Pipeline corrosion control in oil and gas industry: A case study of NNPC/PPMC system 2A pipeline. *Academia.edu*.
 
-5. API. (2016a). *API 570 — Piping Inspection Code: In-service Inspection, Rating, Repair, and Alteration of Piping Systems* (4th ed.). American Petroleum Institute.
+5. API. (2024). *API 570 — Piping Inspection Code: In-service Inspection, Rating, Repair, and Alteration of Piping Systems* (5th ed.). American Petroleum Institute.
 
-6. API. (2016b). *API 580 — Risk-Based Inspection* (3rd ed.). American Petroleum Institute.
+6. API. (2023). *API RP 580 — Risk-Based Inspection* (4th ed.). American Petroleum Institute.
 
-7. API. (2016c). *API 581 — Risk-Based Inspection Methodology* (3rd ed.). American Petroleum Institute.
+7. API. (2025). *API RP 581 — Risk-Based Inspection Methodology* (4th ed.). American Petroleum Institute.
 
 8. ASTM International. (2012). *ASTM G31-12a — Standard Guide for Laboratory Immersion Corrosion Testing of Metals*.
 
@@ -1467,11 +1463,11 @@ Ce chapitre a présenté les résultats provisoires de la campagne. **OS1** : la
 
 14. Cameroun, République du. (1996). *Loi-cadre n° 96/12 du 5 août 1996 relative à la gestion de l'environnement*.
 
-15. Cameroun, République du. (1999). *Loi n° 99/013 du 22 décembre 1999 portant Code Pétrolier*.
+15. Cameroun, République du. (2019). *Loi n° 2019/008 du 25 avril 2019 portant Code Pétrolier* (abrogeant la loi n° 99/013 du 22 décembre 1999).
 
-16. Cameroun, République du. (2000). *Décret n° 2000/465 du 30 juin 2000 fixant les conditions d'exploitation des hydrocarbures*.
+16. Cameroun, République du. (2023). *Décret n° 2023/232 du 4 mai 2023 fixant les modalités d'application de la loi n° 2019/008 du 25 avril 2019 portant Code Pétrolier*.
 
-17. CEN (Comité européen de normalisation). (2018). *EN 13306:2018 — Maintenance — Maintenance terminology*.
+17. CEN (Comité européen de normalisation). (2017). *EN 13306:2017 — Maintenance — Maintenance terminology*.
 
 18. Chad-Cameroon Petroleum Development and Pipeline Project. (2024). *Wikipedia*. https://en.wikipedia.org/wiki/Chad%E2%80%93Cameroon_Petroleum_Development_and_Pipeline_Project
 
@@ -1509,9 +1505,9 @@ Ce chapitre a présenté les résultats provisoires de la campagne. **OS1** : la
 
 35. Inspectioneering. (2016, March 8). NACE study estimates global cost of corrosion at $2.5 trillion annually. *Inspectioneering*. https://inspectioneering.com/news/2016-03-08/5202
 
-36. ISO. (2015a). *ISO 8044:2015 — Corrosion of metals and alloys — Basic terms and definitions*.
+36. ISO. (2024). *ISO 8044:2024 — Corrosion of metals and alloys — Vocabulary*.
 
-37. ISO. (2015b). *ISO 13381-1:2015 — Condition monitoring and diagnostics of machines — Prognostics — Part 1: General guidelines*.
+37. ISO. (2025). *ISO 13381-1:2025 — Condition monitoring and diagnostics of machine systems — Prognostics — Part 1: General guidelines and requirements*.
 
 38. ISO. (2020). *ISO 15156-1:2020 — Petroleum and natural gas industries — Materials for use in H₂S-containing environments in oil and gas production*.
 
@@ -1540,8 +1536,6 @@ Ce chapitre a présenté les résultats provisoires de la campagne. **OS1** : la
 50. Streamlit. (2024). *Streamlit Documentation — A faster way to build and share data apps*. https://docs.streamlit.io/
 
 46. Mayer, A., et al. (2023). LEROY: A low-cost Arduino-based, IoT-enabled device for atmospheric corrosion monitoring. *Sensors*. https://www.mdpi.com/1424-8220/
-
-47. NACE International. (2012). *TM0190-2012 — Impressed Current Test Method for Screening Corrosion Inhibitors for Oilfield Applications*.
 
 48. NACE International. (2016). *IMPACT Study Press Release — CORROSION 2016 conference*.
 
@@ -1803,7 +1797,7 @@ En réponse à l'exigence méthodologique de **traçabilité intégrale** — to
 
 | Seuil / valeur | Valeur | Statut | Ancrage / provenance |
 |---|---|---|---|
-| `r_critique` (fin de vie, RUL) | 0,15·r₀ (≈ 98 % section) | convention labo — **provisoire** | principe ISO 13381-1 (ISO, 2015) ; valeur à recaler (critère mécanique) |
+| `r_critique` (fin de vie, RUL) | 0,15·r₀ (≈ 98 % section) | convention labo — **provisoire** | principe ISO 13381-1 (ISO, 2025) ; valeur à recaler (critère mécanique) |
 | Écrêtage du CR | 2 000 µm/an | convention de prétraitement | documentée §II.4.4 (exclut l'emballement non stationnaire) |
 | Seuils des régimes ; pré-rupture | distributions des runs ; RUL < 12 h | principe normatif + objectif de conception | ISO 13381-1 (seuil de santé) ; **provisoire** |
 | Seuils d'alerte CR (Tableau II.9) | 1 / 5 mm/an | cadre cible industriel — **non NACE** | réf. NACE/AMPP SP0775 : bandes 0,025 / 0,12 / 0,25 mm/an (AMPP, 2023) |
@@ -1817,8 +1811,8 @@ En réponse à l'exigence méthodologique de **traçabilité intégrale** — to
 | Repositionnement Industrie 3.0 → 4.0 | verrou = intelligence applicative, non l'instrumentation | R | Lasi et al. (2014) ; Lu (2017) ; Xu et al. (2018) ; Bagheri et al. (2024) |
 | Recours au ML | modèles physiques : 40–60 % d'erreur réelle | R | de Waard & Milliams (1975) ; Coelho (2022) ; NORSOK M-506 |
 | ML « preuve de concept » (Option B) | limites = conditions du passage à l'échelle | R | Coelho (2022) ; Wei (2024), Yan & Yan (2024), Hu et al. (2024) |
-| Protocole run-to-failure | cycle complet + événement de défaillance observé | N | ISO 13381-1 (ISO, 2015) |
-| Intégration CMMS open-source (vs ex nihilo) | maturité, transposabilité, on-premise | N · R | ISO 14224 (ISO, 2016) ; GLPI Project (2024) ; Bagheri et al. (2024) |
+| Protocole run-to-failure | cycle complet + événement de défaillance observé | N | ISO 13381-1 (ISO, 2025) |
+| Module GMAO maison + transposition CMMS open-source | léger, indépendant de l'API tierce, on-premise | N · R | ISO 14224 (ISO, 2016) ; GLPI Project (2024) ; Bagheri et al. (2024) |
 | Fil fin obligatoire | l'électrolyte shunte la mesure ER (fils épais masqués) | P · E | conduction de l'électrolyte ; Run #18 (§III.6.4) |
 | Jumeau numérique (perspective III.6) | bande prédictive de durée de vie | R | Avrami (1939) ; Saxena et al. (2008) / NASA C-MAPSS |
 
