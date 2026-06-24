@@ -108,6 +108,21 @@ def build_reference():
         s.paragraph_format.space_before = Pt(4)
         s.paragraph_format.space_after = Pt(10)
 
+    # --- styles de table des matières (TOC 1..9) : ALIGNÉS À GAUCHE ---
+    # Sinon, basés sur Normal (justifié), Word étire chaque entrée sur toute la largeur
+    # (espacement disproportionné). Word apparie ces styles par styleId "TOC1".."TOC9".
+    for i in range(1, 10):
+        try:
+            s = doc.styles.add_style(f"toc {i}", 1)
+            s.element.set(qn("w:styleId"), f"TOC{i}")
+            s.base_style = doc.styles["Normal"]
+            set_font(s, size=12)
+            s.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            s.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+            s.paragraph_format.space_after = Pt(2)
+        except Exception:
+            pass
+
     # --- style centré pour la page de titre ---
     try:
         pt_style = doc.styles.add_style("PageTitre", 1)  # 1 = paragraph
@@ -242,8 +257,22 @@ def post_process():
         if re.match(r"^Tableau\s+[\dIVXLA-Z]+", p.text.strip()):
             p.style = doc.styles["Table Caption"]
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    # 4) SOMMAIRE manuel (liste de sections) : aligner À GAUCHE — sinon justifié,
+    #    chaque ligne est étirée sur toute la largeur (espacement disproportionné).
+    in_somm = False
+    for p in doc.paragraphs:
+        nom = p.style.name if p.style else ""
+        if nom.startswith("Heading") and p.text.strip() == "SOMMAIRE":
+            in_somm = True
+            continue
+        if in_somm:
+            if nom.startswith("Heading"):
+                break
+            p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            if p._p.xpath('.//w:br[@w:type="page"]'):
+                break
     doc.save(OUT)
-    print("  post-traitement (page de titre + figures centrées)")
+    print("  post-traitement (page de titre + figures + SOMMAIRE)")
 
 
 if __name__ == "__main__":
