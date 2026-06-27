@@ -243,9 +243,9 @@ Au **Cameroun**, le secteur pétrolier représente une part significative des re
 
 La recherche sur la prédiction de la corrosion par apprentissage automatique a connu une accélération significative depuis 2018, avec une production scientifique en croissance exponentielle (Coelho, 2022 ; npj Materials Degradation, 2022). Les approches les plus utilisées dans la littérature récente incluent :
 
-- **Les méthodes d'ensemble** : forêts aléatoires (Cheng et Niu, 2018), **XGBoost** (Chen et Guestrin, 2016 ; Ma, Zhao et Wang, 2021), LightGBM, AdaBoost et Gradient Boosting (Yan et Yan, 2024). Ces méthodes obtiennent typiquement des erreurs RMSE comprises entre 0,031 et 0,052 mm/an avec des coefficients de détermination R² supérieurs à 0,95 sur des jeux de données de pipelines (Wei et al., 2024).
-- **Les réseaux de neurones** : MLP (Ossai, Boswell et Davies, 2017), réseaux de neurones convolutifs et LSTM pour les séries temporelles (Xu, Xia et Wang, 2020), réseaux résiduels (ResNet) avec analyse d'interprétabilité (Liu et al., 2025), et architectures Transformer pour la prédiction de corrosion interne (Tan et al., 2025).
-- **Les approches interprétables** : utilisation de **SHAP (SHapley Additive exPlanations)** pour quantifier la contribution de chaque variable d'entrée aux prédictions (Hu et al., 2024 ; Yan et Yan, 2024). Ces analyses identifient typiquement la température, la pression partielle de CO₂ et la pression totale comme les trois variables dominantes pour la corrosion interne des pipelines O&G.
+- **Les méthodes d'ensemble** : forêts aléatoires, **XGBoost** (Chen et Guestrin, 2016), LightGBM, AdaBoost et Gradient Boosting (Kuang et Long, 2024). Ces méthodes obtiennent typiquement des erreurs RMSE comprises entre 0,031 et 0,052 mm/an avec des coefficients de détermination R² supérieurs à 0,95 sur des jeux de données de pipelines (Wei et al., 2024).
+- **Les réseaux de neurones** : MLP (Ossai, Boswell et Davies, 2017), réseaux de neurones convolutifs et LSTM pour les séries temporelles, réseaux résiduels (ResNet) avec analyse d'interprétabilité (Zheng et al., 2025), et architectures Transformer pour la prédiction de corrosion interne (Tan et al., 2025).
+- **Les approches interprétables** : utilisation de **SHAP (SHapley Additive exPlanations)** pour quantifier la contribution de chaque variable d'entrée aux prédictions (Hu et al., 2024 ; Kuang et Long, 2024). Ces analyses identifient typiquement la température, la pression partielle de CO₂ et la pression totale comme les trois variables dominantes pour la corrosion interne des pipelines O&G.
 
 Cependant, plusieurs **lacunes critiques** persistent dans la littérature :
 
@@ -253,7 +253,7 @@ Cependant, plusieurs **lacunes critiques** persistent dans la littérature :
 - **Coût prohibitif des sondes commerciales** : les sondes ER industrielles (Cosasco, Permasense, Emerson Roxar) ont un coût unitaire de 500 à 5 000 USD, hors installation et maintenance, ce qui est incompatible avec un déploiement étendu sur un réseau de plusieurs milliers de kilomètres (Cosasco, 2024 ; Hassanzadeh et al., 2024).
 - **Circularité des évaluations sur données synthétiques** : la majorité des modèles ML sont entraînés et évalués sur des données générées par les modèles physiques eux-mêmes (de Waard et Milliams), ce qui invalide la portée scientifique des métriques rapportées. Un modèle XGBoost entraîné sur des données de Waard apprend à reproduire de Waard, sans capacité démontrée de généralisation (Coelho, 2022).
 - **Absence de prédiction simultanée CR + RUL** : la majorité des travaux se limitent à la prédiction du taux de corrosion instantané, sans extrapolation vers le temps avant défaillance — information pourtant décisive pour la planification industrielle (Akash, 2024 ; Liu et al., 2022).
-- **Environnements multi-composants peu modélisés** : les milieux industriels réels combinent souvent plusieurs acides ou agents agressifs dont l'interaction n'est pas modélisable analytiquement par les approches classiques (Heydari et Talebpour, 2024). C'est typiquement le cas des détartrants industriels qui mélangent HCl et H₃PO₄, créant une cinétique multi-mécanismes attaque/passivation difficile à prédire (Persian Utab, 2023 ; Schweitzer, 2010).
+- **Environnements multi-composants peu modélisés** : les milieux industriels réels combinent souvent plusieurs acides ou agents agressifs dont l'interaction n'est pas modélisable analytiquement par les approches classiques (Ma et al., 2024). C'est typiquement le cas des détartrants industriels qui mélangent HCl et H₃PO₄, créant une cinétique multi-mécanismes attaque/passivation difficile à prédire (Persian Utab, 2023 ; Schweitzer, 2010).
 
 ### I.1.4. Justificatif normatif et réglementaire
 
@@ -521,10 +521,10 @@ L'apprentissage automatique offre une alternative capable de capturer les non-li
 - Régularisation L1 et L2 limitant le surapprentissage ;
 - Interprétabilité élevée (feature importance, SHAP).
 
-Les performances rapportées dans la littérature récente sur la corrosion sont remarquables (Wei et al., 2024 ; Yan et Yan, 2024) :
+Les performances rapportées dans la littérature récente sur la corrosion sont remarquables (Wei et al., 2024 ; Kuang et Long, 2024) :
 
 - **Wei et al. (2024)** : XGBoost atteint *RMSE* = 0,031 mm/an et *R²* = 0,99 sur la prédiction de corrosion en pipeline d'eau de refroidissement ;
-- **Yan et Yan (2024)** : XGBoost et AdaBoost obtiennent *RMSE* = 0,052 sur la corrosion atmosphérique d'aciers faiblement alliés ;
+- **Kuang et Long (2024)** : XGBoost obtient *RMSE* = 0,052 sur la corrosion atmosphérique d'aciers faiblement alliés ;
 - **Hu et al. (2024)** : modèle d'ensemble interprétable atteignant *RMSE* = 0,005876 et *R²* = 0,9648 sur la corrosion interne O&G.
 
 **SHAP (SHapley Additive exPlanations)**, introduit par **Lundberg et Lee (2017)**, permet d'interpréter chaque prédiction individuelle en quantifiant la contribution de chaque variable d'entrée. Les analyses SHAP appliquées à la corrosion identifient typiquement la **température**, la **pression partielle de CO₂** et la **pression totale** comme les trois variables dominantes (Hu et al., 2024). Le présent travail mobilise SHAP pour identifier les variables dominantes dans le contexte de la corrosion du fer en milieu HCl, où la température joue un rôle de premier plan.
@@ -570,7 +570,7 @@ Dans le contexte de la corrosion d'un fil de fer en milieu acide, plusieurs rég
 
 ### I.7.9. Systèmes de gestion de la maintenance — GMAO et CMMS
 
-Une **GMAO (Gestion de Maintenance Assistée par Ordinateur)**, ou en anglais **CMMS (Computerized Maintenance Management System)**, est une application logicielle dédiée à la planification, au suivi et à l'optimisation des activités de maintenance d'une organisation industrielle (Lopes et al., 2016 ; Roda et Macchi, 2018). Une GMAO moderne intègre typiquement les fonctions suivantes (ISO 14224, 2016 ; Bagheri et al., 2024) :
+Une **GMAO (Gestion de Maintenance Assistée par Ordinateur)**, ou en anglais **CMMS (Computerized Maintenance Management System)**, est une application logicielle dédiée à la planification, au suivi et à l'optimisation des activités de maintenance d'une organisation industrielle (Lopes et al., 2016 ; Roda et Macchi, 2018). Une GMAO moderne intègre typiquement les fonctions suivantes (ISO 14224, 2016 ; Bagheri et al., 2015) :
 
 - **Gestion des actifs** : inventaire des équipements, hiérarchie fonctionnelle, données techniques, criticité ;
 - **Gestion des ordres de travail (OT)** : création, assignation, planification, exécution, clôture ;
@@ -582,9 +582,9 @@ Une **GMAO (Gestion de Maintenance Assistée par Ordinateur)**, ou en anglais **
 
 Les **GMAO industrielles propriétaires** (SAP Plant Maintenance, IBM Maximo, Oracle eAM, Infor EAM) dominent le marché des grandes entreprises mais présentent un coût de licence prohibitif (10 000 à 100 000 USD/an par site selon le périmètre), une complexité d'implémentation élevée (consultants spécialisés requis), et une dépendance à l'éditeur. Selon Roda et Macchi (2018), moins de 15 % des PME industrielles dans les pays émergents disposent d'une GMAO professionnelle, contre plus de 80 % des grandes entreprises.
 
-Plusieurs **alternatives open-source** existent (CMMS Wikipedia, 2024 ; Murphy, 2021) : GLPI, OpenMaint (CMDBuild), Snipe-IT, Fiix Free, MaintainX, Hippo CMMS Free, Limble. Ces solutions offrent un périmètre fonctionnel comparable aux GMAO propriétaires (gestion d'actifs, ordres de travail, ITIL) avec des API REST documentées qui permettent une intégration tierce. Néanmoins, leur adoption dans le contexte africain présente quelques limites résiduelles : (i) absence de modules de prédiction par apprentissage automatique embarqués (la couche ML reste à raccorder par intégration externe) ; (ii) interfaces parfois en anglais uniquement (GLPI fait exception avec une localisation francophone native) ; (iii) hébergement self-hosted exigeant une compétence IT minimale pour l'administration, ce qui peut être un frein pour les PME sans équipe IT dédiée — frein partiellement levé par les distributions Docker prêtes à déployer.
+Plusieurs **alternatives open-source** existent (CMMS Wikipedia, 2024) : GLPI, OpenMaint (CMDBuild), Snipe-IT, Fiix Free, MaintainX, Hippo CMMS Free, Limble. Ces solutions offrent un périmètre fonctionnel comparable aux GMAO propriétaires (gestion d'actifs, ordres de travail, ITIL) avec des API REST documentées qui permettent une intégration tierce. Néanmoins, leur adoption dans le contexte africain présente quelques limites résiduelles : (i) absence de modules de prédiction par apprentissage automatique embarqués (la couche ML reste à raccorder par intégration externe) ; (ii) interfaces parfois en anglais uniquement (GLPI fait exception avec une localisation francophone native) ; (iii) hébergement self-hosted exigeant une compétence IT minimale pour l'administration, ce qui peut être un frein pour les PME sans équipe IT dédiée — frein partiellement levé par les distributions Docker prêtes à déployer.
 
-L'émergence récente des **architectures sans serveur (BaaS — Backend as a Service)** comme **Supabase** (alternative open-source à Firebase) couplée à des frameworks frontend modernes comme **Next.js** rend désormais possible le développement d'une GMAO sur mesure à un coût d'exploitation marginal nul (offres gratuites jusqu'à des volumes significatifs). C'est cette voie qu'explore l'OS4 du présent mémoire, en proposant une GMAO directement intégrée à la chaîne de surveillance prédictive développée dans les OS1, OS2 et OS3.
+L'émergence récente des **architectures sans serveur (BaaS — Backend as a Service)** comme **Supabase** (alternative open-source à Firebase) couplée à des frameworks applicatifs Python comme **Streamlit** rend désormais possible le développement d'une GMAO sur mesure à un coût d'exploitation marginal nul (offres gratuites jusqu'à des volumes significatifs). C'est cette voie qu'explore l'OS4 du présent mémoire, en proposant une GMAO directement intégrée à la chaîne de surveillance prédictive développée dans les OS1, OS2 et OS3.
 
 La norme **ISO 14224 :2016** définit les standards d'échange de données de fiabilité et de maintenance (formats d'OT, codes anomalie, taxonomie d'équipement) et constitue la référence d'interopérabilité pour toute GMAO du secteur Oil & Gas (ISO, 2016).
 
@@ -699,7 +699,7 @@ Cette section consolide en un seul endroit les arbitrages techniques qui sous-te
 | LSTM | Élevé (>1000 séquences) | Excellente | Faible (boîte noire) | Volume de données insuffisant ici |
 | Transformer temporel | Très élevé | Excellente | Faible | Surdimensionné pour 4 runs RTF |
 
-**Choix retenu : XGBoost.** Critère décisif : performance reconnue en time-series sur faibles volumes (Chen et Guestrin, 2016 ; Ma et al., 2021 ; Wei et al., 2024), interprétabilité native par SHAP (Lundberg et Lee, 2017), régularisation L1/L2 limitant le sur-apprentissage. **Pourquoi écarter les réseaux de neurones** (MLP, LSTM, Transformer — §I.1.3) : chaque run fournit certes **~1 000 à 2 500 lectures** (cadence de 30 s), mais l'apprentissage de la dégradation se raisonne *par essai*, et la campagne ne compte qu'**une poignée de runs** — soit beaucoup de **points** mais **très peu de séquences indépendantes**. Or les réseaux profonds exigent un grand nombre de séquences/exemples pour généraliser et **sur-apprennent** sur ce volume (boîte noire, surdimensionnés ici). XGBoost, qui opère sur des **données tabulaires point par point** (quelques milliers de lignes suffisent) avec une régularisation efficace, est donc le mieux adapté à ce régime « beaucoup de points, peu de runs ». Limite acceptée : architecture point-par-point (pas de mémoire séquentielle native comme LSTM) — compensée par un feature engineering temporel explicite (EMA, pente locale, lag).
+**Choix retenu : XGBoost.** Critère décisif : performance reconnue en time-series sur faibles volumes (Chen et Guestrin, 2016 ; Wei et al., 2024), interprétabilité native par SHAP (Lundberg et Lee, 2017), régularisation L1/L2 limitant le sur-apprentissage. **Pourquoi écarter les réseaux de neurones** (MLP, LSTM, Transformer — §I.1.3) : chaque run fournit certes **~1 000 à 2 500 lectures** (cadence de 30 s), mais l'apprentissage de la dégradation se raisonne *par essai*, et la campagne ne compte qu'**une poignée de runs** — soit beaucoup de **points** mais **très peu de séquences indépendantes**. Or les réseaux profonds exigent un grand nombre de séquences/exemples pour généraliser et **sur-apprennent** sur ce volume (boîte noire, surdimensionnés ici). XGBoost, qui opère sur des **données tabulaires point par point** (quelques milliers de lignes suffisent) avec une régularisation efficace, est donc le mieux adapté à ce régime « beaucoup de points, peu de runs ». Limite acceptée : architecture point-par-point (pas de mémoire séquentielle native comme LSTM) — compensée par un feature engineering temporel explicite (EMA, pente locale, lag).
 
 ### II.0.5.6. Stratégie de validation — leave-one-run-out
 
@@ -1399,7 +1399,7 @@ Les sondes ER commerciales (Cosasco, Emerson Roxar, Permasense) offrent une rés
 
 ### III.6.2. Performance du modèle — confrontation à la littérature
 
-La littérature rapporte d'excellentes performances pour les modèles ML de prédiction du taux de corrosion sur de **grands jeux de données homogènes** (Wei et al., 2024 ; Yan et Yan, 2024 ; Hu et al., 2024, avec des R² > 0,96). Nos résultats, plus modestes en valeur absolue, s'expliquent par un nombre d'essais réduit et, surtout, par le caractère **inter-essais** de notre validation (LORO), bien plus exigeante qu'une validation intra-jeu. Le résultat marquant n'est pas tant la valeur du R² que sa **structure** : positif là où les conditions sont couvertes et répétées, négatif sinon. Cette lecture, rarement explicitée dans la littérature, constitue l'apport méthodologique de ce travail.
+La littérature rapporte d'excellentes performances pour les modèles ML de prédiction du taux de corrosion sur de **grands jeux de données homogènes** (Wei et al., 2024 ; Kuang et Long, 2024 ; Hu et al., 2024, avec des R² > 0,96). Nos résultats, plus modestes en valeur absolue, s'expliquent par un nombre d'essais réduit et, surtout, par le caractère **inter-essais** de notre validation (LORO), bien plus exigeante qu'une validation intra-jeu. Le résultat marquant n'est pas tant la valeur du R² que sa **structure** : positif là où les conditions sont couvertes et répétées, négatif sinon. Cette lecture, rarement explicitée dans la littérature, constitue l'apport méthodologique de ce travail.
 
 ### III.6.3. Apport d'une boucle GMAO légère et transposable
 
@@ -1483,8 +1483,6 @@ Ce chapitre a présenté les résultats provisoires de la campagne. **OS1** : la
 
 19. Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. *Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining*, 785–794. https://doi.org/10.1145/2939672.2939785
 
-20. Cheng, Y. F., & Niu, L. (2018). Predicting corrosion rates of steel pipelines using machine learning. *Corrosion Science*, 145, 170–182.
-
 21. Coelho, L. B. (2022). Reviewing machine learning of corrosion prediction in a data-oriented perspective. *npj Materials Degradation*, 6, 8. https://doi.org/10.1038/s41529-022-00218-4
 
 22. Cosasco. (2024). *Dual Sensor Electrical Resistance (ER) Temperature Probes*. https://www.cosasco.com/product/dual-sensor-electrical-resistance-er-temperature-probes
@@ -1505,11 +1503,11 @@ Ce chapitre a présenté les résultats provisoires de la campagne. **OS1** : la
 
 30. Hassanzadeh, S., et al. (2024). Application of electrical resistance probes for corrosion monitoring and cathodic protection assessment of offshore structures. *Materials and Corrosion (Wiley)*. https://doi.org/10.1002/maco.70138
 
-31. Heydari, M., & Talebpour, A. (2024). Synthesis of Gemini-type imidazoline quaternary ammonium salt using by-product fatty acid as corrosion inhibitor for Q235 steel. *Scientific Reports*, 14, article 64671.
+31. Ma, Y., Qi, W., Yu, M., Huang, N., Li, R., Tan, J., & Zhu, X. (2024). Synthesis of Gemini-type imidazoline quaternary ammonium salt using by-product fatty acid as corrosion inhibitor for Q235 steel. *Scientific Reports*, 14, 13687. https://www.nature.com/articles/s41598-024-64671-8
 
 32. HSPublishing. (2023). *Oil and gas pipeline corrosion monitoring and prevention*. *Journal of Research in Engineering and Computer Sciences*, https://hspublishing.org/JRECS/article/download/114/105
 
-33. Hu, J., et al. (2024). Prediction of the internal corrosion rate for oil and gas pipelines and influence factor analysis with interpretable ensemble learning. *International Journal of Pressure Vessels and Piping*. https://doi.org/10.1016/j.ijpvp.2024.105400
+33. Hu, J., et al. (2024). Prediction of the internal corrosion rate for oil and gas pipelines and influence factor analysis with interpretable ensemble learning. *International Journal of Pressure Vessels and Piping*, 212, 105329. https://www.sciencedirect.com/science/article/abs/pii/S0308016124002060
 
 34. Hyndman, R. J., & Koehler, A. B. (2006). Another look at measures of forecast accuracy. *International Journal of Forecasting*, 22(4), 679–688.
 
@@ -1525,15 +1523,11 @@ Ce chapitre a présenté les résultats provisoires de la campagne. **OS1** : la
 
 40. Koch, G. H., Brongers, M. P. H., Thompson, N. G., Virmani, Y. P., & Payer, J. H. (2016). *International Measures of Prevention, Application, and Economics of Corrosion Technology (IMPACT) Study*. NACE International. http://impact.nace.org/
 
-40. Liu, J., et al. (2025). Intelligent prediction model for pitting corrosion risk in pipelines using developed ResNet and feature reconstruction with interpretability analysis. *Reliability Engineering & System Safety*, 257, 110548.
+40. Zheng, Q., Zhang, H., Liu, H., Xu, H., Xu, B., & Zhu, Z. (2025). Intelligent prediction model for pitting corrosion risk in pipelines using developed ResNet and feature reconstruction with interpretability analysis. *Reliability Engineering & System Safety*, 264, 111347. https://www.sciencedirect.com/science/article/abs/pii/S0951832025005484
 
 41. Liu, Y., et al. (2022). A review: Prediction method for the remaining useful life of the mechanical system. *Journal of Failure Analysis and Prevention*, 22, 2119–2137. https://doi.org/10.1007/s11668-022-01532-4
 
-42. Lu, B. T., & Luo, J. L. (2016). Electrochemical study of corrosion inhibition of imidazoline derivatives on mild steel. *Corrosion Science*, 105, 1–10.
-
 43. Lundberg, S. M., & Lee, S. I. (2017). A unified approach to interpreting model predictions. *Advances in Neural Information Processing Systems (NeurIPS)*, 30, 4768–4777.
-
-44. Ma, Z., Zhao, Y., & Wang, L. (2021). Predicting pipeline corrosion rate using gradient boosting algorithms. *International Journal of Pressure Vessels and Piping*, 192, 104396.
 
 45. Mansfeld, F. (2014). Recent developments in corrosion measurement techniques. *Materials and Corrosion*, 65(7), 631–638.
 
@@ -1546,8 +1540,6 @@ Ce chapitre a présenté les résultats provisoires de la campagne. **OS1** : la
 49. GLPI Project. (2024). *GLPI — Free IT and Asset Management Software — REST API documentation*. https://glpi-project.org/
 
 50. Streamlit. (2024). *Streamlit Documentation — A faster way to build and share data apps*. https://docs.streamlit.io/
-
-46. Mayer, A., et al. (2023). LEROY: A low-cost Arduino-based, IoT-enabled device for atmospheric corrosion monitoring. *Sensors*. https://www.mdpi.com/1424-8220/
 
 48. NACE International. (2016). *IMPACT Study Press Release — CORROSION 2016 conference*.
 
@@ -1569,7 +1561,7 @@ Ce chapitre a présenté les résultats provisoires de la campagne. **OS1** : la
 
 57. Standards Norway. (2017). *NORSOK M-506 — CO₂ corrosion rate calculation model* (3rd ed.).
 
-58. Tan, Y., et al. (2025). Prediction of internal corrosion rate for gas pipeline: A new method based on transformer architecture. *Computers & Chemical Engineering*, 192, 108600.
+58. Tan, L., et al. (2025). Prediction of internal corrosion rate for gas pipeline: A new method based on transformer architecture. *Computers & Chemical Engineering*. https://www.sciencedirect.com/science/article/abs/pii/S0098135425000882
 
 59. Tukey, J. W. (1977). *Exploratory Data Analysis*. Addison-Wesley.
 
@@ -1581,13 +1573,11 @@ Ce chapitre a présenté les résultats provisoires de la campagne. **OS1** : la
 
 63. Wei, X., et al. (2024). Advanced machine learning techniques for corrosion rate estimation and prediction in industrial cooling water pipelines. *Sensors*, 24(11), 3564. https://doi.org/10.3390/s24113564
 
-64. Xu, D., Xia, Y., & Wang, X. (2020). Deep learning for corrosion rate prediction in oil and gas pipelines. *Corrosion*, 76(8), 789–798.
-
-65. Yan, J., & Yan, X. (2024). Prediction model for corrosion rate of low-alloy steels under atmospheric conditions using machine learning algorithms. *International Journal of Minerals, Metallurgy and Materials*, 31, 1109–1119. https://doi.org/10.1007/s12613-023-2679-5
+65. Kuang, J., & Long, Z. (2024). Prediction model for corrosion rate of low-alloy steels under atmospheric conditions using machine learning algorithms. *International Journal of Minerals, Metallurgy and Materials*, 31(2), 337–350. https://doi.org/10.1007/s12613-023-2679-5
 
 66. XGBoost. (2024). *XGBoost Documentation*. https://xgboost.readthedocs.io/
 
-67. Bagheri, B., Yang, S., Kao, H. A., & Lee, J. (2024). Cyber-physical systems architecture for self-aware machines in industry 4.0 environment: A CMMS perspective. *Journal of Manufacturing Systems*, 72, 234–248.
+67. Bagheri, B., Yang, S., Kao, H.-A., & Lee, J. (2015). Cyber-physical systems architecture for self-aware machines in industry 4.0 environment. *IFAC-PapersOnLine*, 48(3), 1622–1627. https://www.sciencedirect.com/science/article/pii/S2405896315005571
 
 68. CMMS Wikipedia. (2024). *Computerized Maintenance Management System*. https://en.wikipedia.org/wiki/Computerized_maintenance_management_system
 
@@ -1595,15 +1585,9 @@ Ce chapitre a présenté les résultats provisoires de la campagne. **OS1** : la
 
 70. Lopes, I., Senra, P., Vilarinho, S., Sá, V., Teixeira, C., Lopes, J., Alves, A., Oliveira, J. A., & Figueiredo, M. (2016). Requirements specification of a computerized maintenance management system — A case study. *Procedia CIRP*, 52, 268–273.
 
-71. Murphy, K. (2021). *The State of Open-Source CMMS for SMEs*. Maintenance World Journal, 18(3), 45–53.
-
-72. Next.js. (2024). *Next.js — The React Framework for the Web*. Vercel Inc. https://nextjs.org/
-
 73. Roda, I., & Macchi, M. (2018). A framework to embed asset management in production companies. *Proceedings of the Institution of Mechanical Engineers, Part O: Journal of Risk and Reliability*, 232(4), 368–378.
 
 74. Supabase. (2024). *Supabase — The Open Source Firebase Alternative*. https://supabase.com/
-
-75. Vercel. (2024). *Vercel — Develop. Preview. Ship.* https://vercel.com/
 
 76. Avrami, M. (1939). Kinetics of phase change. I. General theory. *Journal of Chemical Physics*, 7(12), 1103–1112. https://doi.org/10.1063/1.1750380
 
@@ -1769,7 +1753,8 @@ FROM work_orders wo GROUP BY asset_id;
 | `firmware/corrosion_monitor.ino` | Firmware ESP32 + intégration Supabase |
 | `pipeline/corrosion_pipeline.py` | Pipeline Python ML + diagnostic |
 | `gmao/supabase/migrations/*.sql` | Migrations BDD Supabase |
-| `gmao/nextjs/app/` | Application web Next.js (frontend GMAO) |
+| `dashboard/supervision.py` | Dashboard Streamlit (supervision + GMAO maison) |
+| `src/realtime/predict_loop.py` | Service de prédiction temps réel (CR/RUL, ordres de travail) |
 | `memoire/memoire_v4.md` | Mémoire (ce document, source Markdown) |
 | `memoire/memoire_v4.docx` | Mémoire (version Word ENSPD) |
 
@@ -1820,11 +1805,11 @@ En réponse à l'exigence méthodologique de **traçabilité intégrale** — to
 
 | Décision | Justification | Type | Source exacte |
 |---|---|---|---|
-| Repositionnement Industrie 3.0 → 4.0 | verrou = intelligence applicative, non l'instrumentation | R | Lasi et al. (2014) ; Lu (2017) ; Xu et al. (2018) ; Bagheri et al. (2024) |
+| Repositionnement Industrie 3.0 → 4.0 | verrou = intelligence applicative, non l'instrumentation | R | Lasi et al. (2014) ; Lu (2017) ; Xu et al. (2018) ; Bagheri et al. (2015) |
 | Recours au ML | modèles physiques : 40–60 % d'erreur réelle | R | de Waard & Milliams (1975) ; Coelho (2022) ; NORSOK M-506 |
-| ML « preuve de concept » (Option B) | limites = conditions du passage à l'échelle | R | Coelho (2022) ; Wei (2024), Yan & Yan (2024), Hu et al. (2024) |
+| ML « preuve de concept » (Option B) | limites = conditions du passage à l'échelle | R | Coelho (2022) ; Wei (2024), Kuang & Long (2024), Hu et al. (2024) |
 | Protocole run-to-failure | cycle complet + événement de défaillance observé | N | ISO 13381-1 (ISO, 2025) |
-| Module GMAO maison + transposition CMMS open-source | léger, indépendant de l'API tierce, on-premise | N · R | ISO 14224 (ISO, 2016) ; GLPI Project (2024) ; Bagheri et al. (2024) |
+| Module GMAO maison + transposition CMMS open-source | léger, indépendant de l'API tierce, on-premise | N · R | ISO 14224 (ISO, 2016) ; GLPI Project (2024) ; Bagheri et al. (2015) |
 | Fil fin obligatoire | l'électrolyte shunte la mesure ER (fils épais masqués) | P · E | conduction de l'électrolyte ; Run #18 (§III.6.4) |
 | Jumeau numérique (perspective III.6) | bande prédictive de durée de vie | R | Avrami (1939) ; Saxena et al. (2008) / NASA C-MAPSS |
 
