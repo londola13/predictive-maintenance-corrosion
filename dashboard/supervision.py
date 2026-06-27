@@ -458,28 +458,97 @@ elif page.endswith("live"):
         st.info("Aucun run actif. Lancez un run, puis le service de prédiction : "
                 "`python src/realtime/predict_loop.py` (les prédictions s'afficheront ici).")
     else:
+        import sys as _sys
+        if RACINE not in _sys.path:
+            _sys.path.insert(0, RACINE)
+
+        @st.cache_resource
+        def _modele_cr():
+            import pickle
+            m = pickle.load(open(os.path.join(RACINE, "models", "xgb_cr.pkl"), "rb"))
+            return m, list(m.feature_names_in_)
+
+        est = None
+        try:
+            from src.realtime import predict_band as pb
+            _m, _fe = _modele_cr()
+            est = pb.estimer(run_actif_id, _m, _fe)
+        except Exception as e:
+            st.caption(f"(comparatif des estimateurs indisponible : {e})")
+
         preds = dl.dernieres_predictions(run_actif_id)
-        if preds.empty:
-            st.warning("Run actif détecté, mais aucune prédiction encore. "
-                       "Démarrez le service de fond : `python src/realtime/predict_loop.py`.")
+        if est is None and preds.empty:
+            st.warning("Run actif détecté, mais pas encore assez de points pour prédire. "
+                       "Service de fond : `python src/realtime/predict_loop.py`.")
         else:
-            last = preds.iloc[-1]
-            cr, rul = float(last["cr_pred"]), float(last["rul_pred"])
-            etat = "🔴 ROUGE" if rul <= 2 else ("🟠 ORANGE" if rul <= 5 else "🟢 VERT")
-            c1, c2, c3 = st.columns(3)
-            c1.metric("CR prédit (ML)", f"{cr:.1f}")
-            c2.metric("RUL estimé", f"{rul:.1f} h")
-            c3.metric("État (RUL)", etat)
-            st.caption(f"Dernière prédiction : {last['predicted_at']:%Y-%m-%d %H:%M} "
-                       f"· modèle {last['model_version']} · {len(preds)} points")
-            for col, titre, coul in [("rul_pred", "RUL estimé (h)", "#e08a1e"),
-                                     ("cr_pred", "CR prédit — ML", "#1f77b4")]:
-                fig = go.Figure(go.Scatter(x=preds["predicted_at"], y=preds[col],
-                                           mode="lines+markers", line=dict(color=coul)))
-                fig.update_layout(title=titre, height=300, template="plotly_dark",
-                                  margin=dict(l=10, r=10, t=40, b=10))
+            # --- bandeau d'état (garde-fou : le RUL n'escalade que si section ≥ 40 %) ---
+            if est is not None:
+                sec, rp = est["section_pct"], est["rul_phys_h"]
+                rul_ok = (not np.isnan(rp)) and sec >= 40.0
+                if sec >= 85 or (rul_ok and rp <= 2):
+                    badge = "🔴 ROUGE"
+                elif sec >= 60 or (rul_ok and rp <= 5):
+                    badge = "🟠 ORANGE"
+                else:
+                    badge = "🟢 VERT"
+                c1, c2, c3, c4 = st.columns(4)
+                c1.metric("CR prédit (XGBoost)", f"{est['cr_xgb']:.0f}")
+                c2.metric("Section perdue", f"{sec:.0f} %")
+                c3.metric("Écoulé", f"{est['elapsed_h']:.1f} h")
+                c4.metric("État", badge)
+
+                # --- comparatif des 3 estimateurs de durée de vie ---
+                st.markdown("#### Durée de vie totale — 3 estimateurs côte à côte")
+                XMAX = 28.0  # axe fixe : robuste aux pics de RUL (physique bruité tôt)
+
+                def _pt(v):
+                    if v is None or np.isnan(v):
+                        return None, ""
+                    return min(v, XMAX - 0.4), (f"{v:.0f} h" if v <= XMAX else f"≈{v:.0f} h ▶")
+
+                fig = go.Figure()
+                if not np.isnan(est["sim_p10"]):
+                    fig.add_shape(type="rect", x0=est["sim_p10"], x1=min(est["sim_p90"], XMAX),
+                                  y0=2.62, y1=3.38, fillcolor="rgba(155,109,255,0.22)",
+                                  line=dict(color="rgba(155,109,255,0.6)"))
+                    fig.add_trace(go.Scatter(x=[est["sim_p50"]], y=[3], mode="markers+text",
+                                  marker=dict(color="#9b6dff", size=16, symbol="diamond"),
+                                  text=[f"{est['sim_p50']:.0f} h"], textposition="top center",
+                                  textfont=dict(color="#cbb6ff")))
+                for v, yv, col in [(est["vie_xgb_h"], 2, "#1f77b4"), (est["vie_phys_h"], 1, "#e08a1e")]:
+                    x, lbl = _pt(v)
+                    if x is not None:
+                        fig.add_trace(go.Scatter(x=[x], y=[yv], mode="markers+text",
+                                      marker=dict(color=col, size=15), text=[lbl],
+                                      textposition="middle right", textfont=dict(color=col)))
+                fig.add_vline(x=min(est["elapsed_h"], XMAX), line=dict(color="#9aa6b2", dash="dot"),
+                              annotation_text="maintenant", annotation_position="top")
+                fig.update_yaxes(tickvals=[1, 2, 3],
+                                 ticktext=["Physique (mesuré)", "XGBoost (dérivé)", "Simulateur (bande)"],
+                                 range=[0.4, 3.6])
+                fig.update_xaxes(title="durée de vie totale estimée (h)", range=[0, XMAX])
+                fig.update_layout(height=300, template="plotly_dark", showlegend=False,
+                                  margin=dict(l=10, r=10, t=20, b=40))
                 st.plotly_chart(fig, use_container_width=True)
-            st.caption("CR = modèle XGBoost (échelle labo) · RUL = extrapolation physique du pipeline.")
+                st.caption(
+                    f"🟣 **Simulateur** = bande prédictive robuste **[{est['sim_p10']:.1f}–{est['sim_p90']:.1f}] h** "
+                    f"(médiane {est['sim_p50']:.1f} h), a priori, couvre les 2 morphologies — *le seul vrai prédicteur "
+                    f"du temps de rupture*.  🔵 **XGBoost (dérivé)** = durée déduite du CR prédit.  "
+                    f"🟠 **Physique** = extrapolation de la vitesse mesurée.  Les deux derniers sont **bruités au début** "
+                    f"et convergent vers la rupture en fin de run.")
+
+            # --- séries temporelles (service predict_loop) ---
+            if not preds.empty:
+                last = preds.iloc[-1]
+                st.caption(f"Dernière prédiction live : {last['predicted_at']:%Y-%m-%d %H:%M} "
+                           f"· {len(preds)} points · CR = XGBoost (échelle labo), RUL = extrapolation physique.")
+                for col, titre, coul in [("rul_pred", "RUL estimé (h) — extrapolation physique", "#e08a1e"),
+                                         ("cr_pred", "CR prédit — XGBoost", "#1f77b4")]:
+                    figts = go.Figure(go.Scatter(x=preds["predicted_at"], y=preds[col],
+                                                 mode="lines+markers", line=dict(color=coul)))
+                    figts.update_layout(title=titre, height=260, template="plotly_dark",
+                                        margin=dict(l=10, r=10, t=40, b=10))
+                    st.plotly_chart(figts, use_container_width=True)
 
 
 # ============================================================
