@@ -53,6 +53,11 @@ MODELE_CR = os.path.join(ROOT, "models", "xgb_cr.pkl")
 # Seuils labo — réglables (« seuil souhaité » du fil)
 SECTION_ROUGE, SECTION_ORANGE = 85.0, 60.0   # % de section perdue
 RUL_ROUGE, RUL_ORANGE = 2.0, 5.0             # heures avant rupture
+# Garde-fou RUL : le RUL physique = (r - r_crit)/|dr/dt| n'est fiable qu'une fois la
+# corrosion avancée. Tôt dans le run, dr/dt (phase de stabilisation/induction) est
+# instable -> RUL aberrant -> fausse alerte. Sous ce seuil de section, l'alerte suit
+# la SECTION seule. C'est un garde-fou contre l'estimateur, pas un seuil de corrosion.
+RUL_GATE_SECTION = 40.0
 _LIBELLE = {"rouge": "INTERVENTION URGENTE", "orange": "Planifier inspection", "vert": "Nominal"}
 
 
@@ -75,9 +80,11 @@ def couper_plateau(raw: pd.DataFrame) -> pd.DataFrame:
 
 
 def niveau_de(section: float, rul) -> str:
-    if section >= SECTION_ROUGE or (rul is not None and rul <= RUL_ROUGE):
+    # le RUL ne peut escalader que si la corrosion est déjà avancée (garde-fou début de run)
+    rul_ok = rul is not None and section >= RUL_GATE_SECTION
+    if section >= SECTION_ROUGE or (rul_ok and rul <= RUL_ROUGE):
         return "rouge"
-    if section >= SECTION_ORANGE or (rul is not None and rul <= RUL_ORANGE):
+    if section >= SECTION_ORANGE or (rul_ok and rul <= RUL_ORANGE):
         return "orange"
     return "vert"
 
