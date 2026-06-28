@@ -125,7 +125,7 @@ text(s, 0.95, 3.5, 11.6, 0.9, [[R("Une transition Industrie 3.0 → 4.0 par sond
 rect(s, 0.97, 4.55, 4.7, 0.035, RUST)
 text(s, 0.95, 4.8, 9.5, 1.2, [
     [R("Présenté et soutenu par   ", 13, MUTED), R("BATOUMBI IKOND Ricky Parfait", 15, WHITE, bold=True), R("   (Mat. 0111 II17)", 12, MUTED)],
-    [R("Sous la supervision de   ", 13, MUTED), R("Dr. TCHAWE", 15, WHITE, bold=True)],
+    [R("Sous l'encadrement de   ", 13, MUTED), R("M. FEZEU", 15, WHITE, bold=True), R("      ·      Supervision   ", 13, MUTED), R("Dr. TCHAWE", 15, WHITE, bold=True)],
 ], sp_after=8)
 text(s, 0.95, 6.88, 11.0, 0.4, [[R("Année académique 2025 – 2026", 12, ICE, bold=True)]])
 
@@ -237,8 +237,9 @@ text(s, 0.95, 2.35, 5.95, 4.4, [
     [R("Montage retenu — ", 14, INK, bold=True, font=HFONT), R("2 fils à injection de courant (≈ 1,8 mA), lecture différentielle HX711 24 bits.", 13, INK)],
     [R("Pont de Wheatstone abandonné — ", 14, RUST, bold=True, font=HFONT), R("mode commun du HX711, signal utile noyé dans le bruit.", 13, INK)],
     [R("Valeurs justifiées — ", 14, INK, bold=True, font=HFONT), R("970 Ω : courant faible (évite échauffement / polarisation) mais V lisible (plage ±40 mV).", 13, INK)],
-    [R("Température — ", 14, INK, bold=True, font=HFONT), R("DS18B20 protégé (tube + huile) pour un couplage thermique fiable ; cadence 30 s.", 13, INK)],
-], sp_after=10, ls=1.1)
+    [R("Étalonnage — ", 14, INK, bold=True, font=HFONT), R("par substitution sur résistances étalons ; un étalon de 4,7 Ω, lu 4,5–4,8 Ω, confirme la justesse (écart ≤ 4 %).", 13, INK)],
+    [R("Température — ", 14, INK, bold=True, font=HFONT), R("DS18B20 protégé (tube + huile) ; cadence 30 s.", 13, INK)],
+], sp_after=7, ls=1.08)
 footer(s, 7)
 
 # ═════ 8. OS2 MODÈLE ═════
@@ -260,15 +261,15 @@ footer(s, 8)
 # ═════ 9. RÉSULTATS OS2 ═════
 s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "Résultats — OS2")
 title(s, "Le modèle généralise — là où les conditions sont couvertes")
-img_fit(s, "fig_iii3_r2_runs.png", 7.05, 2.45, 5.65, 4.0, valign="middle")
+img_fit(s, "fig_iii3_loro_evolution.png", 7.05, 2.3, 5.65, 4.25, valign="middle")
 card(s, 0.95, 2.35, 5.8, 1.5)
-text(s, 1.2, 2.5, 5.4, 0.5, [[R("R² = +0,29", 38, DARK, bold=True, font=HFONT), R("  (moy. LORO)", 13, MUTED)]])
-text(s, 1.2, 3.45, 5.4, 0.4, [[R("Run #12 : +0,50   ·   Run #16 : +0,07   —   bat les baselines", 12.5, RUST, bold=True)]])
+text(s, 1.2, 2.5, 5.4, 0.5, [[R("R² = +0,29", 38, DARK, bold=True, font=HFONT), R("  (LORO actuel)", 13, MUTED)]])
+text(s, 1.2, 3.45, 5.4, 0.4, [[R("depuis −1,77 (couverture nulle)   —   bat les baselines", 12.5, RUST, bold=True)]])
 text(s, 0.95, 4.15, 5.85, 2.4, [
-    [R("Le résultat marquant n'est pas la valeur, mais sa ", 14, INK), R("structure", 14, RUST, bold=True, font=HFONT), R(" :", 14, INK)],
-    [R("positif là où les conditions du run testé sont ", 13.5, INK), R("couvertes et répétées", 13.5, TEAL, bold=True), R(", négatif sinon.", 13.5, INK)],
-    [R("Ce n'est pas le volume brut qui compte, mais la ", 13.5, INK), R("répétabilité des conditions", 13.5, INK, bold=True), R(".", 13.5, INK)],
-], sp_after=8, ls=1.12)
+    [R("Une trajectoire, pas un point — couvrir et ", 13.5, INK), R("répéter", 13.5, TEAL, bold=True), R(" les conditions 30 °C a fait passer le LORO de −1,77 à +0,29.", 13.5, INK)],
+    [R("L'apport n'est pas la valeur mais la ", 13.5, INK), R("structure", 14, RUST, bold=True, font=HFONT), R(" du R² : positif si conditions couvertes et répétées, négatif sinon.", 13.5, INK)],
+    [R("Ajouter une morphologie non appariée le ramène à ≈ +0,20 — métrique encore ", 12.5, INK), R("bruitée", 12.5, RUST, bold=True), R(" (peu d'essais).", 12.5, INK)],
+], sp_after=7, ls=1.1)
 footer(s, 9)
 
 # ═════ 10. OS3 TEMPÉRATURE ═════
@@ -322,18 +323,18 @@ footer(s, 12)
 
 # ═════ 13. PERSPECTIVE ═════
 s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "Perspective")
-title(s, "Jumeau numérique : prédire puis confirmer")
-img_fit(s, "fig_simulateur_run21_nonparam.png", 6.95, 2.0, 5.75, 4.5, valign="middle")
-text(s, 0.95, 2.25, 5.8, 1.6, [
-    [R("Un jumeau numérique calibré sur les essais réels génère une ", 14, INK), R("bande prédictive de durée de vie", 14, RUST, bold=True, font=HFONT), R(".", 14, INK)],
-    [R("Test « prédire-puis-confirmer » sur Run #21 :", 14.5, INK, bold=True)],
+title(s, "Jumeau numérique : prédire, confirmer, apprendre des écarts")
+img_fit(s, "fig_iii3_band_scorecard.png", 6.95, 2.35, 5.75, 3.5, valign="middle")
+text(s, 0.95, 2.25, 5.8, 1.4, [
+    [R("Un jumeau calibré sur les essais réels génère une ", 14, INK), R("bande prédictive de durée de vie", 14, RUST, bold=True, font=HFONT), R(" — l'un des ", 14, INK), R("trois estimateurs", 14, TEAL, bold=True), R(" confrontés en live (physique · XGBoost · jumeau).", 14, INK)],
 ], sp_after=6, ls=1.12)
-card(s, 0.95, 3.9, 5.8, 1.45, fill=DARK, line=DARK)
-text(s, 1.25, 4.1, 5.3, 1.1, [
-    [R("Prédit avant l'essai : ", 13.5, ICE), R("13 – 20,5 h", 16, WHITE, bold=True, font=HFONT)],
-    [R("Rupture observée : ", 13.5, ICE), R("13,1 h", 16, RUST, bold=True, font=HFONT), R("  ✓ dans la bande", 13.5, WHITE)],
-], sp_after=7, ls=1.15)
-text(s, 0.95, 5.65, 5.8, 1.0, [[R("Enseignement : on ne prédit bien qu'une morphologie déjà observée ", 13, INK), R("≥ 2 fois", 13, RUST, bold=True), R(" — ce qui quantifie le besoin de répétition.", 13, INK)]], ls=1.12)
+card(s, 0.95, 3.7, 5.8, 1.6, fill=DARK, line=DARK)
+text(s, 1.25, 3.88, 5.35, 1.25, [
+    [R("Deux tests « prédire-puis-confirmer » :", 13, ICE, bold=True)],
+    [R("Run #21 : ", 13.5, ICE), R("13,1 h", 15, WHITE, bold=True, font=HFONT), R("   ✓ dans la bande", 12.5, TEAL, bold=True)],
+    [R("Run #22 : ", 13.5, ICE), R("11,95 h", 15, RUST, bold=True, font=HFONT), R("   ✗ en deçà (le plus rapide)", 12.5, RUST, bold=True)],
+], sp_after=4, ls=1.12)
+text(s, 0.95, 5.5, 5.8, 1.1, [[R("Le jumeau ", 12.5, INK), R("interpole", 12.5, RUST, bold=True), R(" entre morphologies vues, il n'", 12.5, INK), R("extrapole", 12.5, RUST, bold=True), R(" pas. La prédictibilité tient à la répétition au sein d'une ", 12.5, INK), R("même morphologie", 12.5, TEAL, bold=True), R(", pas au simple nombre d'essais.", 12.5, INK)]], ls=1.08)
 footer(s, 13)
 
 # ═════ 14. DISCUSSION ═════
