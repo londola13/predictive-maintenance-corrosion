@@ -887,25 +887,6 @@ Le tableau ci-dessous consolide la totalité des matériels mobilisés dans le c
 | Matplotlib / Seaborn | — | Visualisation |
 | Joblib | — | Persistance modèle |
 
-### II.3.3. Ressources documentaires
-
-**Tableau II.5 — Normes et références principales**
-
-| Référence | Organisme | Objet |
-|---|---|---|
-| ISO 8044 | ISO | Vocabulaire de la corrosion |
-| ASTM G1 | ASTM | Évaluation éprouvettes corrosion |
-| ASTM G31 | ASTM | Essais immersion laboratoire |
-| ASTM G96 | ASTM | Surveillance ER en service |
-| NACE SP0775 | AMPP | Coupons de corrosion O&G |
-| API 570 | API | Inspection tuyauteries |
-| ISO 13381-1 | ISO | Maintenance prévisionnelle, RUL |
-| EN 13306 | CEN | Terminologie maintenance |
-| de Waard & Milliams (1975) | — | Modèle CO₂ corrosion |
-| Chen & Guestrin (2016) | ACM | Algorithme XGBoost |
-| Lundberg & Lee (2017) | NeurIPS | Méthode SHAP |
-| Koch et al. (2016) | NACE | Coût mondial corrosion |
-
 ---
 
 ## II.4. Méthodes d'acquisition et de traitement des données
@@ -944,7 +925,7 @@ $$R_{corr}(t) = \frac{R_{lisse}(t)}{1 + \alpha_{Fe} \cdot (T(t) - T_{ref})}$$
 
 Dix variables d'entrée sont construites pour le modèle XGBoost à partir de *R*_corr(t), *T*(t) et *t* :
 
-**Tableau II.6 — Variables d'entrée (features) du modèle XGBoost**
+**Tableau II.5 — Variables d'entrée (features) du modèle XGBoost**
 
 | Feature | Définition | Justification physique |
 |---|---|---|
@@ -982,15 +963,11 @@ $$RUL(t) = \frac{r(t) - r_{critique}}{|dr/dt|}$$
 
 ### II.5.1. Stratégie de validation : du *walk-forward* au *leave-one-run-out*
 
-Plusieurs stratégies de validation existent pour un modèle prédictif : la séparation simple *train/test*, la validation croisée *k-fold* classique, la validation croisée temporelle *walk-forward* (`TimeSeriesSplit`), et la validation *leave-one-group-out*. Le choix dépend de la question posée.
-
-La validation **walk-forward** (`TimeSeriesSplit`) respecte la **causalité temporelle** à l'intérieur d'un même essai : chaque fold entraîne sur le passé et teste sur le futur, jamais l'inverse (Bergmeir et Benítez, 2012). Elle évite toute fuite temporelle mais ne renseigne que sur la prédiction *au sein* d'un run déjà observé.
-
-Or l'objectif industriel est la **généralisation à un essai nouveau, jamais vu**. Dans le cadre de ce travail, nous retenons donc comme stratégie principale la **validation *leave-one-run-out* (LORO)** : à chaque itération, un run complet est retiré de l'entraînement et sert exclusivement de test. Cette stratégie, plus exigeante, mesure la capacité réelle du modèle à prédire un essai indépendant — et constitue le cœur de la démonstration du Chapitre III (la fiabilité de cette généralisation dépend de la couverture des conditions, notamment thermiques, par les runs d'entraînement).
+Parmi les stratégies comparées au tableau II.0.6, deux sont pertinentes ici. La validation **walk-forward** (`TimeSeriesSplit`) respecte la **causalité temporelle** au sein d'un même essai — chaque fold entraîne sur le passé et teste sur le futur (Bergmeir et Benítez, 2012) — mais ne renseigne que sur la prédiction *au sein* d'un run déjà observé. Or l'objectif industriel est la **généralisation à un essai nouveau, jamais vu** : nous retenons donc comme stratégie principale la **validation *leave-one-run-out* (LORO)**, où un run complet est retiré de l'entraînement et sert exclusivement de test. Plus exigeante, elle mesure la capacité réelle du modèle à prédire un essai indépendant et constitue le cœur de la démonstration du Chapitre III — sa fiabilité dépendant de la couverture des conditions (notamment thermiques) par les runs d'entraînement.
 
 ### II.5.2. Hyperparamètres XGBoost
 
-**Tableau II.7 — Hyperparamètres du modèle XGBoost**
+**Tableau II.6 — Hyperparamètres du modèle XGBoost**
 
 | Hyperparamètre | Valeur | Justification |
 |---|---|---|
@@ -1027,7 +1004,7 @@ L'objectif est d'identifier les **3 variables les plus influentes** et de vérif
 
 ### II.5.5. Module de diagnostic des régimes de corrosion
 
-Au-delà de la prédiction quantitative (CR, RUL), le pipeline implémente un **module de diagnostic** classifiant le régime de corrosion observé, conformément à l'étape *Diagnostic* de la norme ISO 13381-1. Le diagnostic d'un régime peut s'appuyer sur diverses approches : règles métier explicites, classification supervisée (XGBoost classifieur) ou détection non-supervisée d'anomalies (Isolation Forest). Dans le cadre de ce travail, nous retenons une **approche par règles métier explicables**, simple à valider, transparente pour le jury et les utilisateurs industriels — les approches ML de classification étant envisagées en perspective d'évolution.
+Au-delà de la prédiction quantitative (CR, RUL), le pipeline implémente un **module de diagnostic** classifiant le régime de corrosion observé, conformément à l'étape *Diagnostic* de la norme ISO 13381-1. Plutôt qu'une classification supervisée ou une détection non-supervisée d'anomalies, nous retenons une **approche par règles métier explicables**, simple à valider et transparente pour le jury comme pour les utilisateurs industriels — les approches ML de classification restant une perspective d'évolution.
 
 Les régimes correspondent aux phases physiques observées sur un essai RTF du fil de fer en milieu HCl :
 
@@ -1050,9 +1027,7 @@ La fonction `diagnostiquer(features)` du pipeline Python prend en entrée le vec
 
 ### II.6.1. Justification du protocole RTF
 
-Plusieurs protocoles permettent d'étudier la corrosion d'un métal : les **essais électrochimiques** (polarisation, spectroscopie d'impédance EIS), la **perte de masse** par immersion sur durée fixe, et les essais **run-to-failure (RTF)** où l'échantillon est suivi en continu jusqu'à sa rupture. Les essais électrochimiques fournissent des grandeurs instantanées mais nécessitent un instrument coûteux ; la perte de masse est simple mais ne donne qu'une vitesse moyenne, sans dynamique temporelle ni événement de défaillance.
-
-Dans le cadre de ce travail, nous retenons le protocole **run-to-failure (RTF)**, car il est le seul à constituer un jeu d'apprentissage couvrant l'intégralité du cycle de dégradation — de l'état initial jusqu'à la rupture — et à fournir un **événement de défaillance réellement observé**, indispensable à l'apprentissage de la prédiction de durée de vie résiduelle (RUL). Ce choix est conforme à l'esprit de la norme **ISO 13381-1 :2025** sur la maintenance prévisionnelle (ISO, 2025 ; Akash, 2024).
+Face aux essais électrochimiques (grandeurs instantanées, mais instrument coûteux) et à la perte de masse (simple, mais réduite à une vitesse moyenne, sans dynamique temporelle ni événement de défaillance), nous retenons le protocole **run-to-failure (RTF)** : seul à constituer un jeu d'apprentissage couvrant l'intégralité du cycle de dégradation — de l'état initial à la rupture — et à fournir un **événement de défaillance réellement observé**, indispensable à l'apprentissage de la durée de vie résiduelle (RUL). Ce choix est conforme à l'esprit de la norme **ISO 13381-1 :2025** sur la maintenance prévisionnelle (ISO, 2025 ; Akash, 2024).
 
 ### II.6.2. Plan expérimental
 
@@ -1118,7 +1093,7 @@ L'approche retenue **pour le prototype est (A) — un module GMAO maison**, son 
 
 ### II.7.2. Matrice comparative des CMMS open-source candidats
 
-**Tableau II.11 — Comparaison des CMMS open-source candidats (OS4)**
+**Tableau II.10 — Comparaison des CMMS open-source candidats (OS4)**
 
 | CMMS | Maturité | API REST | Modules ticketing | Auto-hébergeable | Communauté | Verdict |
 |---|---|---|---|---|---|---|
@@ -1134,7 +1109,7 @@ Sources : GLPI Project (2024) ; CMMS Wikipedia (2024) ; documentations officiell
 
 ### II.7.3. Stack technologique de la chaîne intégrée
 
-**Tableau II.12 — Stack technologique du prototype intégré**
+**Tableau II.11 — Stack technologique du prototype intégré**
 
 | Couche | Technologie | Rôle | Coût |
 |---|---|---|---|
@@ -1157,7 +1132,7 @@ Sources : Streamlit (2024) ; Supabase (2024) ; XGBoost Documentation (Chen et Gu
 
 Le tableau ci-dessous décrit le mapping entre les sorties du pipeline ML et les champs d'un **ordre de travail**, tel qu'implémenté par le module GMAO maison (les mêmes champs se reporteraient sur un CMMS open-source exposant une API) :
 
-**Tableau II.13 — Mapping des champs prédiction ML → ordre de travail**
+**Tableau II.12 — Mapping des champs prédiction ML → ordre de travail**
 
 | Champ de l'ordre de travail | Source dans la prédiction ML | Exemple |
 |---|---|---|
@@ -1188,7 +1163,7 @@ La transposition vers un CMMS open-source (GLPI…) consisterait simplement à r
 
 Les KPIs maintenance suivants sont calculés à partir de l'historique des ordres de travail tenu par le module GMAO maison (table `cr_work_orders`) ; ils se calculeraient à l'identique côté CMMS après transposition :
 
-**Tableau II.14 — Indicateurs de performance maintenance (KPIs)**
+**Tableau II.13 — Indicateurs de performance maintenance (KPIs)**
 
 | KPI | Formule | Source (module OT) | Cible |
 |---|---|---|---|
@@ -1205,7 +1180,7 @@ Les KPIs maintenance suivants sont calculés à partir de l'historique des ordre
 
 ## II.8. Tableau synoptique de la démarche méthodologique
 
-**Tableau II.15 — Démarche synoptique objectifs / activités / méthodes / résultats attendus**
+**Tableau II.14 — Démarche synoptique objectifs / activités / méthodes / résultats attendus**
 
 | Objectif Spécifique | Activités à réaliser | Méthodes / Outils | Justifications / Résultats attendus |
 |---|---|---|---|
@@ -1317,7 +1292,19 @@ Le tableau III.2 et la figure III.4 présentent le R² obtenu sur chaque essai t
 
 Sur la plage 30 °C couverte, le modèle obtient une **moyenne positive (R² = +0,29)** et devance les deux références. La domination est nette sur Run #12 (+0,50 contre +0,21) ; sur Run #16, essai plus difficile (voir §III.4), XGBoost reste compétitif avec la régression linéaire. Surtout, les deux modèles structurés battent largement la prédiction par la moyenne (R² ≤ 0), ce qui confirme qu'une information exploitable est bien apprise. Ce résultat positif n'est toutefois pas automatique : il dépend de la **couverture des conditions** par l'entraînement, comme le montre la section suivante.
 
-### III.3.2. La couverture des conditions conditionne la fiabilité
+### III.3.2. Évolution de la performance au fil de la campagne : du LORO initial au LORO actuel
+
+Ce résultat positif (+0,29) n'a pas été obtenu d'emblée : il est l'aboutissement d'une trajectoire que la figure III.10 retrace, du **LORO initial** au **LORO actuel**.
+
+![Figure III.10 — Évolution du R² LORO au fil de la campagne, du LORO initial (couverture nulle) au LORO actuel](figures/fig_iii3_loro_evolution.png){ width=85% }
+
+**Du négatif au positif (couverture).** Entraîné sur la **seule série 30 °C**, sans essai couvrant les conditions du run testé, le modèle échouait lourdement (**R² = −1,77**) : c'est le LORO initial. L'ajout progressif d'**essais auxiliaires couvrant et répétant la plage 30 °C** a redressé la performance jusqu'à **+0,29** (LORO actuel, tableau III.2). Le moteur de ce redressement n'est pas le volume brut de données mais la **couverture et la répétition des conditions**, analysées au paragraphe suivant (§III.3.3).
+
+**Un plateau bruité (morphologie).** Au-delà de ce seuil, ajouter un essai ne garantit plus un gain. L'incorporation d'un essai de morphologie **graduelle** (Run #21, puis Run #22), alors que les essais de test relèvent de la morphologie *induction-emballement* (« sprint »), fait légèrement **reculer** la moyenne, vers **≈ +0,20**. Ce recul appelle la prudence : au vu du faible effectif, la métrique est **bruitée** et doit être citée en **fourchette** plutôt qu'en valeur unique. Mesurée sur quatre tirages aléatoires, la moyenne sprint vaut **≈ +0,26 [+0,25 ; +0,29]** sans le run graduel et **≈ +0,20** avec, soit un écart **Δ ≈ −0,07 [−0,02 ; −0,10]**, négatif sur les quatre tirages mais d'amplitude variable : la **direction** du recul est robuste, sa **magnitude** ne l'est pas.
+
+**Enseignement.** La trajectoire confirme que la fiabilité tient à la **couverture appariée** des conditions — thermiques *et* morphologiques (§III.3.3) — et non au volume de données. Elle fixe aussi le cap des essais complémentaires (§III.6.5) : répéter au sein d'une **même morphologie**, en priorité « sprint », plutôt que d'empiler des essais hétérogènes.
+
+### III.3.3. La couverture des conditions conditionne la fiabilité
 
 L'entraînement peut être enrichi de plusieurs manières : série de test seule, ou ajout d'essais auxiliaires bruts, sous-échantillonnés, ou pondérés. La figure III.5 compare ces quatre variantes (R² moyen LORO sur Run #12 et #16). Le résultat est net :
 
@@ -1328,13 +1315,29 @@ L'entraînement peut être enrichi de plusieurs manières : série de test seule
 
 L'interprétation est directe : **la prédiction est fiable là où les conditions du run testé sont couvertes par l'entraînement, et échoue sinon.** Et ce n'est pas le volume brut de données qui compte, mais la couverture : l'analyse de l'apport de chaque auxiliaire (par retrait successif) le confirme — l'essai le plus volumineux (Run #3, ~10 750 points) n'apporte presque rien, tandis que les essais fondateurs (Run #1, Run #2) sont déterminants et le jumeau 30 °C (Run #20) améliore encore la moyenne. C'est la **répétabilité des conditions** — non le volume de données — qui conditionne la fiabilité. Ce constat fonde directement le plan d'essais complémentaires (§III.6).
 
-Cette couverture comporte une seconde dimension, qualitative : la **morphologie de la dégradation**. Le modèle estime le taux de corrosion *CR* instant par instant à partir de l'état de dégradation et de la température ; il ne restitue donc fidèlement un essai que s'il a été entraîné sur des essais dont la *forme* d'évolution est comparable. Or, même à 30 °C régulé, deux morphologies coexistent (§III.4) : une dégradation **graduelle**, précoce (Run #1), et une dégradation par **induction puis emballement** (Run #12, Run #16). L'essai Run #21 (§III.6), de type graduel, l'illustre : son ajout à l'entraînement n'améliore pas la prédiction des deux essais de test — lesquels relèvent de la morphologie *induction-emballement* — et la dégrade même légèrement (R² moyen de +0,29 à +0,18). Loin d'infirmer le modèle, ce résultat en confirme le mécanisme : enrichir l'entraînement n'est profitable que si l'essai ajouté **partage la morphologie** de l'essai à prédire — transposition, au registre de la forme de corrosion, du constat établi pour la couverture thermique. La métrique demeure néanmoins bruitée au vu du faible effectif d'essais ; seule la répétition au sein de chaque morphologie (§III.6) permettra de la stabiliser.
+Cette couverture comporte une seconde dimension, qualitative : la **morphologie de la dégradation**. Le modèle estime le taux de corrosion *CR* instant par instant à partir de l'état de dégradation et de la température ; il ne restitue donc fidèlement un essai que s'il a été entraîné sur des essais dont la *forme* d'évolution est comparable. Or, même à 30 °C régulé, deux morphologies coexistent (§III.4) : une dégradation **graduelle**, précoce (Run #1), et une dégradation par **induction puis emballement** (Run #12, Run #16). Les essais Run #21 et Run #22 (§III.6.5), tous deux de type graduel, l'illustrent : leur ajout à l'entraînement n'améliore pas la prédiction des deux essais de test — lesquels relèvent de la morphologie *induction-emballement* — et la dégrade même légèrement (R² moyen ramené de +0,29 à ≈ +0,20 ; figure III.10). Loin d'infirmer le modèle, ce résultat en confirme le mécanisme : enrichir l'entraînement n'est profitable que si l'essai ajouté **partage la morphologie** de l'essai à prédire — transposition, au registre de la forme de corrosion, du constat établi pour la couverture thermique. La métrique demeure néanmoins bruitée au vu du faible effectif d'essais (l'écart se chiffre en **fourchette Δ ≈ −0,07 [−0,02 ; −0,10]** selon le tirage, §III.3.2) ; de plus, les trois essais graduels observés restent **hétérogènes** (Run #1 à 22 h contre Run #21 et #22 à ≈ 12–13 h), de sorte que le simple décompte de répétitions ne suffit pas : seule la répétition au sein d'une morphologie **homogène** (§III.6.5) permettra de stabiliser la métrique.
 
-### III.3.3. Variables d'influence
+### III.3.4. Variables d'influence
 
 La figure III.6 présente l'importance relative des variables dans le modèle. Les variables traduisant l'**état de dégradation** (ΔR depuis l'origine, résistance compensée) et le **temps d'immersion** ressortent en tête, suivies de la **température** (moyenne sur 6 h et instantanée). Cette hiérarchie est cohérente avec la physique du phénomène — la corrosion est gouvernée par l'état de dégradation cumulé et accélérée par la température — et conforte la validité du modèle.
 
 ![Figure III.6 — Importance des variables explicatives (XGBoost)](figures/fig_iii3_features.png){ width=80% }
+
+### III.3.5. Estimateurs complémentaires de durée de vie (alternatives temporaires appliquées)
+
+Tant que la couverture demeure partielle, le R² inter-essais du *taux de corrosion* reste modeste. Pour ne pas faire reposer la décision opérationnelle sur cette seule métrique, **trois estimateurs complémentaires de la durée de vie** (instant de rupture) ont été mis en œuvre et confrontés en supervision temps réel (tableau III.3). De natures différentes, ils se recoupent et permettent de **borner** la prédiction plutôt que de s'en remettre à une valeur unique.
+
+**Tableau III.3 — Les trois estimateurs de durée de vie confrontés en supervision**
+
+| Estimateur | Principe | Estime | Robustesse |
+|---|---|---|---|
+| **Extrapolation physique** | temps écoulé + RUL mesuré (d'après la vitesse de corrosion instantanée, §II.4) | durée de vie totale | sensible au bruit de la pente, surtout tôt dans l'essai |
+| **XGBoost (dérivé)** | même extrapolation, mais avec le *CR* **prédit** par le modèle au lieu du *CR* mesuré | durée de vie totale | suit la qualité du LORO (§III.3.1) |
+| **Jumeau / simulateur** | bande [P10–P90] du temps de rupture par mélange des essais donneurs réels | bande de durée de vie | seul estimateur *a priori* ; **interpole** sans extrapoler hors de l'enveloppe observée |
+
+Seul le **jumeau** fournit une prédiction *avant* l'essai ; les deux extrapolations affinent l'estimation *en cours* d'essai à mesure que la pente se stabilise. Confronté aux deux essais graduels réalisés depuis (figure III.11, §III.6.5), le jumeau enregistre **un test réussi et un manqué** : annoncé dans sa bande, Run #21 a rompu à 13,1 h (à l'intérieur), tandis que Run #22 — l'essai le plus rapide de la campagne — a rompu à 11,95 h, **en deçà** de la bande. Cet écart est instructif : il révèle que la bande, qui interpole entre morphologies observées, ne s'**extrapole** pas au-delà de l'enveloppe des donneurs.
+
+**Ce que l'on sait faire, et comment l'améliorer.** À ce stade, la chaîne sait : prédire le *CR* en continu et le situer par rapport aux régimes (OS2/OS3), estimer une durée de vie par trois voies redondantes, et déclencher un ordre de travail enrichi (OS4, §III.5). La consolidation passe par des **démarches** précises : (i) répéter les essais **au sein d'une même morphologie** (en priorité « sprint ») pour stabiliser le LORO du *CR* ; (ii) **élargir la bande synthétique** vers les essais rapides, afin de couvrir l'enveloppe basse révélée par Run #22 ; (iii) **contrôler simultanément** tous les facteurs (température, concentration) ; (iv) adjoindre une **validation gravimétrique** indépendante du *CR* (§III.6.4). Ces axes structurent la suite de la campagne (§III.6.5).
 
 ---
 
@@ -1358,7 +1361,7 @@ La figure III.8 confronte la courbe d'un essai propre (Run #16) à celles de ces
 
 ![Figure III.8 — Vitrine 30 °C vs contre-exemples](figures/fig_iii4_contrexemples.png){ width=85% }
 
-**Tableau III.3 — Les deux facteurs de variabilité identifiés**
+**Tableau III.4 — Les deux facteurs de variabilité identifiés**
 
 | Essai | Facteur dégradé | Température | Effet observé | R² en test |
 |---|---|---|---|---|
@@ -1419,9 +1422,11 @@ Structurer la boucle décision → action par un **module GMAO maison léger**, 
 
 La campagne se poursuit selon trois axes : (i) **compléter la couverture thermique** par des essais répétés aux consignes 30 °C et 32 °C, afin de transformer la plage 32 °C de « non couverte » à « couverte » ; (ii) **consolider les métriques** sur un volume d'essais accru ; (iii) **finaliser l'automatisation** de la boucle alerte → ticket CMMS et le calcul des KPIs sur historique. La transposition aux conditions industrielles réelles (acier API 5L, conditions de procédé) constitue l'objet du stage en entreprise prévu à la suite de ce mémoire.
 
-Un quatrième axe, exploratoire, vise à **densifier synthétiquement l'espace des conditions**. Plutôt que de multiplier des essais réels coûteux, un jumeau numérique mécaniste — calibré sur les essais réels et décrivant la cinétique de corrosion par une loi sigmoïde d'Avrami (induction puis emballement, Avrami, 1939) — permet de générer des trajectoires synthétiques et d'en déduire, pour un essai à venir, une **bande prédictive de durée de vie** (figure III.9). Cette démarche s'inspire des données *run-to-failure* synthétiques largement utilisées en maintenance prédictive (benchmark NASA C-MAPSS ; Saxena et al., 2008). Une première analyse en *leave-one-run-out* sur ces trajectoires établit qu'**une morphologie de corrosion n'est prédictible qu'à partir du moment où elle a été observée au moins deux fois**, ce qui quantifie le besoin de répétition. L'essai Run #21 a depuis fourni un premier test « prédire puis confirmer » concluant : annoncée *avant* l'essai dans l'intervalle 13–20,5 h (médiane 16 h), la rupture est survenue à **13,1 h**, soit à l'intérieur de la bande prédite (à sa borne inférieure). Run #21 fournit en outre un **second représentant de la morphologie graduelle**, précisément ce que le critère de prédictibilité (au moins deux observations par morphologie) appelait. Il importe enfin de souligner que le jumeau numérique et le modèle XGBoost (§III.3) répondent à deux questions distinctes — le premier estime la **durée de vie** (l'instant de rupture), le second le **taux de corrosion instantané** — et convergent vers un même enseignement : une prédiction n'est fiable qu'au sein d'une morphologie déjà observée et répétée. Ces travaux, encore préliminaires, seront validés et étendus dans la suite de la campagne.
+Un quatrième axe, exploratoire, vise à **densifier synthétiquement l'espace des conditions**. Plutôt que de multiplier des essais réels coûteux, un jumeau numérique mécaniste — calibré sur les essais réels et décrivant la cinétique de corrosion par une loi sigmoïde d'Avrami (induction puis emballement, Avrami, 1939) — permet de générer des trajectoires synthétiques et d'en déduire, pour un essai à venir, une **bande prédictive de durée de vie** (figure III.9). Cette démarche s'inspire des données *run-to-failure* synthétiques largement utilisées en maintenance prédictive (benchmark NASA C-MAPSS ; Saxena et al., 2008). Une première analyse en *leave-one-run-out* sur ces trajectoires établit qu'**une morphologie de corrosion n'est prédictible qu'à partir du moment où elle a été observée au moins deux fois**, ce qui quantifie le besoin de répétition. Deux essais réels, Run #21 puis Run #22, ont depuis fourni deux tests « prédire-puis-confirmer » à l'issue contrastée et instructive (figure III.11). Pour **Run #21**, la bande annoncée *avant* l'essai (13–20,5 h, médiane 16 h) a été **vérifiée** : rupture à **13,1 h**, à l'intérieur de la bande (borne inférieure). Pour **Run #22**, en revanche, la rupture est survenue à **11,95 h**, **en deçà** de la borne basse : l'essai le plus rapide de toute la campagne tombe **sous l'enveloppe des donneurs**, que le jumeau interpole sans l'extrapoler. Ce **manqué n'infirme pas la démarche** : il en délimite le domaine de validité — la bande devra être élargie vers les essais rapides — et illustre, sur un cas réel, la limite annoncée. Run #21 et Run #22 ajoutent par ailleurs deux représentants de la morphologie graduelle ; mais les trois graduels observés demeurent **hétérogènes** (Run #1 à 22 h contre Run #21 et #22 à ≈ 12–13 h), ce qui montre que le simple décompte de répétitions ne suffit pas : c'est la répétition au sein d'une morphologie **homogène** qui confère la prédictibilité. Il importe enfin de souligner que le jumeau numérique et le modèle XGBoost (§III.3) répondent à deux questions distinctes — le premier estime la **durée de vie** (l'instant de rupture), le second le **taux de corrosion instantané** — et convergent vers un même enseignement : une prédiction n'est fiable qu'au sein d'une morphologie déjà observée et **suffisamment répétée**. Ces travaux, encore préliminaires, seront validés et étendus dans la suite de la campagne.
 
 ![Figure III.9 — Jumeau numérique : bande prédictive de durée de vie (P10–P90) issue des trajectoires synthétiques couvrant les deux morphologies de corrosion, et position de l'essai Run #21 — prédiction *avant* essai 13–20,5 h, rupture observée à 13,1 h, dans la bande](figures/fig_simulateur_run21_nonparam.png){ width=80% }
+
+![Figure III.11 — Bande prédictive du jumeau confrontée aux deux essais graduels réels : Run #21 (13,1 h) à l'intérieur de la bande, Run #22 (11,95 h) en deçà — bilan « prédire-puis-confirmer » de un sur deux](figures/fig_iii3_band_scorecard.png){ width=82% }
 
 ---
 

@@ -216,7 +216,7 @@ for nom, coul in zip(CONTRE.keys(), [ORANGE, ROUGE]):
             label=f"{nom} — {CONTRE[nom][1]}")
 ax.set_xlabel("Temps d'immersion (h)"); ax.set_ylabel("R compensée (Ω)")
 ax.legend(fontsize=8)
-ax.set_title("Figure III.7 — Vitrine 30 °C vs contre-exemples (facteur non contrôlé)")
+ax.set_title("Figure III.8 — Vitrine 30 °C vs contre-exemples (facteur non contrôlé)")
 fig.tight_layout()
 fig.savefig(os.path.join(OUTDIR, "fig_iii4_contrexemples.png"), bbox_inches="tight")
 plt.close(fig)
