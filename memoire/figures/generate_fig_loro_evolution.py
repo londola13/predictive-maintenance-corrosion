@@ -81,7 +81,7 @@ ax.set_xticklabels(labels, fontsize=9.6)
 ax.set_ylim(-2.0, 0.7)
 ax.set_xlim(-0.35, 2.5)
 ax.set_ylabel("R² LORO moyen (essais de test sprint : Run #12 et #16)", fontsize=10.5)
-ax.set_title("Figure III.10 — Évolution du R² LORO : du LORO initial (couverture nulle)\n"
+ax.set_title("Figure III.5 — Évolution du R² LORO : du LORO initial (couverture nulle)\n"
              "au LORO actuel (couverture établie), puis effet d'une morphologie non appariée",
              fontsize=12, family="serif")
 ax.grid(axis="y", alpha=0.25)
