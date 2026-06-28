@@ -39,7 +39,7 @@ title: "Maintenance prédictive de la corrosion : une transition Industrie 3.0 �
 |---|---|
 | **Rédigé par :** | BATOUMBI IKOND Ricky Parfait |
 | **Matricule :** | 0111 II17 |
-| **Sous encadrement académique de :** | À compléter |
+| **Sous encadrement académique de :** | M. FEZEU |
 | **Sous la supervision de :** | Dr. TCHAWE |
 | **Année académique :** | 2025 — 2026 |
 
@@ -1234,7 +1234,7 @@ Avant d'exploiter la sonde pour le suivi de corrosion, sa chaîne de mesure doit
 
 ### III.1.1. Étalonnage sur résistances de référence
 
-La justesse de la mesure de résistance a été vérifiée par substitution du fil par des résistances de précision connues. L'étalonnage a conduit à retenir un **facteur de correction du module HX711** (constant), appliqué à toutes les mesures du pipeline. *[Tableau comparatif HX711 vs étalon et courbe de linéarité à insérer après consolidation des points d'étalonnage.]*
+La justesse de la mesure de résistance a été vérifiée par **substitution** du fil par des résistances de précision connues. Le **facteur de correction du module HX711** (constant, **×0,32**), qui compense l'écart systématique du module, a été déterminé sur un étalon de **8,2 Ω** (lecture brute 25,8 Ω → 8,2 / 25,8 ≈ 0,32). Un second étalon **indépendant** de **4,7 Ω**, lu entre **4,5 et 4,8 Ω** par le système (écart ≤ 4 %), confirme la **justesse** et la **linéarité** de la réponse sur la plage de mesure exploitée. Ce facteur est ensuite appliqué, constant, à toutes les mesures du pipeline. Une caractérisation multipoints plus fine (≥ 5 étalons) est prévue pour consolider la courbe de linéarité.
 
 ### III.1.2. Compensation thermique
 
