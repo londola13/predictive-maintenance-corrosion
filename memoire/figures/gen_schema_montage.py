@@ -57,7 +57,7 @@ ax.add_patch(FancyBboxPatch((4.05, 3.7), 3.2, 1.9, boxstyle="round,pad=0.02",
 ax.text(5.65, 3.95, "Bécher — HCl (bain 30 °C)", ha="center", color=VERT, fontsize=8)
 # DS18B20 dans le bécher
 ax.plot(6.5, 4.4, "s", color=ROUGE, ms=9)
-ax.text(6.5, 4.15, "DS18B20", ha="center", color=ROUGE, fontsize=7.5)
+ax.text(6.78, 4.4, "DS18B20", ha="left", va="center", color=ROUGE, fontsize=7.5)
 
 # ---- HX711 (mesure A+ / A-) ----
 box(3.6, 6.4, 4.1, 1.0, "HX711  (ADC 24 bits, gain 64)", BLEU,
@@ -68,14 +68,13 @@ wire(7.0, Y, 7.0, 6.4, color=BLEU, lw=1.3)      # A- -> HX711
 # ---- ESP32 ----
 box(0.4, 1.0, 3.2, 1.3, "ESP32", GRIS,
     sub="DOUT→21 · SCK→22 · 1-Wire→19")
-# liaisons logiques HX711 <-> ESP32
-ax.annotate("", xy=(2.0, 2.3), xytext=(4.6, 6.4),
-            arrowprops=dict(arrowstyle="-", color=GRIS, ls="--", lw=1.2))
-ax.text(3.0, 4.4, "DOUT / SCK", color=GRIS, fontsize=7.5, rotation=58)
-# DS18B20 -> ESP32 (1-Wire)
-ax.annotate("", xy=(3.6, 1.7), xytext=(6.5, 4.4),
-            arrowprops=dict(arrowstyle="-", color=ROUGE, ls=":", lw=1.1))
-ax.text(4.7, 2.7, "1-Wire", color=ROUGE, fontsize=7.5, rotation=42)
+# liaison logique HX711 <-> ESP32 (DOUT/SCK) : descente verticale à gauche du bécher (x < 4,05)
+ax.plot([3.7, 3.7], [6.4, 2.3], color=GRIS, ls="--", lw=1.1, zorder=1)
+ax.text(3.55, 3.5, "DOUT / SCK", color=GRIS, fontsize=7.5, rotation=90, ha="right", va="center")
+# liaison DS18B20 -> ESP32 (1-Wire) : sortie verticale du bécher puis retour orthogonal
+ax.plot([6.5, 6.5], [4.4, 1.65], color=ROUGE, ls=":", lw=1.1, zorder=1)
+ax.plot([6.5, 3.6], [1.65, 1.65], color=ROUGE, ls=":", lw=1.1, zorder=1)
+ax.text(6.65, 2.05, "1-Wire", color=ROUGE, fontsize=7.5, ha="left", va="center")
 # alim ESP32 -> 3V3 et GND du circuit
 wire(2.0, 2.3, 0.5, 2.3); wire(0.5, 2.3, 0.5, Y, color=ROUGE, lw=1.3)
 wire(3.6, 1.3, 10.5, 1.3); wire(10.5, 1.3, 10.5, Y, color="black", lw=1.3)

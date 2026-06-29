@@ -23,7 +23,7 @@ fig, ax = plt.subplots(figsize=(9.6, 3.9))
 ax.axvspan(P10, P90, color="#cfe3f5", alpha=0.85, zorder=1,
            label="Bande prédictive du jumeau (P10–P90)")
 ax.axvline(P50, color="#1f4e79", ls="--", lw=1.4, zorder=3)
-ax.text(P50, 1.38, "médiane\n16 h", color="#1f4e79", fontsize=8.6, ha="center",
+ax.text(P50 + 0.18, 1.45, "médiane 16 h", color="#1f4e79", fontsize=8.6, ha="left",
         va="bottom", family="serif")
 for xb, lab in [(P10, "P10 = 13 h"), (P90, "P90 = 20,5 h")]:
     ax.text(xb, 0.46, lab, color="#2a5a86", fontsize=8.2, ha="center", va="center",

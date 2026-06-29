@@ -55,23 +55,24 @@ ax.axvspan(t_emb, t_rupt, color="#ffe0a8", alpha=0.7,
 ax.axhline(R0, color="gray", ls=":", lw=1)
 ax.text(0.2, R0 * 1.05, r"$R_0$", color="gray", fontsize=10)
 
-ax.annotate(f"Rupture / saturation\n(section restante ≈ {sect_fin:.0f} % → circuit ouvert)",
-            xy=(t_rupt, mx), xytext=(t_rupt - 0.34 * t_rupt, mx * 0.55),
-            fontsize=9.4, family="serif", ha="center",
-            arrowprops=dict(arrowstyle="-|>", color="black", lw=1.3))
-ax.annotate("Le fil s'amincit : la section chute en $r^2$,\ndonc $R$ s'emballe en $1/r^{3}$",
-            xy=(0.65 * t_emb + 0.35 * t_rupt, 8 * R0),
-            xytext=(0.2, mx * 0.6), fontsize=9.4, family="serif", ha="left",
-            arrowprops=dict(arrowstyle="-|>", color="black", lw=1.3))
+# Mécanisme géométrique : texte seul, posé dans la zone centrale vide (aucune flèche)
+ax.text(8.0, 12.0, "Le fil s'amincit : section $\\propto r^{2}$,\ndonc $R$ s'emballe en $1/r^{3}$",
+        ha="center", va="center", fontsize=9.6, family="serif",
+        bbox=dict(boxstyle="round,pad=0.35", facecolor="white", edgecolor="#1f4e79", lw=1, alpha=0.95))
 
-# Encadré : mécanisme post-rupture (décrit, non extrapolé)
-ax.text(0.98, 0.04,
-        "Au-delà de la rupture mécanique, la conduction résiduelle\n"
-        "(électrolyte HCl + dernier filament) maintient une résistance\n"
-        "élevée et croissante jusqu'à l'ouverture franche du circuit\n"
-        "(§III.4.1, §III.6.4).",
-        transform=ax.transAxes, ha="right", va="bottom", fontsize=8.3, family="serif",
-        bbox=dict(boxstyle="round,pad=0.4", facecolor="#fff3e0", edgecolor="#cc8800", lw=1))
+# Rupture : une courte flèche vers le pic, hors de la courbe
+ax.annotate(f"Rupture / saturation\n(section restante ≈ {sect_fin:.0f} %, circuit ouvert)",
+            xy=(t_rupt, mx * 0.9), xytext=(0.66 * t_rupt, mx * 0.40),
+            fontsize=9.4, family="serif", ha="center",
+            arrowprops=dict(arrowstyle="-|>", color="black", lw=1.2))
+
+# Conduction post-rupture : note brève, dans la zone basse vide à gauche
+ax.text(0.6, 4.3,
+        "Après rupture : conduction résiduelle\n"
+        "(électrolyte HCl + dernier filament)\n"
+        "jusqu'au circuit ouvert (§III.4.1, §III.6.4).",
+        ha="left", va="top", fontsize=8.4, family="serif",
+        bbox=dict(boxstyle="round,pad=0.35", facecolor="#fff3e0", edgecolor="#cc8800", lw=1))
 
 ax.set_xlabel("Temps (h)", fontsize=11)
 ax.set_ylabel(r"Résistance mesurée $R(t)$  (Ω, échelle log)", fontsize=11)

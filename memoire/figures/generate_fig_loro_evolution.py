@@ -12,7 +12,6 @@ seule graine). Aucun recalcul ici : la figure visualise des résultats déjà ca
 """
 import os
 import matplotlib.pyplot as plt
-from matplotlib.patches import FancyArrowPatch
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fig_iii3_loro_evolution.png")
 
@@ -55,18 +54,12 @@ for xi, yi, t, dy, va in zip(x, r2, val_txt, val_dy, val_va):
     ax.annotate(t, xy=(xi, yi), xytext=(xi, yi + dy), ha="center", va=va,
                 fontsize=11, fontweight="bold", color="#1f4e79", family="serif")
 
-# Flèches de transition + commentaire mécaniste
-arr1 = FancyArrowPatch((0.12, -1.45), (0.88, 0.02), connectionstyle="arc3,rad=0.28",
-                       arrowstyle="-|>", mutation_scale=16, color="#2e7d32", lw=1.6, zorder=6)
-ax.add_patch(arr1)
-ax.text(0.5, -0.55, "Couverture & répétition\ndes conditions 30 °C", color="#2e7d32",
+# Commentaires de transition (placés dans les zones vides, sans flèche qui croise le texte)
+ax.text(0.5, -1.12, "Couverture et répétition\ndes conditions 30 °C", color="#2e7d32",
         fontsize=9.2, ha="center", va="center", family="serif",
         bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="#2e7d32", lw=1, alpha=0.95))
 
-arr2 = FancyArrowPatch((1.12, 0.27), (1.9, 0.225), connectionstyle="arc3,rad=-0.25",
-                       arrowstyle="-|>", mutation_scale=16, color="#b8860b", lw=1.6, zorder=6)
-ax.add_patch(arr2)
-ax.text(1.55, 0.40, "Morphologie non appariée\n→ léger recul (métrique bruitée)", color="#9a6a00",
+ax.text(1.5, 0.52, "Morphologie non appariée :\nléger recul, métrique bruitée", color="#9a6a00",
         fontsize=9.2, ha="center", va="center", family="serif",
         bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="#b8860b", lw=1, alpha=0.95))
 

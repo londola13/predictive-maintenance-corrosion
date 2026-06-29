@@ -36,10 +36,10 @@ box(2.4, 5.3, 5.0, 3.5,
 box(3.0, 1.8, 4.0, 1.4, "Technicien (web / mobile)", "#EADBFF")
 
 # --- Flèches ---
-arrow(2.0, 10.6, 6.3, 11.2, 'HTTPS POST')                                   # ESP32 -> Supabase
-arrow(7.4, 10.3, 6.0, 8.8, 'REST Supabase\n(lecture mesures ·\nécriture OT)',
-      style='<|-|>', dx=0.25)                                               # Supabase <-> Streamlit
-arrow(4.9, 5.3, 4.9, 3.2, 'ordre de travail /\nnotification')               # Streamlit -> Technicien
+arrow(3.7, 11.4, 5.9, 11.3, 'HTTPS POST', dy=0.22)                          # ESP32 -> Supabase (bord à bord)
+arrow(7.2, 10.3, 6.4, 8.8, 'REST Supabase\n(lecture mesures ·\nécriture OT)',
+      style='<|-|>', dx=0.95)                                               # Supabase <-> Streamlit (label à droite)
+arrow(4.9, 5.3, 4.9, 3.2, 'ordre de travail /\nnotification', dx=0.2)       # Streamlit -> Technicien
 
 ax.set_title("Figure II.1 — Architecture de la boucle intégrée\n"
              "Sonde ER → Supabase → Streamlit (module GMAO maison)",
