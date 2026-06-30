@@ -240,6 +240,40 @@ def run_pandoc():
 
 
 # ───────────────────────── 4. POST-TRAITEMENT (.docx) ─────────────────────────
+def set_table_borders(table):
+    """Bordures noires fines (0,5 pt) sur tout le tableau : contour + grille interne.
+    Pandoc génère des tableaux sans bordures ; on les ajoute ici."""
+    tblPr = table._tbl.tblPr
+    old = tblPr.find(qn("w:tblBorders"))
+    if old is not None:
+        tblPr.remove(old)
+    borders = OxmlElement("w:tblBorders")
+    for edge in ("top", "left", "bottom", "right", "insideH", "insideV"):
+        el = OxmlElement(f"w:{edge}")
+        el.set(qn("w:val"), "single")
+        el.set(qn("w:sz"), "4")        # 0,5 pt
+        el.set(qn("w:space"), "0")
+        el.set(qn("w:color"), "000000")
+        borders.append(el)
+    tblPr.append(borders)
+
+
+def shade_header_row(table):
+    """Légère trame grise sur la première ligne (en-tête) pour la lisibilité."""
+    if not table.rows:
+        return
+    for cell in table.rows[0].cells:
+        tcPr = cell._tc.get_or_add_tcPr()
+        old = tcPr.find(qn("w:shd"))
+        if old is not None:
+            tcPr.remove(old)
+        shd = OxmlElement("w:shd")
+        shd.set(qn("w:val"), "clear")
+        shd.set(qn("w:color"), "auto")
+        shd.set(qn("w:fill"), "EFEFEF")
+        tcPr.append(shd)
+
+
 def post_process():
     doc = Document(OUT)
     # 1) centrer la page de titre : tous les paragraphes jusqu'au 1er saut de page
@@ -271,8 +305,12 @@ def post_process():
             p.alignment = WD_ALIGN_PARAGRAPH.LEFT
             if p._p.xpath('.//w:br[@w:type="page"]'):
                 break
+    # 5) bordures + en-tête tramé sur tous les tableaux
+    for tbl in doc.tables:
+        set_table_borders(tbl)
+        shade_header_row(tbl)
     doc.save(OUT)
-    print("  post-traitement (page de titre + figures + SOMMAIRE)")
+    print(f"  post-traitement (page de titre + figures + SOMMAIRE + bordures de {len(doc.tables)} tableaux)")
 
 
 if __name__ == "__main__":
