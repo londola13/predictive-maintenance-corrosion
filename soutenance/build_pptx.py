@@ -160,8 +160,8 @@ text(s, 0.95, 4.55, 11.5, 2.1, [
     [R("Le verrou n'est plus l'instrumentation.", 17, INK, bold=True, font=HFONT)],
     [R("Les opérateurs disposent déjà de sondes ER en place (cas COTCO) et tracent leurs interventions (SAP). Ce qui manque, c'est l'", 14, INK),
      R("intelligence applicative", 14, RUST, bold=True), R(" : corréler résistance / température / temps, prédire le taux de corrosion et la durée de vie, et relier ces prédictions à l'action.", 14, INK)],
-    [R("→ C'est précisément la transition ", 14.5, INK, bold=True), R("Industrie 3.0 → Industrie 4.0", 14.5, TEAL, bold=True),
-     R(" que ce travail propose d'opérer, à coût maîtrisé.", 14.5, INK, bold=True)],
+    [R("C'est la transition ", 14.5, INK, bold=True), R("Industrie 3.0 → 4.0", 14.5, TEAL, bold=True),
+     R(" que ce travail engage, à coût maîtrisé.", 14.5, INK, bold=True)],
 ], sp_after=9, ls=1.12)
 footer(s, 3)
 
@@ -174,7 +174,7 @@ gaps = [("Pas de corrélation", "les courbes ER ne sont pas reliées algorithmiq
 y = 2.35
 for t, d in gaps:
     rect(s, 0.95, y + 0.05, 0.22, 0.22, RUST, shape=MSO_SHAPE.OVAL)
-    text(s, 1.35, y, 11.0, 0.6, [[R(t + ", ", 15, INK, bold=True, font=HFONT), R(d, 13.5, INK)]], ls=1.05)
+    text(s, 1.35, y, 11.0, 0.6, [[R(t + " : ", 15, INK, bold=True, font=HFONT), R(d, 13.5, INK)]], ls=1.05)
     y += 0.66
 card(s, 0.95, 4.5, 11.45, 2.05, fill=DARK, line=DARK)
 rect(s, 0.95, 4.5, 0.14, 2.05, RUST, shape=MSO_SHAPE.ROUNDED_RECTANGLE)
@@ -229,7 +229,7 @@ for i, (t, d) in enumerate(steps, 1):
 footer(s, 6)
 
 # ═════ 7. OS1 SONDE ═════
-s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "OS1, Détection", color=TEAL)
+s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "OS1 · Détection", color=TEAL)
 title(s, "Sonde à résistance électrique : un montage maison robuste")
 img_fit(s, "fig_montage_reel.png", 7.2, 2.35, 5.45, 4.0, valign="top")
 text(s, 0.95, 2.35, 5.95, 4.4, [
@@ -243,7 +243,7 @@ text(s, 0.95, 2.35, 5.95, 4.4, [
 footer(s, 7)
 
 # ═════ 8. OS2 MODÈLE ═════
-s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "OS2, Pronostic", color=TEAL)
+s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "OS2 · Pronostic", color=TEAL)
 title(s, "XGBoost : le bon modèle pour « beaucoup de points, peu de runs »")
 text(s, 0.95, 2.35, 6.0, 0.4, [[R("Pourquoi pas un réseau de neurones ?", 16, INK, bold=True, font=HFONT)]])
 text(s, 0.95, 2.85, 6.05, 2.2, [
@@ -259,21 +259,21 @@ text(s, 7.25, 6.32, 5.35, 0.35, [[R("Importance des variables (SHAP) : dégradat
 footer(s, 8)
 
 # ═════ 9. RÉSULTATS OS2 ═════
-s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "Résultats, OS2")
+s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "Résultats · OS2")
 title(s, "Le modèle généralise, là où les conditions sont couvertes")
 img_fit(s, "fig_iii3_loro_evolution.png", 7.05, 2.3, 5.65, 4.25, valign="middle")
 card(s, 0.95, 2.35, 5.8, 1.5)
 text(s, 1.2, 2.5, 5.4, 0.5, [[R("R² = +0,29", 38, DARK, bold=True, font=HFONT), R("  (LORO actuel)", 13, MUTED)]])
-text(s, 1.2, 3.45, 5.4, 0.4, [[R("depuis −1,77 (couverture nulle), bat les baselines", 12.5, RUST, bold=True)]])
+text(s, 1.2, 3.45, 5.4, 0.4, [[R("depuis −1,77 (couverture nulle) · bat les références", 12.5, RUST, bold=True)]])
 text(s, 0.95, 4.15, 5.85, 2.4, [
-    [R("Une trajectoire, pas un point, couvrir et ", 13.5, INK), R("répéter", 13.5, TEAL, bold=True), R(" les conditions 30 °C a fait passer le LORO de −1,77 à +0,29.", 13.5, INK)],
+    [R("Une trajectoire, pas un point : couvrir et ", 13.5, INK), R("répéter", 13.5, TEAL, bold=True), R(" les conditions 30 °C a fait passer le LORO de −1,77 à +0,29.", 13.5, INK)],
     [R("L'apport n'est pas la valeur mais la ", 13.5, INK), R("structure", 14, RUST, bold=True, font=HFONT), R(" du R² : positif si conditions couvertes et répétées, négatif sinon.", 13.5, INK)],
     [R("Ajouter une morphologie non appariée le ramène à ≈ +0,20, métrique encore ", 12.5, INK), R("bruitée", 12.5, RUST, bold=True), R(" (peu d'essais).", 12.5, INK)],
 ], sp_after=7, ls=1.1)
 footer(s, 9)
 
 # ═════ 10. OS3 TEMPÉRATURE ═════
-s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "Résultats, OS3", color=TEAL)
+s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "Résultats · OS3", color=TEAL)
 title(s, "Température dominante & deux contre-exemples instructifs")
 img_fit(s, "fig_iii4_contrexemples.png", 7.05, 2.45, 5.65, 4.0, valign="middle")
 text(s, 0.95, 2.35, 5.85, 1.5, [
@@ -286,7 +286,7 @@ ce = [("Run #15", "régulation thermique dérivante (31 → 28 °C)"),
 y = 4.1
 for t, d in ce:
     rect(s, 0.95, y + 0.04, 0.2, 0.2, RUST, shape=MSO_SHAPE.OVAL)
-    text(s, 1.28, y, 5.5, 0.55, [[R(t + ", ", 13.5, INK, bold=True), R(d, 12.5, INK)]], ls=1.05)
+    text(s, 1.28, y, 5.5, 0.55, [[R(t + " : ", 13.5, INK, bold=True), R(d, 12.5, INK)]], ls=1.05)
     y += 0.6
 text(s, 0.95, 5.45, 5.85, 1.0, [[R("→ La fiabilité exige le contrôle ", 13.5, INK, bold=True), R("simultané", 13.5, RUST, bold=True), R(" de tous les facteurs, pas seulement la température.", 13.5, INK, bold=True)]], ls=1.1)
 footer(s, 10)
@@ -304,7 +304,7 @@ text(s, 0.95, 2.35, 5.85, 4.4, [
 footer(s, 11)
 
 # ═════ 12. OS4 GMAO ═════
-s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "Résultats, OS4", color=TEAL)
+s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "Résultats · OS4", color=TEAL)
 title(s, "Boucle décision → action : un module GMAO maison")
 text(s, 0.95, 2.35, 11.4, 1.5, [
     [R("Aucun CMMS open-source (GLPI, OpenMaint, Snipe-IT…) n'offre d'API exploitable en version gratuite.", 14, INK)],
@@ -347,7 +347,7 @@ lim = [("Matériau", "fil de fer ≠ acier API 5L : les valeurs absolues de CR n
 y = 2.3
 for t, d in lim:
     card(s, 0.95, y, 11.45, 0.92); rect(s, 0.95, y, 0.14, 0.92, RUST, shape=MSO_SHAPE.ROUNDED_RECTANGLE)
-    text(s, 1.35, y, 10.8, 0.92, [[R(t + " ,  ", 15, INK, bold=True, font=HFONT), R(d, 13.5, INK)]], ls=1.05, anchor=MSO_ANCHOR.MIDDLE)
+    text(s, 1.35, y, 10.8, 0.92, [[R(t + " : ", 15, INK, bold=True, font=HFONT), R(d, 13.5, INK)]], ls=1.05, anchor=MSO_ANCHOR.MIDDLE)
     y += 1.02
 text(s, 0.95, 6.5, 11.4, 0.45, [[R("Ces limites ne sont pas intrinsèques à la méthode : elles définissent les conditions du passage à l'échelle.", 13.5, TEAL, bold=True, italic=True)]])
 footer(s, 14)
@@ -377,10 +377,10 @@ concl = [("OS1", "chaîne d'acquisition ER fonctionnelle, suivi d'essais run-to-
 y = 2.3
 for tag, d in concl:
     circle(s, 0.97, y, 0.6, tag[-1], fill=RUST, size=17)
-    text(s, 1.8, y + 0.02, 10.6, 0.6, [[R(tag + ", ", 15, RUST, bold=True, font=HFONT), R(d, 14, ICE)]], ls=1.05)
+    text(s, 1.8, y + 0.02, 10.6, 0.6, [[R(tag + " : ", 15, RUST, bold=True, font=HFONT), R(d, 14, ICE)]], ls=1.05)
     y += 0.78
-text(s, 0.95, 5.7, 11.4, 1.0, [[R("Objectifs partiellement atteints et en voie de consolidation, ", 14.5, WHITE, bold=True),
-     R("un prototype doublement transposable, de la mesure à la décision.", 14.5, ICE, italic=True)]], ls=1.15)
+text(s, 0.95, 5.7, 11.4, 1.0, [[R("Objectifs partiellement atteints, en cours de consolidation. ", 14.5, WHITE, bold=True),
+     R("Mais un prototype qui va de la mesure à la décision, transposable des deux côtés.", 14.5, ICE, italic=True)]], ls=1.15)
 footer(s, 16, dark=True)
 
 # ═════ 17. MERCI ═════
