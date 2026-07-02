@@ -7,24 +7,25 @@ Maintenance prédictive de la corrosion · BATOUMBI IKOND Ricky Parfait · ESTL 
 |---|---|---|---|
 | 1 | Titre | 0:30 | 0:30 |
 | 2 | Plan | 0:30 | 1:00 |
-| 3 | Contexte | 1:00 | 2:00 |
-| 4 | Problématique | 1:00 | 3:00 |
-| 5 | Objectifs | 1:15 | 4:15 |
-| 6 | Méthodologie | 0:45 | 5:00 |
-| 7 | OS1 — Sonde | 1:00 | 6:00 |
-| 8 | OS2 — Modèle | 0:45 | 6:45 |
-| 9 | XGBoost, comment il apprend | 0:45 | 7:30 |
-| 10 | D'où vient le +0,29 | 0:45 | 8:15 |
-| 11 | Résultats OS2 | 1:15 | 9:30 |
-| 12 | OS3 — Température | 1:00 | 10:30 |
-| 13 | Physique | 0:45 | 11:15 |
-| 14 | OS4 — GMAO | 1:00 | 12:15 |
-| 15 | Jumeau | 1:15 | 13:30 |
-| 16 | Limites | 0:45 | 14:15 |
-| 17 | Apports | 0:45 | 15:00 |
-| 18 + 19 | Conclusion + Merci | 1:15 | 16:15* |
+| 3 | Contexte | 0:45 | 1:45 |
+| 4 | Problématique | 0:45 | 2:30 |
+| 5 | Objectifs | 1:15 | 3:45 |
+| 6 | Méthodologie | 0:45 | 4:30 |
+| 7 | OS1 — Sonde | 1:00 | 5:30 |
+| 8 | OS2 — Modèle | 0:45 | 6:15 |
+| 9 | XGBoost, l'exemple réel | 0:45 | 7:00 |
+| 10 | Hyperparamètres | 0:45 | 7:45 |
+| 11 | D'où vient le +0,29 | 0:45 | 8:30 |
+| 12 | Résultats OS2 | 1:15 | 9:45 |
+| 13 | OS3 — Température | 1:00 | 10:45 |
+| 14 | Physique | 0:45 | 11:30 |
+| 15 | OS4 — GMAO | 1:00 | 12:30 |
+| 16 | Jumeau | 1:15 | 13:45 |
+| 17 | Limites | 0:45 | 14:30 |
+| 18 | Apports | 0:45 | 15:15 |
+| 19 + 20 | Conclusion + Merci | 1:15 | 16:30* |
 
-\* Prévoir une marge : viser 14 min 30 de parole pour rester sous 15-16.
+\* Prévoir une marge : viser environ 15 min de parole.
 
 ---
 
@@ -68,13 +69,16 @@ Deuxième objectif : le modèle. Pourquoi XGBoost, et pas un réseau de neurones
 
 Reste deux questions : comment il apprend, et comment on le note. Les deux slides suivantes y répondent.
 
-## 9 · XGBOOST, COMMENT IL APPREND *(0:45)*
-Concrètement, comment ça marche ? Le premier arbre fait une prédiction grossière. On regarde ses erreurs. Le deuxième arbre n'apprend pas les données : il apprend ces erreurs-là. Puis un troisième, sur ce qui reste. Et ainsi de suite, cinq cents fois, avec des arbres peu profonds et des corrections minuscules. La prédiction finale, c'est la somme de toutes ces petites corrections. Voilà le gradient boosting.
+## 9 · XGBOOST, L'EXEMPLE RÉEL *(0:45)*
+Concrètement, voici un instant réel de l'essai douze, tiré de la base. Douze heures et vingt minutes d'immersion, 27,7 degrés, 2,03 ohms, quarante pour cent de section perdue. Le taux mesuré vaut 389 microns par an. Que fait le modèle ? Le premier arbre prédit 121 : c'est grossier, proche de la moyenne des données. Le deuxième corrige un peu : 135. Au dixième arbre, 197. Au cinquantième, 372. Et après cinq cents arbres : 390, pour 389 mesurés. Chaque arbre n'a fait qu'une chose, apprendre l'erreur restante et la corriger un peu. C'est ça, le gradient boosting.
 
-## 10 · D'OÙ VIENT LE +0,29 *(0:45)*
+## 10 · HYPERPARAMÈTRES *(0:45)*
+Un mot sur les réglages, ce qu'on appelle les hyperparamètres. Le modèle apprend ses arbres, mais pas ses réglages : ceux-là, c'est moi qui les fixe avant l'entraînement. Trois principaux. Cinq cents arbres : le nombre de corrections. Profondeur quatre : chaque arbre pose au plus quatre questions, des arbres simples, exprès, pour éviter le par-cœur sur un petit jeu de données. Et un pas de 0,05 : chaque correction ne compte que pour cinq pour cent, on avance prudemment. Ces valeurs viennent des pratiques établies de XGBoost, et je les ai adaptées à mon faible volume d'essais.
+
+## 11 · D'OÙ VIENT LE +0,29 *(0:45)*
 Et ce +0,29, d'où sort-il ? De deux plis. Premier pli : je cache le Run 12, j'entraîne sur tout le reste, et je le prédis. R² : +0,50. Deuxième pli : même chose avec le Run 16. R² : +0,07. La moyenne des deux donne +0,29. Le point essentiel, c'est que dans chaque pli, l'essai testé n'a jamais été vu à l'entraînement. Ce chiffre note la généralisation, pas la mémorisation.
 
-## 11 · RÉSULTATS OS2 *(1:15)*, temps fort
+## 12 · RÉSULTATS OS2 *(1:15)*, temps fort
 Et voilà le résultat le plus important du travail. En leave-one-run-out, le R² moyen atteint +0,29, et il bat les méthodes de référence. Mais ce chiffre, je ne l'ai pas eu d'emblée. C'est une trajectoire.
 
 Au début, sur la seule série à 30 degrés, sans couvrir les conditions, le modèle s'effondrait : moins 1,77. En ajoutant des essais qui couvrent et répètent les conditions, je suis remonté à +0,29.
@@ -83,36 +87,36 @@ Ce qui compte, ce n'est donc pas la valeur du R². C'est sa structure. Il est po
 
 Et j'assume une nuance. Ajouter une morphologie différente le ramène vers +0,20. La métrique reste bruitée, j'ai encore peu d'essais. Cette lecture-là, on la trouve rarement dans la littérature. C'est, pour moi, la contribution centrale du travail.
 
-## 12 · OS3 — TEMPÉRATURE *(1:00)*
+## 13 · OS3 — TEMPÉRATURE *(1:00)*
 Troisième objectif : comprendre ce qui gouverne cette fiabilité. La variable dominante, c'est la température. Loi d'Arrhenius : la vitesse de corrosion grimpe exponentiellement avec elle.
 
 Deux essais ont résisté au modèle, et chacun m'a isolé un facteur. Le Run 15 : une régulation qui dérivait, de 31 à 28 degrés. Le Run 17 : un acide qui avait perdu de sa concentration, le HCl s'étant évaporé avant l'immersion. La leçon tient en une phrase. Il faut maîtriser tous les facteurs en même temps, pas seulement la température.
 
-## 13 · PHYSIQUE *(0:45)*
+## 14 · PHYSIQUE *(0:45)*
 J'ai aussi voulu comprendre la physique de la rupture. L'emballement final n'est pas une accélération chimique. C'est une divergence géométrique. La section varie en r carré, donc la résistance s'emballe en 1 sur r cube. Voilà pourquoi la rupture mécanique tombe pile au début de l'emballement : « section qui tend vers zéro », c'est à la fois la résistance qui explose et le fil qui lâche. Après la rupture, l'électrolyte continue de conduire un peu. Ce bout de signal n'est plus métallique ; je l'écarte de l'apprentissage.
 
-## 14 · OS4 — GMAO *(1:00)*
+## 15 · OS4 — GMAO *(1:00)*
 Quatrième objectif : fermer la boucle, de la prédiction à l'action. Un constat, d'abord : aucun logiciel de GMAO open-source ne donne d'API exploitable en version gratuite. J'ai donc écrit mon propre module. À chaque alerte, il génère un ordre de travail complet, avec le taux de corrosion, la durée de vie, le régime, la section perdue. Et il le trace, sans le moindre appel externe. Les indicateurs MTBF, MTTR, disponibilité se calculent sur l'historique. Coût de licence : zéro. Donc à portée d'une PME africaine. Et le mécanisme reste transposable à un outil open-source.
 
-## 15 · JUMEAU *(1:15)*, temps fort (honnêteté)
+## 16 · JUMEAU *(1:15)*, temps fort (honnêteté)
 En perspective, j'ai exploré un jumeau numérique. Calibré sur les essais réels, il produit une bande de durée de vie prédite. C'est l'un des trois estimateurs que je confronte en temps réel.
 
 J'ai fait deux tests « prédire, puis confirmer ». Et j'ai choisi de vous montrer les deux, même le raté. Le Run 21 : annoncé dans la bande avant l'essai, il a rompu à 13,1 heures, dans la bande. Le Run 22, lui, a rompu à 11,95 heures, sous la bande. C'est l'essai le plus rapide de toute la campagne.
 
 Ce raté ne casse pas la démarche. Il en trace la limite. Le jumeau interpole entre les morphologies qu'il a vues, il n'extrapole pas au-delà. La leçon : ce qui rend prédictible, c'est de répéter une même morphologie, pas d'accumuler des essais.
 
-## 16 · LIMITES *(0:45)*
+## 17 · LIMITES *(0:45)*
 J'assume les limites de cette preuve de concept. Le fil de fer n'est pas l'acier API 5L des pipelines : les valeurs absolues de corrosion ne se transposent pas telles quelles. En HCl concentré, l'électrolyte court-circuite un peu la mesure, d'où le fil fin. Le jeu de données est encore mince, les métriques bruitées. Et une seule plage de température est bien couverte. Rien de tout cela n'est intrinsèque à la méthode. Ce sont les conditions du passage à l'échelle.
 
-## 17 · APPORTS *(0:45)*
+## 18 · APPORTS *(0:45)*
 Je retiens quatre apports. Le premier est méthodologique : la fiabilité d'un modèle se lit dans la structure de son R². Le deuxième, une chaîne complète et bon marché, de la mesure à l'ordre de travail, avec des composants qu'on trouve sur place. Le troisième, une double transposabilité : un saut surtout logiciel chez COTCO, un déploiement autonome pour les PME. Le dernier, la rigueur : chaque donnée, chaque seuil, chaque décision renvoie à une source.
 
-## 18 · CONCLUSION *(1:00)*
+## 19 · CONCLUSION *(1:00)*
 Pour conclure. OS1, la chaîne d'acquisition fonctionne, elle a suivi des essais complets jusqu'à la rupture. OS2, XGBoost prédit la corrosion et bat les références, à condition que les conditions soient couvertes. OS3, la température domine, et c'est la répétabilité qui fait la fiabilité. OS4, la boucle décision-action est démontrée, par un module maison à coût nul.
 
 Les objectifs sont partiellement atteints, en cours de consolidation. Mais l'essentiel est là : un prototype qui va de la mesure à la décision, transposable des deux côtés, et une lecture claire des conditions sous lesquelles la maintenance prédictive de la corrosion devient fiable.
 
-## 19 · MERCI *(0:15)*
+## 20 · MERCI *(0:15)*
 Je vous remercie de votre attention. Je reste à votre disposition pour vos questions.
 
 ---

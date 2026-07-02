@@ -26,7 +26,7 @@ ICE   = RGBColor(0xCA, 0xDD, 0xDC)
 BORD  = RGBColor(0xE3, 0xDE, 0xD4)
 
 HFONT, BFONT = "Georgia", "Calibri"
-SW, SH, TOTAL, CT = 13.333, 7.5, 19, 2.3   # CT = haut du contenu (sous titre 2 lignes)
+SW, SH, TOTAL, CT = 13.333, 7.5, 20, 2.3   # CT = haut du contenu (sous titre 2 lignes)
 
 prs = Presentation(); prs.slide_width = I(SW); prs.slide_height = I(SH)
 BLANK = prs.slide_layouts[6]
@@ -263,14 +263,40 @@ s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "OS2 · Pronostic", color=TEAL
 title(s, "Comment XGBoost apprend : corriger ses erreurs, 500 fois")
 img_fit(s, "fig_xgb_principe.png", 0.75, 2.15, 11.85, 3.55, valign="top")
 text(s, 0.95, 5.95, 11.4, 1.0, [
-    [R("Un arbre seul prédit mal. ", 14.5, INK, bold=True, font=HFONT),
-     R("Mais chaque arbre suivant apprend les erreurs du précédent, et la ", 14, INK),
-     R("somme des petites corrections", 14, RUST, bold=True),
-     R(" donne la prédiction du taux de corrosion. C'est le gradient boosting.", 14, INK)],
+    [R("Le 1ᵉʳ arbre prédit 121, près de la moyenne des données : erreur −268. ", 14, INK),
+     R("Chaque arbre suivant apprend l'erreur restante et la corrige un peu", 14, RUST, bold=True),
+     R(" : 135, 137, 197, 372… et après 500 arbres, ", 14, INK),
+     R("390 pour 389 mesurés", 14, INK, bold=True, font=HFONT),
+     R(". C'est le gradient boosting.", 14, INK)],
 ], ls=1.12)
 footer(s, 9)
 
-# ═════ 10. D'OÙ VIENT LE +0,29 ═════
+# ═════ 10. HYPERPARAMÈTRES ═════
+s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "OS2 · Réglages", color=TEAL)
+title(s, "Les hyperparamètres : trois réglages fixés avant l'apprentissage")
+text(s, 0.95, 2.15, 11.45, 0.75, [
+    [R("Le modèle apprend ses arbres ; il n'apprend pas ses réglages. ", 14.5, INK, bold=True, font=HFONT),
+     R("Ceux-là sont choisis par le concepteur, avant l'entraînement : ce sont les hyperparamètres.", 14, INK)],
+], ls=1.12)
+hp = [("500", "arbres (n_estimators)",
+       "le nombre de petites corrections successives ; assez pour converger avec des pas de 5 %"),
+      ("4", "profondeur max (max_depth)",
+       "au plus 4 questions par arbre : des arbres simples, pas de « par-cœur » sur un petit jeu d'essais"),
+      ("0,05", "pas d'apprentissage (learning_rate)",
+       "chaque correction ne compte qu'à 5 % : 500 petits pas prudents plutôt que quelques grands")]
+x = 0.95
+for big, nom, d in hp:
+    card(s, x, 3.05, 3.74, 2.5); rect(s, x, 3.05, 3.74, 0.12, TEAL, shape=MSO_SHAPE.ROUNDED_RECTANGLE)
+    text(s, x + 0.25, 3.32, 3.3, 0.8, [[R(big, 34, DARK, bold=True, font=HFONT)], [R(nom, 12.5, RUST, bold=True)]], sp_after=2)
+    text(s, x + 0.25, 4.42, 3.28, 1.0, [[R(d, 11.5, INK)]], ls=1.1)
+    x += 3.93
+text(s, 0.95, 5.85, 11.45, 1.0, [
+    [R("D'où viennent ces valeurs ? ", 13.5, INK, bold=True),
+     R("Des pratiques établies de XGBoost (Chen & Guestrin, 2016), adaptées au faible volume d'essais : compromis biais-variance, contrôle de la complexité, convergence stable (Tableau II.6 du mémoire). S'y ajoutent des garde-fous anti-surapprentissage (régularisation L1/L2, sous-échantillonnage 0,8).", 12.5, INK)],
+], ls=1.12)
+footer(s, 10)
+
+# ═════ 11. D'OÙ VIENT LE +0,29 ═════
 s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "OS2 · Validation", color=TEAL)
 title(s, "D'où vient le R² moyen de +0,29 ?")
 img_fit(s, "fig_loro_mecanique.png", 0.75, 2.1, 11.85, 3.9, valign="top")
@@ -279,9 +305,9 @@ text(s, 0.95, 6.15, 11.4, 0.8, [
      R("le modèle ne voit jamais l'essai qu'il doit prédire", 14, RUST, bold=True),
      R(". Le +0,29 est simplement la moyenne des deux R² obtenus.", 14, INK)],
 ], ls=1.12)
-footer(s, 10)
+footer(s, 11)
 
-# ═════ 11. RÉSULTATS OS2 ═════
+# ═════ 12. RÉSULTATS OS2 ═════
 s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "Résultats · OS2")
 title(s, "Le modèle généralise, là où les conditions sont couvertes")
 img_fit(s, "fig_iii3_loro_evolution.png", 7.05, 2.3, 5.65, 4.25, valign="middle")
@@ -293,9 +319,9 @@ text(s, 0.95, 4.15, 5.85, 2.4, [
     [R("L'apport n'est pas la valeur mais la ", 13.5, INK), R("structure", 14, RUST, bold=True, font=HFONT), R(" du R² : positif si conditions couvertes et répétées, négatif sinon.", 13.5, INK)],
     [R("Ajouter une morphologie non appariée le ramène à ≈ +0,20, métrique encore ", 12.5, INK), R("bruitée", 12.5, RUST, bold=True), R(" (peu d'essais).", 12.5, INK)],
 ], sp_after=7, ls=1.1)
-footer(s, 11)
+footer(s, 12)
 
-# ═════ 12. OS3 TEMPÉRATURE ═════
+# ═════ 13. OS3 TEMPÉRATURE ═════
 s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "Résultats · OS3", color=TEAL)
 title(s, "Température dominante & deux contre-exemples instructifs")
 img_fit(s, "fig_iii4_contrexemples.png", 7.05, 2.45, 5.65, 4.0, valign="middle")
@@ -312,9 +338,9 @@ for t, d in ce:
     text(s, 1.28, y, 5.5, 0.55, [[R(t + " : ", 13.5, INK, bold=True), R(d, 12.5, INK)]], ls=1.05)
     y += 0.6
 text(s, 0.95, 5.45, 5.85, 1.0, [[R("→ La fiabilité exige le contrôle ", 13.5, INK, bold=True), R("simultané", 13.5, RUST, bold=True), R(" de tous les facteurs, pas seulement la température.", 13.5, INK, bold=True)]], ls=1.1)
-footer(s, 12)
+footer(s, 13)
 
-# ═════ 13. PHYSIQUE EMBALLEMENT ═════
+# ═════ 14. PHYSIQUE EMBALLEMENT ═════
 s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "Compréhension physique")
 title(s, "Emballement & rupture : une divergence géométrique")
 img_fit(s, "fig_iii4_emballement.png", 7.0, 2.3, 5.7, 4.3, valign="middle")
@@ -324,9 +350,9 @@ text(s, 0.95, 2.35, 5.85, 4.4, [
     [R("Après rupture, ", 13.5, INK), R("la conduction résiduelle", 13.5, TEAL, bold=True), R(" (électrolyte HCl + dernier filament) maintient une résistance croissante jusqu'au circuit ouvert.", 13.5, INK)],
     [R("Cette portion terminale est ", 13.5, INK), R("électrolytique, non métallique", 13.5, RUST, bold=True), R(" : tronquée et exclue de l'apprentissage.", 13.5, INK)],
 ], sp_after=11, ls=1.13)
-footer(s, 13)
+footer(s, 14)
 
-# ═════ 14. OS4 GMAO ═════
+# ═════ 15. OS4 GMAO ═════
 s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "Résultats · OS4", color=TEAL)
 title(s, "Boucle décision → action : un module GMAO maison")
 text(s, 0.95, 2.35, 11.4, 1.5, [
@@ -342,9 +368,9 @@ for big, d in kpis:
     text(s, x + 0.28, 4.5, 3.2, 0.7, [[R(big, 23, DARK, bold=True, font=HFONT)]])
     text(s, x + 0.28, 5.35, 3.2, 1.0, [[R(d, 13, MUTED)]], ls=1.12)
     x += 3.93
-footer(s, 14)
+footer(s, 15)
 
-# ═════ 15. PERSPECTIVE ═════
+# ═════ 16. PERSPECTIVE ═════
 s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "Perspective")
 title(s, "Jumeau numérique : prédire, confirmer, apprendre des écarts")
 img_fit(s, "fig_iii3_band_scorecard.png", 6.95, 2.35, 5.75, 3.5, valign="middle")
@@ -358,9 +384,9 @@ text(s, 1.25, 3.88, 5.35, 1.25, [
     [R("Run #22 : ", 13.5, ICE), R("11,95 h", 15, RUST, bold=True, font=HFONT), R("   ✗ en deçà (le plus rapide)", 12.5, RUST, bold=True)],
 ], sp_after=4, ls=1.12)
 text(s, 0.95, 5.5, 5.8, 1.1, [[R("Le jumeau ", 12.5, INK), R("interpole", 12.5, RUST, bold=True), R(" entre morphologies vues, il n'", 12.5, INK), R("extrapole", 12.5, RUST, bold=True), R(" pas. La prédictibilité tient à la répétition au sein d'une ", 12.5, INK), R("même morphologie", 12.5, TEAL, bold=True), R(", pas au simple nombre d'essais.", 12.5, INK)]], ls=1.08)
-footer(s, 15)
+footer(s, 16)
 
-# ═════ 16. DISCUSSION ═════
+# ═════ 17. DISCUSSION ═════
 s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "Discussion")
 title(s, "Limites assumées d'une preuve de concept")
 lim = [("Matériau", "fil de fer ≠ acier API 5L : les valeurs absolues de CR ne sont pas directement transposables."),
@@ -373,9 +399,9 @@ for t, d in lim:
     text(s, 1.35, y, 10.8, 0.92, [[R(t + " : ", 15, INK, bold=True, font=HFONT), R(d, 13.5, INK)]], ls=1.05, anchor=MSO_ANCHOR.MIDDLE)
     y += 1.02
 text(s, 0.95, 6.5, 11.4, 0.45, [[R("Ces limites ne sont pas intrinsèques à la méthode : elles définissent les conditions du passage à l'échelle.", 13.5, TEAL, bold=True, italic=True)]])
-footer(s, 16)
+footer(s, 17)
 
-# ═════ 17. APPORTS ═════
+# ═════ 18. APPORTS ═════
 s = new(); bg(s, LIGHT); accent_bar(s); kicker(s, "Apports du travail")
 title(s, "Ce que cette étude apporte")
 apf = [("Apport méthodologique", "La fiabilité du ML se lit dans la STRUCTURE du R² (positif si conditions couvertes et répétées), rarement explicité dans la littérature."),
@@ -387,9 +413,9 @@ for i, (t, d) in enumerate(apf, 1):
     circle(s, 0.95, y + 0.08, 0.55, str(i), fill=TEAL, size=16)
     text(s, 1.7, y, 10.7, 1.0, [[R(t, 16, INK, bold=True, font=HFONT)], [R(d, 13, INK)]], sp_after=3, ls=1.08)
     y += 1.08
-footer(s, 17)
+footer(s, 18)
 
-# ═════ 18. CONCLUSION ═════
+# ═════ 19. CONCLUSION ═════
 s = new(); bg(s, DARK); rect(s, 0, 0, 0.28, SH, RUST)
 text(s, 0.95, 0.66, 11.0, 0.4, [[R("CONCLUSION", 13, RUST, bold=True)]])
 text(s, 0.92, 1.12, 11.6, 1.0, [[R("Une brique fondatrice, validée et reproductible", 31, WHITE, bold=True, font=HFONT)]])
@@ -404,9 +430,9 @@ for tag, d in concl:
     y += 0.78
 text(s, 0.95, 5.7, 11.4, 1.0, [[R("Objectifs partiellement atteints, en cours de consolidation. ", 14.5, WHITE, bold=True),
      R("Mais un prototype qui va de la mesure à la décision, transposable des deux côtés.", 14.5, ICE, italic=True)]], ls=1.15)
-footer(s, 18, dark=True)
+footer(s, 19, dark=True)
 
-# ═════ 19. MERCI ═════
+# ═════ 20. MERCI ═════
 s = new(); bg(s, DARK); rect(s, 0, 0, SW, 0.28, RUST); rect(s, 0, SH - 0.28, SW, 0.28, RUST)
 text(s, 1.0, 2.5, 11.3, 1.2, [[R("Merci de votre attention", 44, WHITE, bold=True, font=HFONT)]], align=PP_ALIGN.CENTER)
 text(s, 1.0, 3.75, 11.3, 0.7, [[R("Questions & discussion", 22, RUST, bold=True, italic=True)]], align=PP_ALIGN.CENTER)

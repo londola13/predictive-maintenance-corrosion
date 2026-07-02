@@ -1,86 +1,107 @@
 # -*- coding: utf-8 -*-
-"""Schéma pédagogique (slide) : principe du gradient boosting (XGBoost).
+"""Schéma pédagogique (slide) : le gradient boosting montré sur UN INSTANT RÉEL.
 
-Arbres construits en séquence : chaque arbre apprend les ERREURS (résidus) du
-cumul précédent ; la prédiction finale est la somme des petites corrections.
-Hyperparamètres réels du mémoire (Tableau II.6) : 500 arbres, profondeur 4,
-pas d'apprentissage 0,05. Pas de titre gravé : porté par la slide.
+Point choisi : Run #12 (base Supabase), t ≈ 12,3 h, T = 27,7 °C, R = 2,03 Ω,
+section perdue ≈ 40 %, CR mesuré ≈ 389 µm/an. Le script recharge le modèle réel
+(models/xgb_cr.pkl) et rejoue sa construction : prédiction cumulée après
+1, 2, 3, 10, 50 puis 500 arbres (iteration_range). Rien n'est inventé :
+chaque barre est la sortie du modèle entraîné. Requiert SUPABASE_KEY.
+Pas de titre gravé : porté par la slide.
 """
 import os
+import pickle
+import sys
+import tempfile
+import warnings
+
+warnings.filterwarnings("ignore")
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.insert(0, ROOT)
+
+import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patches as mp
+from src.etl.fetch_supabase import fetch_run
+from pipeline.corrosion_pipeline import traiter_run
 
 INK, MUTED, RUST, TEAL = "#202B31", "#6B7A82", "#C9601A", "#0A9498"
-PAPER, CHIP = "#FFFFFF", "#EDEAE3"
+CHIP = "#EDEAE3"
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fig_xgb_principe.png")
+RUN12 = "f5852fd4-8c3f-474e-9c20-a1ac129e018c"
+ETAPES = [1, 2, 3, 10, 50, 500]
 
-fig, ax = plt.subplots(figsize=(12.4, 3.8))
-ax.set_xlim(0, 12.4); ax.set_ylim(0, 3.75); ax.axis("off")
+# ── calcul réel : prédiction cumulée arbre par arbre sur l'instant choisi ────
+model = pickle.load(open(os.path.join(ROOT, "models", "xgb_cr.pkl"), "rb"))
+feats = list(model.feature_names_in_)
+raw = fetch_run(RUN12)
+tmp = tempfile.NamedTemporaryFile(suffix=".csv", delete=False, mode="w")
+raw.to_csv(tmp, sep=";", index=False); tmp.close()
+d = traiter_run(tmp.name)
+os.unlink(tmp.name)
+d = d.replace([np.inf, -np.inf], np.nan).dropna(subset=feats + ["CR_lisse"]).reset_index(drop=True)
 
+# instant t ≈ 12,3 h (début d'emballement, bien expliqué par le modèle)
+cand = d[(d["temps_immersion_h"].between(12.25, 12.40)) & (d["CR_lisse"] > 380)]
+row = cand.iloc[0]
+X = row[feats].to_frame().T.astype(float)
+cr_meas = float(row["CR_lisse"])
+preds = [float(model.predict(X, iteration_range=(0, k))[0]) for k in ETAPES]
+print("instant :", f"t={row['temps_immersion_h']:.1f}h T={row['temp_lisse']:.1f}C "
+      f"R={row['rx_corr']:.2f} sect={row['section_perdue_pct']:.0f}% CR={cr_meas:.0f}")
+print("preds   :", [round(p) for p in preds])
 
-def rbox(x, y, w, h, fc=PAPER, ec=INK, lw=1.4):
-    ax.add_patch(mp.FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.06",
-                                   fc=fc, ec=ec, lw=lw))
+# ── figure ───────────────────────────────────────────────────────────────────
+fig, (axL, ax) = plt.subplots(1, 2, figsize=(12.6, 4.3),
+                              gridspec_kw={"width_ratios": [1, 2.55], "wspace": 0.14})
 
+def fr(v, nd=1):
+    return f"{v:.{nd}f}".replace(".", ",")
 
-def tree(cx, cy, col=MUTED, s=0.30):
-    """Petit glyphe d'arbre binaire (racine + 2 niveaux)."""
-    r = (cx, cy + s)
-    n1, n2 = (cx - s, cy), (cx + s, cy)
-    leaves = [(cx - 1.5 * s, cy - s), (cx - 0.5 * s, cy - s),
-              (cx + 0.5 * s, cy - s), (cx + 1.5 * s, cy - s)]
-    for a, b in [(r, n1), (r, n2), (n1, leaves[0]), (n1, leaves[1]),
-                 (n2, leaves[2]), (n2, leaves[3])]:
-        ax.plot([a[0], b[0]], [a[1], b[1]], color=col, lw=1.3, zorder=2)
-    for p in [r, n1, n2] + leaves:
-        ax.plot(*p, "o", color=col, ms=5.5, zorder=3)
+# panneau gauche : l'instant réel (carte)
+axL.set_xlim(0, 1); axL.set_ylim(0, 1); axL.axis("off")
+axL.add_patch(plt.Rectangle((0.02, 0.04), 0.96, 0.92, fc=CHIP, ec=MUTED, lw=1.2))
+axL.text(0.5, 0.84, "Un instant réel\nde l'essai n°12", ha="center", va="center",
+         fontsize=11.5, color=INK, fontweight="bold", linespacing=1.4)
+axL.text(0.5, 0.55, f"t = {fr(row['temps_immersion_h'])} h\n"
+                    f"T = {fr(row['temp_lisse'])} °C\n"
+                    f"R = {fr(row['rx_corr'], 2)} Ω\n"
+                    f"section perdue ≈ {row['section_perdue_pct']:.0f} %",
+         ha="center", va="center", fontsize=10.5, color=INK, linespacing=1.8)
+axL.text(0.5, 0.24, "le modèle doit prédire :", ha="center", fontsize=9.5, color=MUTED)
+axL.text(0.5, 0.13, f"CR mesuré = {cr_meas:.0f} µm/an", ha="center", fontsize=12,
+         color=TEAL, fontweight="bold")
 
+# panneau droit : la prédiction se construit arbre après arbre
+xs = np.arange(len(ETAPES))
+bars = ax.bar(xs, preds, width=0.58, color=["#9AA6AC"] * (len(ETAPES) - 1) + [RUST],
+              edgecolor="white", linewidth=1.2, zorder=3)
+ax.axhline(cr_meas, color=TEAL, ls="--", lw=1.8, zorder=2)
+ax.text(0.62, cr_meas + 14, f"CR mesuré : {cr_meas:.0f}",
+        ha="left", fontsize=10.5, color=TEAL, fontweight="bold")
 
-def flow(x1, x2, y):
-    ax.annotate("", xy=(x2, y), xytext=(x1, y),
-                arrowprops=dict(arrowstyle="-|>", color=INK, lw=1.5, mutation_scale=16))
+for x, p in zip(xs, preds):
+    ax.text(x, p + 12, f"{p:.0f}", ha="center", fontsize=10.5, color=INK,
+            fontweight="bold", zorder=4)
 
+# erreurs : première et dernière barre (récit du boosting)
+ax.annotate(f"erreur : {preds[0]-cr_meas:+.0f}", xy=(0, preds[0]),
+            xytext=(0, preds[0] + 105), ha="center", fontsize=9.5, color=RUST,
+            arrowprops=dict(arrowstyle="-|>", color=RUST, lw=1.2))
+ax.text(len(ETAPES) - 1, preds[-1] / 2, f"erreur : {preds[-1]-cr_meas:+.0f}",
+        ha="center", va="center", fontsize=9.5, color="white", fontweight="bold",
+        rotation=90, zorder=5)
 
-# ── Données (entrée) ─────────────────────────────────────────────
-rbox(0.25, 1.55, 2.1, 1.7, fc=CHIP, ec=MUTED)
-ax.text(1.30, 2.88, "Données des essais", ha="center", fontsize=10.5,
-        color=INK, fontweight="bold")
-ax.text(1.30, 2.42, "résistance R(t)\ntempérature T\ntemps d'immersion", ha="center",
-        va="center", fontsize=8.8, color=MUTED, linespacing=1.5)
-ax.text(1.30, 1.78, "cible : CR mesuré", ha="center", fontsize=8.8, color=TEAL,
-        fontweight="bold")
-
-flow(2.50, 3.10, 2.4)
-
-# ── Arbres en séquence ───────────────────────────────────────────
-def stage(x, num, note):
-    rbox(x, 1.55, 1.85, 1.7)
-    ax.text(x + 0.925, 2.95, f"Arbre {num}", ha="center", fontsize=10.5,
-            color=INK, fontweight="bold")
-    tree(x + 0.925, 2.35)
-    ax.text(x + 0.925, 1.78, note, ha="center", fontsize=8.6, color=MUTED)
-
-stage(3.10, 1, "prédiction grossière")
-stage(5.85, 2, "petite correction")
-stage(8.60, 3, "petite correction")
-
-# flèches entre arbres, avec la mention résidus SOUS la flèche (jamais dessus)
-for x1, x2, lab in [(4.95, 5.85, "ses erreurs (résidus)\ndeviennent la cible"),
-                    (7.70, 8.60, "idem, sur les erreurs\nrestantes")]:
-    flow(x1, x2, 2.4)
-    ax.text((x1 + x2) / 2, 1.30, lab, ha="center", va="top", fontsize=8.4,
-            color=RUST, linespacing=1.4)
-
-ax.text(10.62, 2.40, "… ×500", ha="center", va="center", fontsize=13,
-        color=MUTED, fontweight="bold", style="italic")
-
-# ── Somme finale ─────────────────────────────────────────────────
-rbox(0.9, 0.18, 10.6, 0.72, fc="#16252E", ec="#16252E")
-ax.text(6.2, 0.54, "CR prédit  =  somme des 500 petites corrections"
-        "      (profondeur 4  ·  pas d'apprentissage 0,05)",
-        ha="center", va="center", fontsize=11, color="white")
-ax.annotate("", xy=(6.2, 0.98), xytext=(6.2, 1.42),
-            arrowprops=dict(arrowstyle="-|>", color=INK, lw=1.5, mutation_scale=16))
+ax.set_xticks(xs)
+ax.set_xticklabels(["1 arbre", "2 arbres", "3 arbres", "10 arbres", "50 arbres", "500 arbres"],
+                   fontsize=10)
+ax.set_xlim(-0.65, len(ETAPES) - 0.30)
+ax.set_ylabel("CR prédit (µm/an)", fontsize=10.5)
+ax.set_ylim(0, max(cr_meas, max(preds)) * 1.30)
+ax.grid(axis="y", alpha=0.25)
+for sp in ("top", "right"):
+    ax.spines[sp].set_visible(False)
+ax.text(0.02, -0.24, "prédiction cumulée : chaque arbre supplémentaire ajoute une petite "
+        "correction apprise sur les erreurs restantes",
+        transform=ax.transAxes, fontsize=9.5, color=MUTED, style="italic")
 
 plt.tight_layout()
 plt.savefig(OUT, dpi=200, bbox_inches="tight", facecolor="white")
