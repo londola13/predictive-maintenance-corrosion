@@ -52,9 +52,6 @@ ax.set_xlim(9.8, 22)
 ax.set_ylim(0.3, 2.1)
 ax.set_yticks([])
 ax.set_xlabel("Durée de vie / temps de rupture (h)", fontsize=10.5)
-ax.set_title("Figure III.15 — Bande prédictive de durée de vie du jumeau confrontée\n"
-             "à deux essais graduels réels (Run #21 touché, Run #22 manqué)",
-             fontsize=11.5, family="serif")
 ax.legend(loc="upper right", fontsize=8.4, framealpha=0.9)
 for s in ("top", "left", "right"):
     ax.spines[s].set_visible(False)

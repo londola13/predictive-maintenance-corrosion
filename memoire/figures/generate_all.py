@@ -39,8 +39,6 @@ def fig_ii1_architecture():
     arr(5.0, 7.8, 5.0, 6.2, 'POST /apirest.php/Ticket\n(si alerte critique)')
     arr(5.0, 4.4, 5.0, 2.6, 'notification')
 
-    ax.set_title("Figure II.1 — Architecture de la boucle intégrée\nSonde ER → Supabase → Streamlit → CMMS open-source",
-                 fontsize=12, pad=15, **SERIF)
     save(fig, 'fig_ii1_architecture.png')
 
 
@@ -100,8 +98,6 @@ def fig_ii2_wheatstone():
                               facecolor='white', edgecolor='black', lw=1.5))
     ax.text(A[0], A[1]+0.85, "R_série 100 Ω", ha='center', fontsize=9, **SERIF)
 
-    ax.set_title("Figure II.2 — Pont de Wheatstone instrumenté par HX711\n(Rx = fil de fer immergé dans le milieu corrosif)",
-                 fontsize=12, pad=12, **SERIF)
     save(fig, 'fig_ii2_wheatstone.png')
 
 
@@ -142,8 +138,6 @@ def fig_ii3_cycle_esp32():
     ax.text((first_x+last_x)/2, 0.4, "cycle = 30 secondes (acquisition continue)", ha='center',
             fontsize=10, style='italic', color='gray', **SERIF)
 
-    ax.set_title("Figure II.3 — Cycle d'acquisition continue de l'ESP32 (période 30 s)",
-                 fontsize=12, pad=10, **SERIF)
     save(fig, 'fig_ii3_cycle_esp32.png')
 
 
@@ -176,8 +170,6 @@ def fig_ii4_pipeline():
             ax.annotate('', xy=(x+w+gap, y0+h/2), xytext=(x+w, y0+h/2),
                         arrowprops=dict(arrowstyle='-|>', color='black', lw=1.5))
 
-    ax.set_title("Figure II.4 — Pipeline Python de traitement des données (5 étapes)",
-                 fontsize=12, pad=10, **SERIF)
     save(fig, 'fig_ii4_pipeline.png')
 
 
@@ -256,14 +248,12 @@ def fig_c1_cablage():
                                    facecolor="#F5E5D5", edgecolor='black', lw=1.8))
     ax.text(10.5, 4.2, "Bécher\n(HCl, bain 30 °C)", ha='center', fontsize=10, weight='bold', **SERIF)
     ax.text(10.5, 3.2, "Fil Fe (Rx)\n+ DS18B20\nimmergés", ha='center', fontsize=9, **SERIF)
-    # Liaisons cellule → fil Fe (Rx) et DS18B20
-    ax.annotate('', xy=((xAp+xAm)/2, yb-0.1), xytext=(10.5, 4.5),
+    # Liaisons cellule → fil Fe (Rx) et DS18B20 (ancrée près de A−, à l'écart du label "Fil de fer (Rx)")
+    ax.annotate('', xy=(xAm - 0.1, yb - 0.1), xytext=(10.5, 4.5),
                 arrowprops=dict(arrowstyle='-', color='gray', lw=1.0, ls='--'))
     ax.annotate('', xy=(7.0, 2.1), xytext=(9.5, 2.8),
                 arrowprops=dict(arrowstyle='-', color='gray', lw=1.0, ls='--'))
 
-    ax.set_title("Figure C.1 — Schéma de câblage complet de la sonde ER\nESP32 + HX711 + montage shunt + R_lift + DS18B20",
-                 fontsize=12, pad=12, **SERIF)
     save(fig, 'fig_c1_cablage.png')
 
 
@@ -279,8 +269,11 @@ def fig_f1_erd():
         ax.add_patch(mp.Rectangle((x, y+h-0.45), w, 0.45, facecolor='#444', edgecolor='black', lw=1.6))
         ax.text(x+w/2, y+h-0.22, name, ha='center', va='center', color='white',
                 fontsize=10.5, weight='bold', **SERIF)
+        # espacement des champs calculé pour tenir dans la boîte, quel que soit leur nombre
+        # (évite tout débordement du dernier champ sous le cadre)
+        step = min(0.28, (h - 0.85) / max(len(fields) - 1, 1))
         for i, f in enumerate(fields):
-            ax.text(x+0.1, y+h-0.7-i*0.28, f, fontsize=8.5, **SERIF)
+            ax.text(x+0.1, y+h-0.7-i*step, f, fontsize=8.5, **SERIF)
         return (x, y, w, h)
 
     def link(t1, t2, side1='right', side2='left'):
@@ -292,6 +285,14 @@ def fig_f1_erd():
         ax.plot([sx, ex], [sy, ey], 'k-', lw=1.2)
         # crow's foot simple : petit cercle côté "many"
         ax.plot(ex, ey, 'ko', markersize=5, markerfacecolor='white')
+
+    def link_over(t1, t2, stub_x, bus_y=9.85):
+        """Route en L par-dessus les tables intermédiaires (évite de traverser leurs champs)."""
+        x1, y1, w1, h1 = t1; x2, y2, w2, h2 = t2
+        sx, sy = x1 + w1, y1 + h1 / 2
+        tx, ty = x2 + w2 / 2, y2 + h2
+        ax.plot([sx, stub_x, stub_x, tx, tx], [sy, sy, bus_y, bus_y, ty], 'k-', lw=1.2)
+        ax.plot(tx, ty, 'ko', markersize=5, markerfacecolor='white')
 
     assets = tab(0.5, 7.0, 2.6, 2.5, "assets",
                  ["id (PK)", "nom", "type", "localisation", "date_install",
@@ -325,16 +326,14 @@ def fig_f1_erd():
 
     # Liaisons (FK)
     link(assets, measurements, 'right', 'left')
-    link(assets, predictions, 'right', 'left')
-    link(assets, alerts, 'right', 'left')
+    link_over(assets, predictions, stub_x=3.3)   # évite de traverser measurements
+    link_over(assets, alerts, stub_x=3.5)        # évite de traverser measurements + predictions
     link(alerts, work_orders, 'left', 'right')
     link(work_orders, interventions, 'left', 'right')
     link(interventions, inhibitor, 'left', 'right')
     link(assets, inhibitor, 'left', 'left')
     link(work_orders, kpi, 'left', 'right')
 
-    ax.set_title("Figure F.1 — Schéma relationnel (ERD) de la base de données Supabase\n8 tables · clés étrangères en cardinalité 1 — *",
-                 fontsize=12, pad=12, **SERIF)
     save(fig, 'fig_f1_erd.png')
 
 

@@ -20,12 +20,12 @@ def box(x, y, w, h, text, color):
             fontsize=10.5, family='serif')
 
 
-def arrow(x1, y1, x2, y2, label='', style='-|>', dx=0.18, dy=0.0):
+def arrow(x1, y1, x2, y2, label='', style='-|>', dx=0.18, dy=0.0, ha='left', va='baseline'):
     ax.annotate('', xy=(x2, y2), xytext=(x1, y1),
                 arrowprops=dict(arrowstyle=style, color='black', lw=1.6, mutation_scale=18))
     if label:
         ax.text((x1 + x2) / 2 + dx, (y1 + y2) / 2 + dy, label, fontsize=9.3,
-                family='serif', style='italic')
+                family='serif', style='italic', ha=ha, va=va)
 
 
 # --- Boîtes ---
@@ -36,14 +36,10 @@ box(2.4, 5.3, 5.0, 3.5,
 box(3.0, 1.8, 4.0, 1.4, "Technicien (web / mobile)", "#EADBFF")
 
 # --- Flèches ---
-arrow(3.7, 11.4, 5.9, 11.3, 'HTTPS POST', dy=0.22)                          # ESP32 -> Supabase (bord à bord)
+arrow(3.6, 11.4, 5.7, 11.3, 'HTTPS POST', dx=-0.35, dy=0.28, ha='center', va='bottom')  # ESP32 -> Supabase (centré, dégagé)
 arrow(7.2, 10.3, 6.4, 8.8, 'REST Supabase\n(lecture mesures ·\nécriture OT)',
-      style='<|-|>', dx=0.95)                                               # Supabase <-> Streamlit (label à droite)
-arrow(4.9, 5.3, 4.9, 3.2, 'ordre de travail /\nnotification', dx=0.2)       # Streamlit -> Technicien
-
-ax.set_title("Figure II.1 — Architecture de la boucle intégrée\n"
-             "Sonde ER → Supabase → Streamlit (module GMAO maison)",
-             fontsize=12, family='serif', pad=15)
+      style='<|-|>', dx=0.95)                                               # Supabase <-> Streamlit (label à droite, inchangé)
+arrow(4.9, 5.3, 4.9, 3.2, 'ordre de travail /\nnotification', dx=0.2)       # Streamlit -> Technicien (inchangé)
 
 plt.tight_layout()
 plt.savefig('fig_ii1_architecture.png', dpi=200, bbox_inches='tight', facecolor='white')

@@ -87,8 +87,6 @@ ax.text(6, 0.45,
         r"$R_{fil} = \dfrac{V_{sense}}{I}\times k_{cal}$   (k = 33,7)",
         ha="center", fontsize=10, color="black")
 
-ax.set_title("Montage de mesure de résistance — 2 fils + shunt + R_lift",
-             fontsize=12, fontweight="bold", color=BLEU, pad=12)
 fig.tight_layout()
 out = "fig_montage_reel.png"
 fig.savefig(out, dpi=150, bbox_inches="tight")

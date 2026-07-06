@@ -76,9 +76,6 @@ ax.text(0.6, 4.3,
 
 ax.set_xlabel("Temps (h)", fontsize=11)
 ax.set_ylabel(r"Résistance mesurée $R(t)$  (Ω, échelle log)", fontsize=11)
-ax.set_title("Figure III.8 — Emballement géométrique de R en fin d'essai\n"
-             "et rupture par disparition de la section (Run #1)",
-             fontsize=12, family="serif")
 ax.legend(loc="upper left", fontsize=8.8)
 ax.grid(alpha=0.3, which="both")
 

@@ -54,11 +54,7 @@ for xi, yi, t, dy, va in zip(x, r2, val_txt, val_dy, val_va):
     ax.annotate(t, xy=(xi, yi), xytext=(xi, yi + dy), ha="center", va=va,
                 fontsize=11, fontweight="bold", color="#1f4e79", family="serif")
 
-# Commentaires de transition (placés dans les zones vides, sans flèche qui croise le texte)
-ax.text(0.5, -1.12, "Couverture et répétition\ndes conditions 30 °C", color="#2e7d32",
-        fontsize=9.2, ha="center", va="center", family="serif",
-        bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="#2e7d32", lw=1, alpha=0.95))
-
+# Commentaire de transition (placé dans la zone plate, sans croiser la ligne)
 ax.text(1.5, 0.52, "Morphologie non appariée :\nléger recul, métrique bruitée", color="#9a6a00",
         fontsize=9.2, ha="center", va="center", family="serif",
         bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="#b8860b", lw=1, alpha=0.95))
@@ -74,9 +70,6 @@ ax.set_xticklabels(labels, fontsize=9.6)
 ax.set_ylim(-2.0, 0.7)
 ax.set_xlim(-0.35, 2.5)
 ax.set_ylabel("R² LORO moyen (essais de test sprint : Run #12 et #16)", fontsize=10.5)
-ax.set_title("Figure III.5 — Évolution du R² LORO : du LORO initial (couverture nulle)\n"
-             "au LORO actuel (couverture établie), puis effet d'une morphologie non appariée",
-             fontsize=12, family="serif")
 ax.grid(axis="y", alpha=0.25)
 for s in ("top", "right"):
     ax.spines[s].set_visible(False)
